@@ -141,6 +141,7 @@ export default function CheckoutPage() {
                                                 id="whatsapp"
                                                 placeholder="+92 300 1234567"
                                                 value={formData.whatsapp}
+                                                type="number"
                                                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
                                                 required
                                             />
