@@ -1,0 +1,139 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { HiMenuAlt4, HiX } from "react-icons/hi";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "@/context/CartContext";
+import { ShoppingBag } from "lucide-react";
+import Link from "next/link";
+
+export default function Header() {
+    const [isOpen, setIsOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const { cart, mounted } = useCart();
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    const cartCount = mounted ? cart.reduce((total, item) => total + item.quantity, 0) : 0;
+
+    return (
+        <>
+            <header
+                className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
+                    ? "bg-black/90 backdrop-blur-md shadow-lg shadow-black/30"
+                    : "bg-transparent"
+                    }`}
+            >
+                <div className="w-full flex items-center justify-between pl-6 pr-12 md:pl-12 md:pr-24 2xl:pl-20 2xl:pr-40 py-4">
+                    {/* Logo */}
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="w-10 h-10 rounded-full border-2 border-gold flex items-center justify-center group-hover:bg-gold/10 transition-colors">
+                            <span className="font-serif text-gold font-bold text-lg">S</span>
+                        </div>
+                        <span className="font-serif text-2xl md:text-3xl tracking-[0.3em] text-white font-light">
+                            SVESTON
+                        </span>
+                    </Link>
+
+                    {/* Desktop Navigation */}
+                    <nav className="hidden lg:flex items-center gap-8">
+                        {[
+                            { name: "Home", href: "/" },
+                            { name: "Product Gallery", href: "/gallery" },
+                            { name: "Contact Us", href: "/contact" },
+                        ].map((link, i) => (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                className="text-white/80 hover:text-gold text-sm uppercase tracking-widest transition-colors relative group"
+                            >
+                                {link.name}
+                                <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full" />
+                            </Link>
+                        ))}
+
+                        {/* Cart Icon */}
+                        <Link href="/cart" className="relative group text-white/80 hover:text-gold transition-colors">
+                            <ShoppingBag size={20} />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-gold text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-black">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
+                    </nav>
+
+                    {/* Mobile Menu Button - shows Cart count too */}
+                    <div className="flex items-center gap-4 lg:hidden">
+                        <Link href="/cart" className="relative text-white hover:text-gold transition-colors">
+                            <ShoppingBag size={24} />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-gold text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-black">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
+
+                        <button
+                            onClick={() => setIsOpen(true)}
+                            className="text-white hover:text-gold transition-colors"
+                        >
+                            <HiMenuAlt4 size={32} />
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Fullscreen Overlay Menu */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ clipPath: "circle(0% at 100% 0%)" }}
+                        animate={{ clipPath: "circle(150% at 100% 0%)" }}
+                        exit={{ clipPath: "circle(0% at 100% 0%)" }}
+                        transition={{ duration: 0.8, ease: "easeInOut" }}
+                        className="fixed inset-0 bg-dark z-50 flex flex-col items-center justify-center"
+                    >
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="absolute top-8 right-8 text-white/50 hover:text-gold transition-colors"
+                        >
+                            <HiX size={40} />
+                        </button>
+
+                        <nav className="flex flex-col items-center gap-8">
+                            {[
+                                { name: "Home", href: "/" },
+                                { name: "Product Gallery", href: "/gallery" },
+                                { name: "Cart", href: "/cart" },
+                                { name: "Contact Us", href: "/contact" },
+                            ].map((link, i) => (
+                                <motion.a
+                                    key={link.name}
+                                    href={link.href}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 + i * 0.1 }}
+                                    onClick={() => setIsOpen(false)}
+                                    className="font-serif text-4xl md:text-6xl text-white hover:text-gold transition-colors"
+                                >
+                                    {link.name}
+                                </motion.a>
+                            ))}
+                        </nav>
+
+                        <div className="absolute bottom-10 text-gray-muted text-xs tracking-[0.3em] uppercase">
+                            Est. 1978 — Dubai, UAE
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </>
+    );
+}
