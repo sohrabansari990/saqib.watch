@@ -21,15 +21,19 @@ export const metadata = {
   description: "Experience the perfect blend of luxury, beauty, and elegance with Sveston timepieces.",
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
-      <body className="bg-dark text-foreground antialiased font-sans">
-        <CartProvider>
-          {children}
-          <Toaster position="top-center" richColors theme="dark" />
-        </CartProvider>
+      <body className="bg-dark text-foreground antialiased font-sans" suppressHydrationWarning suppressContentEditableWarning>
+        <AuthProvider>
+          <CartProvider>
+            {children}
+            <Toaster position="top-center" richColors theme="dark" />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
-  );
+  ); // Keep the closing brace for the function
 }
