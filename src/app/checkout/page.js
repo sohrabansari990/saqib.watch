@@ -57,6 +57,7 @@ export default function CheckoutPage() {
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const [screenshot, setScreenshot] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isOrdered, setIsOrdered] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -66,8 +67,8 @@ export default function CheckoutPage() {
 
     const total = getCartTotal();
 
-    // Redirect if empty
-    if (cart.length === 0) {
+    // Redirect if empty (but not if we just placed an order)
+    if (cart.length === 0 && !isOrdered) {
         if (mounted) router.push("/cart");
         return null;
     }
@@ -99,15 +100,17 @@ export default function CheckoutPage() {
                 description: "We've received your order. You will get a confirmation on WhatsApp soon.",
                 duration: 5000,
             });
-            clearCart();
+            setIsOrdered(true);
             router.push("/");
+            // Clear cart after a small delay to allow navigation
+            setTimeout(() => clearCart(), 100);
         }, 2500);
     };
 
     return (
         <>
             <Header />
-            <main className="min-h-screen bg-dark pb-20" style={{ padding: "120px 20px 0px 20px" }}>
+            <main className="min-h-screen bg-dark pb-20" style={{ padding: "120px 2vw 0px 2vw" }}>
                 <div className="w-full px-4 md:px-12 lg:px-32 xl:px-64">
                     <div className="mb-8">
                         <button onClick={() => router.back()} className="text-gray-400 hover:text-gold transition-colors text-sm uppercase tracking-widest flex items-center gap-2">
@@ -123,27 +126,29 @@ export default function CheckoutPage() {
                             <form onSubmit={handleSubmit}>
                                 {/* Shipping Info */}
                                 <div className="space-y-6 mb-12">
-                                    <h2 className="text-xl font-serif text-white border-b border-white/10 pb-2">Shipping Information</h2>
+                                    <h2 className="text-xl font-serif text-white border-b border-white/10 pb-2" style={{ padding: "1vw 0" }}>Shipping Information</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
+                                        <div className="space-y-2" style={{ padding: "1vw 0" }}>
                                             <Label htmlFor="name">Full Name *</Label>
                                             <Input
                                                 id="name"
-                                                placeholder="John Doe"
+                                                placeholder="Enter your full name"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                 required
+                                                style={{ padding: "1vw" }}
                                             />
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2" style={{ padding: "1vw 0" }}>
                                             <Label htmlFor="whatsapp">WhatsApp Number *</Label>
                                             <Input
                                                 id="whatsapp"
-                                                placeholder="+92 300 1234567"
+                                                placeholder="eg: +92 300 1234567"
                                                 value={formData.whatsapp}
                                                 type="number"
                                                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                                                required
+                                                required    
+                                                style={{ padding: "1vw" }}
                                             />
                                         </div>
                                         <div className="space-y-2 md:col-span-2">
@@ -155,6 +160,7 @@ export default function CheckoutPage() {
                                                 value={formData.address}
                                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                                 required
+                                                style={{ padding: "1vw" }}
                                             />
                                         </div>
                                         <div className="space-y-2 md:col-span-2">
@@ -166,6 +172,8 @@ export default function CheckoutPage() {
                                                     value={formData.city}
                                                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                                                     required
+                                                    style={{ padding: "0vw 1vw 0vw 1vw" }}
+
                                                 >
                                                     <option value="" disabled>Select City</option>
                                                     {cities.map((city) => (
@@ -181,9 +189,9 @@ export default function CheckoutPage() {
                                 </div>
 
                                 {/* Payment Method */}
-                                <div className="space-y-6">
+                                <div className="space-y-6" style={{ padding: "1vw 0vw 1vw 0vw" }}>
                                     <h2 className="text-xl font-serif text-white border-b border-white/10 pb-2">Payment Method</h2>
-                                    <div className="space-y-4">
+                                    <div className="space-y-4" >
                                         <RadioOption
                                             id="cod"
                                             value="cod"
@@ -191,6 +199,7 @@ export default function CheckoutPage() {
                                             description="Pay with cash upon delivery."
                                             check={paymentMethod}
                                             onChange={setPaymentMethod}
+                                            
                                         />
                                         <RadioOption
                                             id="online"
@@ -203,11 +212,11 @@ export default function CheckoutPage() {
                                     </div>
 
                                     {paymentMethod === "online" && (
-                                        <div className="bg-dark-card border border-gold/30 rounded-lg p-6 space-y-6 animate-in fade-in slide-in-from-top-4">
+                                        <div className="bg-dark-card border border-gold/30 rounded-lg p-6 space-y-6 animate-in fade-in slide-in-from-top-4" style={{ padding: "1vw" }}>
                                             <div className="text-center space-y-2">
                                                 <p className="text-sm text-gray-400 uppercase tracking-widest">Send Payment To</p>
-                                                <p className="text-2xl text-white font-bold tracking-widest">0317 5177780</p>
-                                                <p className="text-gold font-medium">Sohrab Alefi</p>
+                                                <p className="text-2xl text-white font-bold tracking-widest">0334 5062546</p>
+                                                <p className="text-gold font-medium">Erfan Khan</p>
                                             </div>
 
                                             <div className="space-y-3">
@@ -229,24 +238,29 @@ export default function CheckoutPage() {
                                 <Button
                                     type="submit"
                                     size="lg"
-                                    className="w-full mt-10 py-6 text-sm uppercase tracking-widest font-bold bg-gold text-black hover:bg-gold-light transition-all shadow-lg hover:shadow-gold/20"
+                                    className="w-full mt-10 py-6 text-sm uppercase cursor-pointer tracking-widest font-bold bg-gold text-black hover:bg-gold-light transition-all shadow-lg hover:shadow-gold/20"
                                     disabled={loading}
+                                    style={{ marginBottom: "1vw" }}
                                 >
-                                    {loading ? "Processing..." : `Place Order — $${total.toFixed(2)}`}
+                                    {loading ? "Processing..." : `Place Order — PKR ${total.toFixed(2)}`}
                                 </Button>
                             </form>
                         </div>
 
                         {/* Right Column: Summary */}
-                        <div className="lg:col-span-1">
-                            <Card className="sticky top-32 border-white/10 bg-dark-lighter">
+                        <div className="lg:col-span-1" style={{ marginBottom: "2vw" }}>
+                            <Card className="sticky top-32 border-white/10 bg-dark-lighter" style={{ padding: "1vw" }}>
                                 <CardContent className="p-8 space-y-6">
-                                    <h3 className="font-serif text-xl text-white mb-4">Your Order</h3>
+                                    <h3 style={{ padding: "1vw 0" }} className="font-serif text-xl text-white mb-4">Your Order</h3>
                                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                         {cart.map((item) => (
-                                            <div key={item.id} className="flex gap-4 items-start border-b border-white/5 pb-4 last:border-0 last:pb-0">
-                                                <div className="w-16 h-16 bg-white/5 rounded flex items-center justify-center shrink-0">
-                                                    <div className="w-10 h-10 rounded-full" style={{ backgroundColor: item.color }}></div>
+                                            <div style={{ padding: "1vw 0" }} key={item.id} className="flex gap-4 items-start border-b border-white/5 pb-4 last:border-0 last:pb-0">
+                                                <div className="w-16 h-16 bg-white/5 rounded flex items-center justify-center shrink-0 overflow-hidden border border-white/10">
+                                                    {item.imageUrl ? (
+                                                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-10 h-10 rounded-full" style={{ backgroundColor: item.color }}></div>
+                                                    )}
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-white text-sm font-medium line-clamp-2">{item.name}</p>
@@ -259,18 +273,18 @@ export default function CheckoutPage() {
                                         ))}
                                     </div>
 
-                                    <div className="border-t border-white/10 pt-4 space-y-2">
+                                    <div style={{ padding: "1vw 0" }} className="border-t border-white/10 pt-4 space-y-2">
                                         <div className="flex justify-between text-gray-400 text-sm">
                                             <span>Subtotal</span>
-                                            <span>${total.toFixed(2)}</span>
+                                            <span>PKR {total.toFixed(2)}</span>
                                         </div>
                                         <div className="flex justify-between text-gray-400 text-sm">
                                             <span>Shipping</span>
                                             <span className="text-gold">Free</span>
                                         </div>
-                                        <div className="border-t border-white/10 pt-4 flex justify-between text-white font-bold text-lg">
+                                        <div style={{ padding: "1vw 0" }} className="border-t border-white/10 pt-4 flex justify-between text-white font-bold text-lg">
                                             <span>Total</span>
-                                            <span>${total.toFixed(2)}</span>
+                                            <span>PKR {total.toFixed(2)}</span>
                                         </div>
                                     </div>
                                 </CardContent>

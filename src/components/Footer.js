@@ -11,7 +11,7 @@ import {
 
 const footerLinks = [
     { label: "Home", href: "/" },
-    { label: "About Us", href: "#about" },
+    { label: "About Us", href: "/about" },
     { label: "Product Gallery", href: "#products" },
     { label: "New Arrivals", href: "#arrivals" },
     { label: "Men's Collection", href: "#men" },
@@ -53,7 +53,7 @@ const showrooms = [
 
 export default function Footer() {
     return (
-        <footer className="bg-dark-lighter border-t border-white/5">
+        <footer className="bg-dark-lighter border-t border-white/5" style={{ padding: "2vw 2vw 0vw 2vw" }}>
             {/* Main Footer */}
             <div className="w-full px-6 md:px-12 2xl:px-20 py-16 md:py-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const categories = ["all", "men", "women", "couples", "monitor", "other"];
 
@@ -14,6 +15,28 @@ export default function GalleryPage() {
     const [products, setProducts] = useState([]);
     const [filter, setFilter] = useState("all");
     const [loading, setLoading] = useState(true);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const hasSyncedQuery = useRef(false);
+
+    // Sync initial filter from URL query
+    useEffect(() => {
+        const qp = searchParams.get("category");
+        if (qp && categories.includes(qp)) {
+            setFilter(qp);
+        }
+    }, [searchParams]);
+
+    // Keep URL in sync with current filter (skip first sync until initial read)
+    useEffect(() => {
+        if (!router) return;
+        if (!hasSyncedQuery.current) {
+            hasSyncedQuery.current = true;
+            return;
+        }
+        const queryString = filter === "all" ? "" : `?category=${filter}`;
+        router.replace(`/gallery${queryString}`, { scroll: false });
+    }, [filter, router]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -43,7 +66,7 @@ export default function GalleryPage() {
     return (
         <>
             <Header />
-            <main className="pt-24 min-h-screen bg-dark">
+            <main className="pt-24 min-h-screen bg-dark" style={{ padding: "8.5vw 2vw 3vw 2vw" }}>
                 <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
                     <div className="text-center mb-12">
                         <p className="text-gold tracking-[0.4em] text-xs uppercase mb-3">

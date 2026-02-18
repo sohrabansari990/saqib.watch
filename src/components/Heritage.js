@@ -1,6 +1,7 @@
 "use client";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import Link from "next/link";
 
 export default function Heritage() {
     const sectionRef = useRef(null);
@@ -11,6 +12,7 @@ export default function Heritage() {
             id="about"
             ref={sectionRef}
             className="relative py-32 md:py-48 px-6 md:px-12 overflow-hidden"
+            style={{ padding: "2vw 0vw 4vw 0vw" }}
         >
             {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-b from-dark via-[#0d0a05] to-dark" />
@@ -159,13 +161,13 @@ export default function Heritage() {
                 </motion.p>
 
                 <motion.a
-                    href="#outlets"
+                    href="/about"
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.8, delay: 0.8 }}
                     className="inline-block px-10 py-4 border border-gold text-gold text-xs tracking-[0.3em] uppercase hover:bg-gold hover:text-black transition-all duration-500"
                 >
-                    View Outlets
+                    More About Us
                 </motion.a>
 
                 {/* Stats */}

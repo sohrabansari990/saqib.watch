@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase"; // Add Supabase
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Upload, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -116,40 +117,36 @@ export default function AddProductPage() {
     };
 
     return (
-        <div className="min-h-screen bg-dark text-white p-8">
-            <div className="max-w-4xl mx-auto">
+        <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-br from-[#0b0b0f] via-[#0f0f14] to-[#0f0a06] text-white">
+            <div className="max-w-5xl md:max-w-[70%] mx-auto px-6 py-14" style={{padding: "2vw 1vw"}}>
                 <div className="mb-8 flex items-center gap-4">
                     <Link href="/admin">
                         <Button variant="ghost" className="text-gray-400 hover:text-white">
                             <ArrowLeft size={20} />
                         </Button>
                     </Link>
-                    <h1 className="text-3xl font-serif">Add New Product</h1>
+                    <div>
+                        <p className="text-xs uppercase tracking-[0.35em] text-gold/80 mb-2">Create</p>
+                        <h1 className="text-3xl font-serif">Add New Product</h1>
+                    </div>
                 </div>
 
-                <div className="bg-dark-card border border-white/10 rounded-lg p-8">
+                <Card className="bg-[#121214] border border-white/10 shadow-2xl shadow-black/50 rounded-2xl" style={{padding: "2vw 1vw"}}>
+                    <CardHeader className="space-y-2">
+                        <CardTitle className="text-2xl">Product Details</CardTitle>
+                        <CardDescription>Upload imagery and metadata for the catalog.</CardDescription>
+                    </CardHeader>
+                    <CardContent style={{padding: "2vw 1vw"}} >
                     <form onSubmit={handleSubmit} className="space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             {/* Left Column: Image Upload */}
-                            <div className="space-y-4">
-                                <Label>Product Image</Label>
-
-                                <div className="flex items-center space-x-2 pb-2">
-                                    <input
-                                        type="checkbox"
-                                        id="skipImage"
-                                        className="rounded border-white/10 bg-dark-card text-gold focus:ring-gold"
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                setImageFile(null);
-                                                setImagePreview(null);
-                                            }
-                                        }}
-                                    />
-                                    <label htmlFor="skipImage" className="text-sm text-gray-400">Skip Image Upload (Fixes CORS Stuck)</label>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-sm">Product Image</Label>
+                                    <span className="text-xs text-gray-500">Required</span>
                                 </div>
 
-                                <div className="border-2 border-dashed border-white/10 rounded-lg p-4 flex flex-col items-center justify-center min-h-[300px] relative bg-black/20 hover:bg-white/5 transition-colors group">
+                                <div className="border-2 border-dashed border-white/10 rounded-xl p-6 flex flex-col items-center justify-center min-h-[340px] relative bg-gradient-to-br from-black/50 via-black/30 to-black/50 hover:border-gold/60 transition-colors group">
                                     {imagePreview ? (
                                         <>
                                             <img
@@ -166,10 +163,10 @@ export default function AddProductPage() {
                                             </button>
                                         </>
                                     ) : (
-                                        <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
-                                            <Upload size={40} className="text-gray-500 mb-2 group-hover:text-gold transition-colors" />
-                                            <span className="text-gray-400 text-sm">Click to upload image</span>
-                                            <span className="text-gray-600 text-xs mt-1">PNG, JPG up to 5MB</span>
+                                        <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full py-8">
+                                            <Upload size={40} className="text-gray-500 mb-3 group-hover:text-gold transition-colors" />
+                                            <span className="text-gray-300 text-sm">Drag & drop or click to upload</span>
+                                            <span className="text-gray-600 text-xs mt-1">PNG/JPG up to 5MB</span>
                                             <input
                                                 type="file"
                                                 className="hidden"
@@ -194,7 +191,9 @@ export default function AddProductPage() {
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         placeholder="e.g. Royal SV-7513"
                                         required
+                                        style={{padding: "1vw 1vw"}}
                                     />
+                                    <p className="text-xs text-gray-500">Visible in listings and product page.</p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -205,8 +204,10 @@ export default function AddProductPage() {
                                         value={formData.price}
                                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                         placeholder="e.g. 5000"
-                                        required
+                                        required    
+                                        style={{padding: "1vw 1vw"}}
                                     />
+                                    <p className="text-xs text-gray-500">Enter numeric value only.</p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -218,14 +219,16 @@ export default function AddProductPage() {
                                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                             className="flex h-10 w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold appearance-none cursor-pointer capitalize"
                                             required
+                                            style={{padding: "0vw 1vw 0vw 1vw"}}
                                         >
                                             <option value="" disabled>Select Category</option>
                                             {categories.map(cat => (
                                                 <option key={cat} value={cat}>{cat}</option>
                                             ))}
                                         </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">v</div>
                                     </div>
+                                    <p className="text-xs text-gray-500">Used for gallery filters.</p>
                                 </div>
 
                                 <div className="space-y-2">
@@ -236,10 +239,12 @@ export default function AddProductPage() {
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                         placeholder="Product details..."
+                                        style={{padding: "1vw 1vw"}}
                                     />
+                                    <p className="text-xs text-gray-500">Tip: keep it short and benefits-focused.</p>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                {/* <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="color">Color (Hex)</Label>
                                         <div className="flex gap-2">
@@ -255,7 +260,7 @@ export default function AddProductPage() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-2" style={{padding: "1vw 1vw"}}>
                                         <Label htmlFor="accent">Accent (Hex)</Label>
                                         <div className="flex gap-2">
                                             <Input
@@ -270,22 +275,24 @@ export default function AddProductPage() {
                                             />
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
 
-                        <div className="pt-4 flex justify-end">
+                        <div className="pt-4 flex justify-center">
                             <Button
                                 type="submit"
                                 size="lg"
-                                className="bg-gold text-black hover:bg-gold-light font-bold"
+                                className="bg-gold cursor-pointer text-black hover:bg-gold-light font-bold shadow-lg shadow-gold/20"
                                 disabled={loading}
+                                style={{padding: "1vw 1vw", marginTop: "2vw"}}
                             >
                                 {loading ? "Creating..." : "Create Product"}
                             </Button>
                         </div>
                     </form>
-                </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

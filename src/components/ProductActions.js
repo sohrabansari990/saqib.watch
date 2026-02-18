@@ -28,9 +28,9 @@ export default function ProductActions({ product }) {
             >
                 {loading ? "Adding..." : "Add to Cart"}
             </Button>
-            <p className="text-xs text-center md:text-left text-gray-500 mt-2">
+            {/* <p className="text-xs text-center md:text-left text-gray-500 mt-2">
                 Free shipping on all orders over $200
-            </p>
+            </p> */}
         </div>
     );
 }

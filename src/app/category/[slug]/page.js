@@ -30,7 +30,7 @@ export default async function CategoryPage({ params }) {
     return (
         <>
             <Header />
-            <main className="pt-24 min-h-screen bg-dark">
+            <main className="pt-24 min-h-screen bg-dark" style={{ padding: "8.5vw 2vw 3vw 2vw" }}>
                 <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
                     <div className="text-center mb-16">
                         <p className="text-gold tracking-[0.4em] text-xs uppercase mb-3">

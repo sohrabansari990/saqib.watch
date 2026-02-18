@@ -42,7 +42,7 @@ function CategoryCard({ category, index }) {
             transition={{ duration: 0.8, delay: index * 0.2 }}
             className="group relative overflow-hidden rounded-xl cursor-pointer"
         >
-            <Link href={`/category/${category.id}`} className="block h-full">
+            <Link href={`/gallery?category=${category.id}`} className="block h-full">
                 <div
                     className={`relative bg-gradient-to-b ${category.gradient} aspect-[3/4] md:aspect-[2/3] flex flex-col items-center justify-center p-8 transition-all duration-700 h-full`}
                 >

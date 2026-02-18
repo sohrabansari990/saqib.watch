@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
+import { onAuthStateChanged, signOut as firebaseSignOut, setPersistence, inMemoryPersistence } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 const AuthContext = createContext({});
@@ -13,14 +13,28 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setUser(user);
-            } else {
-                setUser(null);
-            }
+        if (!auth) {
             setLoading(false);
-        });
+            return;
+        }
+
+        let unsubscribe = () => {};
+
+        setPersistence(auth, inMemoryPersistence)
+            .then(() => {
+                unsubscribe = onAuthStateChanged(auth, (user) => {
+                    setUser(user || null);
+                    setLoading(false);
+                });
+            })
+            .catch((err) => {
+                console.error("Failed to set auth persistence", err);
+                // Fall back to default persistence
+                unsubscribe = onAuthStateChanged(auth, (user) => {
+                    setUser(user || null);
+                    setLoading(false);
+                });
+            });
 
         return () => unsubscribe();
     }, []);

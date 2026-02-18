@@ -78,7 +78,7 @@ export default function ProductPage() {
                         </div>
 
                         {/* Details Section */}
-                        <div>
+                        <div className="flex flex-col gap-2" style={{ marginRight: "1vw" }}>
                             <Link
                                 href="/gallery"
                                 className="text-gold text-xs tracking-[0.2em] uppercase mb-4 inline-block hover:underline"

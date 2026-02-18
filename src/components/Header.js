@@ -28,7 +28,7 @@ export default function Header() {
                 className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
                     ? "bg-black/90 backdrop-blur-md shadow-lg shadow-black/30"
                     : "bg-transparent"
-                    }`}
+                    }`} style={{ padding: "1vw 2vw 1vw 2vw" }}
             >
                 <div className="w-full flex items-center justify-between pl-6 pr-12 md:pl-12 md:pr-24 2xl:pl-20 2xl:pr-40 py-4">
                     {/* Logo */}
@@ -45,6 +45,7 @@ export default function Header() {
                     <nav className="hidden lg:flex items-center gap-8">
                         {[
                             { name: "Home", href: "/" },
+                            { name: "About Us", href: "/about" },
                             { name: "Product Gallery", href: "/gallery" },
                             { name: "Contact Us", href: "/contact" },
                         ].map((link, i) => (
@@ -107,29 +108,33 @@ export default function Header() {
                             <HiX size={40} />
                         </button>
 
-                        <nav className="flex flex-col items-center gap-8">
+                        <nav className="flex flex-col items-center gap-8 text-center">
                             {[
                                 { name: "Home", href: "/" },
+                                { name: "About Us", href: "/about" },
                                 { name: "Product Gallery", href: "/gallery" },
                                 { name: "Cart", href: "/cart" },
                                 { name: "Contact Us", href: "/contact" },
                             ].map((link, i) => (
-                                <motion.a
+                                <motion.div
                                     key={link.name}
-                                    href={link.href}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.3 + i * 0.1 }}
-                                    onClick={() => setIsOpen(false)}
-                                    className="font-serif text-4xl md:text-6xl text-white hover:text-gold transition-colors"
                                 >
-                                    {link.name}
-                                </motion.a>
+                                    <Link
+                                        href={link.href}
+                                        onClick={() => setIsOpen(false)}
+                                        className="font-serif text-4xl md:text-5xl text-white hover:text-gold transition-colors"
+                                    >
+                                        {link.name}
+                                    </Link>
+                                </motion.div>
                             ))}
                         </nav>
 
-                        <div className="absolute bottom-10 text-gray-muted text-xs tracking-[0.3em] uppercase">
-                            Est. 1978 — Dubai, UAE
+                        <div className="absolute bottom-10 text-gray-muted text-xs tracking-[0.3em] uppercase text-center px-4">
+                            Est. 1978 — Luxury Horizon
                         </div>
                     </motion.div>
                 )}

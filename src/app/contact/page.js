@@ -6,9 +6,9 @@ export default function ContactPage() {
     return (
         <>
             <Header />
-            <main className="pt-24 min-h-screen bg-dark">
+            <main className="pt-24 min-h-screen bg-dark" style={{ padding: "8vw 2vw 3vw 2vw" }}>
                 <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
-                    <div className="text-center mb-16">
+                    <div className="text-center mb-16" style={{ marginBottom: "2vw" }}>
                         <p className="text-gold tracking-[0.4em] text-xs uppercase mb-3">
                             Get in Touch
                         </p>
@@ -29,8 +29,8 @@ export default function ContactPage() {
                                 order? Our dedicated support team is available to assist you.
                             </p>
 
-                            <div className="space-y-6 pt-4">
-                                <div className="flex items-center gap-4 bg-dark-card p-6 rounded-lg border border-white/5">
+                            <div className="space-y-6 pt-4" style={{ paddingTop: "10px" }}>
+                                <div className="flex items-center gap-4 bg-dark-card p-6 rounded-lg border border-white/5" style={{ marginBottom: "0.5vw", padding: "0.5vw" }}>
                                     <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold text-xl">
                                         <FaPhoneAlt />
                                     </div>
@@ -39,12 +39,12 @@ export default function ContactPage() {
                                             Call Us
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            +971 50 460 4904
+                                            +92 334 5062546
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 bg-dark-card p-6 rounded-lg border border-white/5">
+                                <div className="flex items-center gap-4 bg-dark-card p-6 rounded-lg border border-white/5" style={{ marginBottom: "0.5vw", padding: "0.5vw" }}>
                                     <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold text-xl">
                                         <FaWhatsapp />
                                     </div>
@@ -53,12 +53,12 @@ export default function ContactPage() {
                                             WhatsApp
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            +971 50 460 4904
+                                            +9271 5177 780
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 bg-dark-card p-6 rounded-lg border border-white/5">
+                                <div className="flex items-center gap-4 bg-dark-card p-6 rounded-lg border border-white/5" style={{ marginBottom: "0.5vw", padding: "0.5vw" }}>
                                     <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold text-xl">
                                         <FaEnvelope />
                                     </div>
@@ -67,7 +67,7 @@ export default function ContactPage() {
                                             Email Us
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            support@sveston.com
+                                            sohrabalefi99@gmail.com
                                         </p>
                                     </div>
                                 </div>
@@ -75,7 +75,7 @@ export default function ContactPage() {
                         </div>
 
                         {/* Contact Form */}
-                        <div className="bg-dark-card p-8 md:p-10 rounded-xl border border-white/5">
+                        <div className="bg-dark-card p-8 md:p-10 rounded-xl border border-white/5" style={{ padding: "1vw" }}>
                             <h3 className="font-serif text-2xl text-white mb-6">
                                 Send us a message
                             </h3>
@@ -87,7 +87,7 @@ export default function ContactPage() {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors"
+                                            className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors" style={{ padding: "0.5vw" }}
                                             placeholder="John"
                                         />
                                     </div>
@@ -97,7 +97,7 @@ export default function ContactPage() {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors"
+                                            className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors" style={{ padding: "0.5vw" }}
                                             placeholder="Doe"
                                         />
                                     </div>
@@ -108,7 +108,7 @@ export default function ContactPage() {
                                     </label>
                                     <input
                                         type="email"
-                                        className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors"
+                                        className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors" style={{ padding: "0.5vw" }}
                                         placeholder="john@example.com"
                                     />
                                 </div>
@@ -118,13 +118,14 @@ export default function ContactPage() {
                                     </label>
                                     <textarea
                                         rows="4"
-                                        className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors resize-none"
+                                        className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors resize-none" style={{ padding: "0.5vw" }}
                                         placeholder="How can we help you?"
                                     ></textarea>
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full py-4 bg-gold text-black font-bold uppercase tracking-[0.2em] hover:bg-gold-light transition-colors"
+                                    className="w-full cursor-pointer py-4 bg-gold text-black font-bold uppercase tracking-[0.2em] hover:bg-gold-light transition-colors"
+                                    style={{ padding: "0.5vw" }}
                                 >
                                     Send Message
                                 </button>
