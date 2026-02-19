@@ -47,10 +47,10 @@ export default function AddProductPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // if (!imageFile) {
-        //     toast.error("Please upload a product image");
-        //     return;
-        // }
+        if (!imageFile) {
+            toast.error("Please upload a product image");
+            return;
+        }
 
         if (!formData.category) {
             toast.error("Please select a category");
@@ -156,10 +156,14 @@ export default function AddProductPage() {
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => { setImageFile(null); setImagePreview(null); }}
-                                                className="absolute top-2 right-2 bg-red-500 rounded-full p-1 text-white hover:bg-red-600 transition-colors"
+                                                onClick={(e) => { 
+                                                    e.stopPropagation(); 
+                                                    setImageFile(null); 
+                                                    setImagePreview(null); 
+                                                }}
+                                                className="absolute top-2 right-2 cursor-pointer bg-red-500 rounded-full p-1 text-white hover:bg-red-600 transition-colors z-50"
                                             >
-                                                <X size={16} />
+                                                <X size={26} />
                                             </button>
                                         </>
                                     ) : (

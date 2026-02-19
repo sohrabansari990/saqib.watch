@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // Correct hook for App Router
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,6 +79,21 @@ export default function EditProductPage({ params }) {
         }
     };
 
+    const deleteOldImage = async (url) => {
+        if (!url || !url.includes("supabase")) return;
+        try {
+            // Extract filename correctly from Supabase public URL
+            const fileName = url.split('/').pop().split('?')[0];
+            console.log("Deleting old image from Supabase:", fileName);
+            const { error } = await supabase.storage
+                .from('products')
+                .remove([fileName]);
+            if (error) throw error;
+        } catch (err) {
+            console.error("Failed to delete old image:", err);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -92,12 +107,37 @@ export default function EditProductPage({ params }) {
         try {
             let downloadURL = formData.imageUrl;
 
+            // 1. Handle New File Upload or Replacement
             if (imageFile) {
-                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                const snapshot = await uploadBytes(storageRef, imageFile);
-                downloadURL = await getDownloadURL(snapshot.ref);
+                // If there was an old image, delete it from storage
+                if (formData.imageUrl) {
+                    await deleteOldImage(formData.imageUrl);
+                }
+
+                // Upload new image to Supabase
+                const fileExt = imageFile.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const filePath = `${fileName}`;
+
+                const { data, error } = await supabase.storage
+                    .from('products')
+                    .upload(filePath, imageFile);
+
+                if (error) throw error;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('products')
+                    .getPublicUrl(filePath);
+
+                downloadURL = publicUrl;
+            } 
+            // 2. Handle Image Removal (if no new file and preview was cleared)
+            else if (!imagePreview && formData.imageUrl) {
+                await deleteOldImage(formData.imageUrl);
+                downloadURL = "";
             }
 
+            // 3. Update Database
             await updateDoc(doc(db, "products", id), {
                 ...formData,
                 price: parseFloat(formData.price),
@@ -145,8 +185,12 @@ export default function EditProductPage({ params }) {
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => { setImageFile(null); setImagePreview(formData.imageUrl || null); }}
-                                                className="absolute top-2 right-2 bg-red-500 rounded-full p-1 text-white hover:bg-red-600 transition-colors"
+                                                onClick={(e) => { 
+                                                    e.stopPropagation(); 
+                                                    setImageFile(null); 
+                                                    setImagePreview(null); 
+                                                }}
+                                                className="absolute top-2 right-2 cursor-pointer bg-red-500 rounded-full p-1 text-white hover:bg-red-600 transition-colors z-50"
                                             >
                                                 <X size={16} />
                                             </button>

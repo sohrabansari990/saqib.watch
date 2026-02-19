@@ -9,12 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Eye } from "lucide-react";
 
 export default function AdminLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState(""); // Fixed variable name
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [show, setShow] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -76,15 +78,18 @@ export default function AdminLogin() {
                                     style={{padding: "1vw 1vw"}}
                                 />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2 relative">
                                 <Label htmlFor="password">Password</Label>
                                 <Input
                                     id="password"
-                                    type="password"
+                                    type= {show ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     style={{padding: "1vw 1vw"}}
+                                />
+                                <Eye className="absolute top-1/2 right-4 cursor-pointer hover:text-zinc-700"
+                                onClick={()=> setShow(!show) }
                                 />
                             </div>
                             <Button
