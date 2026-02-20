@@ -9,9 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@radix-ui/react-slot": "^1.2.4",
     "@supabase/supabase-js": "^2.96.0",
     "clsx": "^2.1.1",
+    "emailjs-com": "^3.2.0",
     "firebase": "^12.9.0",
     "framer-motion": "^12.34.1",
     "lucide-react": "^0.574.0",

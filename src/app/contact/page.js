@@ -1,8 +1,20 @@
+"use client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { FaPhoneAlt, FaEnvelope, FaWhatsapp } from "react-icons/fa";
+import emailjs from "@emailjs/browser";
+
 
 export default function ContactPage() {
+
+
+    function emailSend(e) {
+        e.preventDefault();
+        emailjs.sendForm(
+            "service_v3f938c", "template_p0pf2le", e.target, "_B-DScnQtHlKbGAfi"
+        )
+    }
+
     return (
         <>
             <Header />
@@ -53,7 +65,7 @@ export default function ContactPage() {
                                             WhatsApp
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            +9271 5177 780
+                                            +92 334 5062546
                                         </p>
                                     </div>
                                 </div>
@@ -67,7 +79,7 @@ export default function ContactPage() {
                                             Email Us
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            sohrabalefi99@gmail.com
+                                            kashkot1997@gmail.com
                                         </p>
                                     </div>
                                 </div>
@@ -79,7 +91,7 @@ export default function ContactPage() {
                             <h3 className="font-serif text-2xl text-white mb-6">
                                 Send us a message
                             </h3>
-                            <form className="space-y-6">
+                            <form onSubmit={emailSend} target="/" className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-sm text-gray-muted uppercase tracking-wider">
@@ -87,8 +99,10 @@ export default function ContactPage() {
                                         </label>
                                         <input
                                             type="text"
+                                            name="first_name"
                                             className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors" style={{ padding: "0.5vw" }}
                                             placeholder="John"
+                                            required
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -97,8 +111,10 @@ export default function ContactPage() {
                                         </label>
                                         <input
                                             type="text"
+                                            name="last_name"
                                             className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors" style={{ padding: "0.5vw" }}
                                             placeholder="Doe"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -108,8 +124,10 @@ export default function ContactPage() {
                                     </label>
                                     <input
                                         type="email"
+                                        name="user_email"
                                         className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors" style={{ padding: "0.5vw" }}
                                         placeholder="john@example.com"
+                                        required
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -118,8 +136,10 @@ export default function ContactPage() {
                                     </label>
                                     <textarea
                                         rows="4"
+                                        name="message"
                                         className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors resize-none" style={{ padding: "0.5vw" }}
                                         placeholder="How can we help you?"
+                                        required
                                     ></textarea>
                                 </div>
                                 <button
