@@ -124,7 +124,7 @@ export default function ContactPage() {
                                     </label>
                                     <input
                                         type="email"
-                                        name="user_email"
+                                        name="email"
                                         className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors" style={{ padding: "0.5vw" }}
                                         placeholder="john@example.com"
                                         required
