@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import {
     FaFacebookF,
     FaInstagram,
@@ -60,13 +61,9 @@ export default function Footer() {
                     {/* Brand Column */}
                     <div className="lg:col-span-1">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 rounded-full border-2 border-gold flex items-center justify-center">
-                                <span className="font-serif text-gold font-bold text-lg">
-                                    S
-                                </span>
-                            </div>
+                            <Image src="/lahza-logo.png" alt="Logo" width={50} height={50} className="w-10 h-10 hover:scale-110 transition-all duration-300" />
                             <span className="font-serif text-2xl tracking-[0.3em] text-white font-light">
-                                SVESTON
+                                Lahza
                             </span>
                         </div>
                         <p className="text-gray-muted text-sm leading-relaxed mb-6">
@@ -191,7 +188,7 @@ export default function Footer() {
             <div className="border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-6 md:px-20 py-6 flex flex-col md:flex-row md:max-w-[100%]  items-center justify-between gap-4">
                     <p className="text-gray-muted text-xs tracking-wider">
-                        &copy; 2026 Sveston Watches. All rights reserved.
+                        &copy; 2026 Lahza Watches. All rights reserved.
                     </p>
                     <p className="text-gray-muted text-xs tracking-wider">
                         Privacy Policy

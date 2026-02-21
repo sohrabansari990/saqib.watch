@@ -4,13 +4,17 @@ import { useState, useEffect } from "react";
 import { HiMenuAlt4, HiX } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
-import { ShoppingBag } from "lucide-react";
+import { useFavorites } from "@/context/FavoritesContext";
+import { ShoppingBag, Heart } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { cart, mounted } = useCart();
+    const { favorites } = useFavorites();
+    const favCount = favorites.length;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -33,11 +37,9 @@ export default function Header() {
                 <div className="w-full flex items-center justify-between pl-6 pr-12 md:pl-12 md:pr-24 2xl:pl-20 2xl:pr-40 py-4">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 rounded-full border-2 border-gold flex items-center justify-center group-hover:bg-gold/10 transition-colors">
-                            <span className="font-serif text-gold font-bold text-lg">S</span>
-                        </div>
+                        <Image src="/lahza-logo.png" alt="Logo" width={60} height={60} className="w-12 h-12 hover:scale-110 transition-all duration-300" />
                         <span className="font-serif text-2xl md:text-3xl tracking-[0.3em] text-white font-light">
-                            SVESTON
+                            LAHZA
                         </span>
                     </Link>
 
@@ -59,6 +61,16 @@ export default function Header() {
                             </Link>
                         ))}
 
+                        {/* Favorites Icon */}
+                        <Link href="/favorites" className="relative group text-white/80 hover:text-gold transition-colors">
+                            <Heart size={20} />
+                            {favCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-gold text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-black">
+                                    {favCount}
+                                </span>
+                            )}
+                        </Link>
+
                         {/* Cart Icon */}
                         <Link href="/cart" className="relative group text-white/80 hover:text-gold transition-colors">
                             <ShoppingBag size={20} />
@@ -72,6 +84,15 @@ export default function Header() {
 
                     {/* Mobile Menu Button - shows Cart count too */}
                     <div className="flex items-center gap-4 lg:hidden">
+                        <Link href="/favorites" className="relative text-white hover:text-gold transition-colors">
+                            <Heart size={24} />
+                            {favCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-gold text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-black">
+                                    {favCount}
+                                </span>
+                            )}
+                        </Link>
+
                         <Link href="/cart" className="relative text-white hover:text-gold transition-colors">
                             <ShoppingBag size={24} />
                             {cartCount > 0 && (
@@ -113,6 +134,7 @@ export default function Header() {
                                 { name: "Home", href: "/" },
                                 { name: "About Us", href: "/about" },
                                 { name: "Product Gallery", href: "/gallery" },
+                                { name: "Favorites", href: "/favorites" },
                                 { name: "Cart", href: "/cart" },
                                 { name: "Contact Us", href: "/contact" },
                             ].map((link, i) => (

@@ -154,7 +154,7 @@ export default function Heritage() {
                     transition={{ duration: 0.8, delay: 0.7 }}
                     className="text-gray-muted text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-12"
                 >
-                    With over four decades of experience in watchmaking, Sveston
+                    With over four decades of experience in watchmaking, Lahza
                     represents the perfect blend of traditional craftsmanship and modern
                     design. Every timepiece is a testament to our commitment to precision,
                     beauty, and elegance.

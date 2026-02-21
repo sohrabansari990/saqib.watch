@@ -49,6 +49,25 @@ body {
   background: var(--color-gold-light) !important;
 }
 
+/* Product page carousel */
+.product-carousel .swiper-button-next,
+.product-carousel .swiper-button-prev {
+  color: var(--color-gold) !important;
+  background: rgba(0, 0, 0, 0.4);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+}
+.product-carousel .swiper-button-next::after,
+.product-carousel .swiper-button-prev::after {
+  font-size: 16px;
+}
+
+.product-thumbs .swiper-slide-thumb-active > div {
+  border-color: var(--color-gold) !important;
+}
+
 /* Themed scrollbar */
 * {
   scrollbar-width: thin;

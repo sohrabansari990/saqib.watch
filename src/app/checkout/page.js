@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { clsx } from "clsx";
+import emailjs from "@emailjs/browser";
+import Image from "next/image";
 
 function RadioOption({ id, value, check, onChange, label, description }) {
     const isChecked = check === value;
@@ -56,6 +58,7 @@ export default function CheckoutPage() {
 
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const [screenshot, setScreenshot] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isOrdered, setIsOrdered] = useState(false);
 
@@ -65,8 +68,7 @@ export default function CheckoutPage() {
 
     if (!mounted || !contextMounted) return null;
 
-    const total = getCartTotal();
-
+    
     // Redirect if empty (but not if we just placed an order)
     if (cart.length === 0 && !isOrdered) {
         if (mounted) router.push("/cart");
@@ -74,12 +76,29 @@ export default function CheckoutPage() {
     }
 
     const handleFileChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setScreenshot(e.target.files[0]);
-        }
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setScreenshot(file);
+        setImagePreview(URL.createObjectURL(file));
     };
 
-    const handleSubmit = (e) => {
+    // Upload image to Cloudinary and return the public URL
+    async function uploadToCloudinary(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "easypaisa");
+        formData.append("folder", "lahza-orders");
+
+        const res = await fetch(
+            "https://api.cloudinary.com/v1_1/dsqrekouz/image/upload",
+            { method: "POST", body: formData }
+        );
+        const data = await res.json();
+        if (!data.secure_url) throw new Error("Cloudinary upload failed");
+        return data.secure_url;
+    }
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.name || !formData.whatsapp || !formData.address || !formData.city) {
@@ -94,18 +113,60 @@ export default function CheckoutPage() {
 
         setLoading(true);
 
-        // Simulate API submission
-        setTimeout(() => {
-            toast.success("Order Placed Successfully!", {
+        try {
+            // 1. Upload payment screenshot to Cloudinary (if provided)
+            let paymentProofUrl = "cash on delivery";
+            if (screenshot) {
+                paymentProofUrl = await uploadToCloudinary(screenshot);
+            }
+
+            // 2. Build items list string
+            const itemsList = cart
+                .map((item) => {
+                    const color = item.selectedColor ? ` (${item.selectedColor})` : "";
+                    return `${item.name}${color} x${item.quantity} — Rs.${item.price * item.quantity}`;
+                })
+                .join(" | ");
+
+            // 3. Send order email via EmailJS
+            await emailjs.send(
+                "service_v3f938c",
+                "template_order",
+                {
+                    customer_name: formData.name,
+                    customer_whatsapp: formData.whatsapp,
+                    customer_address: formData.address,
+                    customer_city: formData.city,
+                    payment_method: paymentMethod === "cod" ? "Cash on Delivery" : "EasyPaisa / JazzCash",
+                    order_items: itemsList,
+                    order_total: `Rs. ${total.toLocaleString()}`,
+                    payment_proof_url: paymentProofUrl,
+                },
+                "_B-DScnQtHlKbGAfi"
+            );
+
+            toast.success("Order Placed Successfully! 🎉", {
                 description: "We've received your order. You will get a confirmation on WhatsApp soon.",
                 duration: 5000,
             });
             setIsOrdered(true);
+            setImagePreview(null);
+            setScreenshot(null);
             router.push("/");
-            // Clear cart after a small delay to allow navigation
             setTimeout(() => clearCart(), 100);
-        }, 2500);
+        } catch (error) {
+            console.error("Order submission error:", error);
+            toast.error("Something went wrong. Please WhatsApp us directly at +92 334 5062546");
+        } finally {
+            setLoading(false);
+        }
     };
+    const amount = getCartTotal();
+    const storedTotal = typeof window !== 'undefined' ? localStorage.getItem("total") : null;
+    const finalTotal = storedTotal ? parseFloat(storedTotal) : amount;
+    const discount = Math.max(0, amount - finalTotal);
+    const total = amount - discount;
+
 
     return (
         <>
@@ -230,6 +291,21 @@ export default function CheckoutPage() {
                                                         <input id="screenshot" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                                                     </label>
                                                 </div>
+                                                {imagePreview && (
+                                                    <div style={{ marginTop: "12px", display: "flex", justifyContent: "center" }}>
+                                                        <Image
+                                                            src={imagePreview}
+                                                            alt="Payment proof preview"
+                                                            style={{
+                                                                width: "160px",
+                                                                height: "160px",
+                                                                objectFit: "cover",
+                                                                borderRadius: "8px",
+                                                                border: "1px solid rgba(201,169,110,0.3)",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -254,7 +330,7 @@ export default function CheckoutPage() {
                                     <h3 style={{ padding: "1vw 0" }} className="font-serif text-xl text-white mb-4">Your Order</h3>
                                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                         {cart.map((item) => (
-                                            <div style={{ padding: "1vw 0" }} key={item.id} className="flex gap-4 items-start border-b border-white/5 pb-4 last:border-0 last:pb-0">
+                                            <div style={{ padding: "1vw 0" }} key={item.cartKey || item.id} className="flex gap-4 items-start border-b border-white/5 pb-4 last:border-0 last:pb-0">
                                                 <div className="w-16 h-16 bg-white/5 rounded flex items-center justify-center shrink-0 overflow-hidden border border-white/10">
                                                     {item.imageUrl ? (
                                                         <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
@@ -264,6 +340,7 @@ export default function CheckoutPage() {
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-white text-sm font-medium line-clamp-2">{item.name}</p>
+                                                    {item.selectedColor && <p className="text-xs text-gray-500">Color: {item.selectedColor}</p>}
                                                     <div className="flex justify-between items-center mt-1">
                                                         <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
                                                         <p className="text-gold text-sm">{item.price}</p>
@@ -274,6 +351,10 @@ export default function CheckoutPage() {
                                     </div>
 
                                     <div style={{ padding: "1vw 0" }} className="border-t border-white/10 pt-4 space-y-2">
+                                        <div className="flex justify-between text-gray-400 text-sm">
+                                            <span>Discount</span>
+                                            <span>PKR {discount}</span>
+                                        </div>
                                         <div className="flex justify-between text-gray-400 text-sm">
                                             <span>Subtotal</span>
                                             <span>PKR {total.toFixed(2)}</span>

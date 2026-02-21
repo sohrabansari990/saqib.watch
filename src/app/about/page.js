@@ -47,13 +47,13 @@ export default function AboutPage() {
                             viewport={{ once: true }}
                         >
                             <h2 className="font-serif text-4xl text-white mb-8 border-l-4 border-gold pl-6">
-                                The Sveston Legacy
+                                The Lahza Legacy
                             </h2>
                             <p className="text-gray-400 leading-relaxed mb-6 text-lg">
-                                Born from a passion for precision and a commitment to elegance, Sveston has been a hallmark of luxury watchmaking for over four decades. From our humble beginnings in Dubai to becoming a global icon, our journey is defined by the relentless pursuit of perfection.
+                                Born from a passion for precision and a commitment to elegance, Lahza has been a hallmark of luxury watchmaking for over four decades. From our humble beginnings in Dubai to becoming a global icon, our journey is defined by the relentless pursuit of perfection.
                             </p>
                             <p className="text-gray-400 leading-relaxed text-lg">
-                                Each Sveston timepiece is more than just a watch; it's a testament to the artistry of horology. We blend traditional craftsmanship with modern innovation to create pieces that transcend generations.
+                                Each Lahza timepiece is more than just a watch; it's a testament to the artistry of horology. We blend traditional craftsmanship with modern innovation to create pieces that transcend generations.
                             </p>
                         </motion.div>
                         <motion.div

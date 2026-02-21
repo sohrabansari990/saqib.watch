@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { FaPhoneAlt, FaEnvelope, FaWhatsapp } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
+import { toast } from "sonner";
 
 
 export default function ContactPage() {
@@ -13,6 +14,11 @@ export default function ContactPage() {
         emailjs.sendForm(
             "service_v3f938c", "template_p0pf2le", e.target, "_B-DScnQtHlKbGAfi"
         )
+        toast.success("Email sent successfully", {
+            description: "we have reveived your email successfully, we'll reach out to you soon!",
+            duration: 3000
+        })
+        e.target.reset();
     }
 
     return (
@@ -79,7 +85,7 @@ export default function ContactPage() {
                                             Email Us
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            kashkot1997@gmail.com
+                                            lahza.timepieces@gmail.com
                                         </p>
                                     </div>
                                 </div>
@@ -124,7 +130,7 @@ export default function ContactPage() {
                                     </label>
                                     <input
                                         type="email"
-                                        name="user_email"
+                                        name="email"
                                         className="w-full bg-dark border border-white/10 rounded px-4 py-3 text-white focus:border-gold focus:outline-none transition-colors" style={{ padding: "0.5vw" }}
                                         placeholder="john@example.com"
                                         required
@@ -144,7 +150,7 @@ export default function ContactPage() {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full cursor-pointer py-4 bg-gold text-black font-bold uppercase tracking-[0.2em] hover:bg-gold-light transition-colors"
+                                    className="w-full cursor-pointer py-4 bg-gold text-black font-bold  uppercase tracking-[0.2em] hover:bg-gold-light transition-colors"
                                     style={{ padding: "0.5vw" }}
                                 >
                                     Send Message

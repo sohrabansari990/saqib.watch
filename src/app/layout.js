@@ -17,11 +17,65 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata = {
-  title: "SVESTON | Luxury Timepieces",
-  description: "Experience the perfect blend of luxury, beauty, and elegance with Sveston timepieces.",
+  icons: {
+    icon: "/lahza-logo.png",
+    shortcut: "/lahza-logo.png",
+    apple: "/lahza-logo.png",
+  },
+  title: {
+    default: "LAHZA | Timepieces - Precious in Your Wrist",
+    template: "%s | LAHZA Timepieces",
+  },
+  description:
+    "Discover LAHZA Timepieces — premium luxury watches for men, women & couples. Elegant designs, affordable prices. Shop the finest watch collection in Pakistan.",
+  keywords: [
+    "LAHZA",
+    "LAHZA Timepieces",
+    "luxury watches Pakistan",
+    "buy watches online Pakistan",
+    "men watches",
+    "women watches",
+    "couple watches",
+    "affordable luxury watches",
+    "wrist watches Pakistan",
+    "online watch store",
+  ],
+  authors: [{ name: "LAHZA Timepieces" }],
+  creator: "LAHZA Timepieces",
+  publisher: "LAHZA Timepieces",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "LAHZA Timepieces",
+    title: "LAHZA | Timepieces - Precious in Your Wrist",
+    description:
+      "Discover LAHZA Timepieces — premium luxury watches for men, women & couples. Elegant designs, affordable prices.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "LAHZA Timepieces",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LAHZA | Timepieces - Precious in Your Wrist",
+    description:
+      "Discover LAHZA Timepieces — premium luxury watches for men, women & couples.",
+    images: ["/og-image.jpg"],
+  },
+  metadataBase: new URL("https://lahza.watch"),
 };
 
 import { AuthProvider } from "@/context/AuthContext";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 
 export default function RootLayout({ children }) {
   return (
@@ -29,11 +83,13 @@ export default function RootLayout({ children }) {
       <body className="bg-dark text-foreground antialiased font-sans" suppressHydrationWarning suppressContentEditableWarning>
         <AuthProvider>
           <CartProvider>
-            {children}
+            <FavoritesProvider>
+              {children}
+            </FavoritesProvider>
             <Toaster position="top-center" richColors theme="dark" />
           </CartProvider>
         </AuthProvider>
       </body>
     </html>
-  ); // Keep the closing brace for the function
+  );
 }

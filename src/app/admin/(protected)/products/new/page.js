@@ -1,108 +1,215 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-// import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Removed Firebase Storage
-import { db } from "@/lib/firebase"; // Keep auth/db
-import { supabase } from "@/lib/supabase"; // Add Supabase
+import { collection, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Upload, X, ArrowLeft } from "lucide-react";
+import { Upload, X, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-const categories = ["men", "women", "couples", "monitor", "other"];
+const COLOR_PRESETS = [
+    { name: "Red", hex: "#DC2626" },
+    { name: "Black", hex: "#000000" },
+    { name: "Green", hex: "#16A34A" },
+    { name: "White", hex: "#FFFFFF" },
+    { name: "Silver", hex: "#C0C0C0" },
+    { name: "Gold", hex: "#D4AF37" },
+    { name: "Blue", hex: "#2563EB" },
+    { name: "Rose Gold", hex: "#B76E79" },
+    { name: "Brown", hex: "#8B4513" },
+    { name: "Black with Silver", hex: "#2F4F4F" },
+    { name: "Black with Gold", hex: "#3D3D00" },
+    { name: "Navy", hex: "#001F3F" },
+];
 
 export default function AddProductPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
+    const [existingCategories, setExistingCategories] = useState([]);
+    const [customCategory, setCustomCategory] = useState("");
+    const [showCustomCategory, setShowCustomCategory] = useState(false);
+
+    // Variants: array of { color, hex, imageFiles: File[], imagePreviews: string[] }
+    const [variants, setVariants] = useState([]);
+    // General images (used when NO variants are added)
+    const [generalImages, setGeneralImages] = useState([]);
 
     const [formData, setFormData] = useState({
         name: "",
+        model: "",
         category: "",
         price: "",
         description: "",
-        color: "#000000",
-        accent: "#c9a96e",
-        mode: "new", // new, sale, featured
+        mode: "new",
     });
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setImageFile(file);
+    // Fetch existing categories from Firestore
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const snapshot = await getDocs(collection(db, "products"));
+                const cats = new Set();
+                snapshot.docs.forEach((d) => {
+                    const cat = d.data().category;
+                    if (cat) cats.add(cat);
+                });
+                setExistingCategories([...cats].sort());
+            } catch (err) {
+                console.error("Failed to load categories:", err);
+            }
+        };
+        fetchCategories();
+    }, []);
+
+    const allCategories = [...new Set([...existingCategories, "men", "women", "couples"])].sort();
+
+    // --- General image handlers ---
+    const handleGeneralImageAdd = (e) => {
+        const files = Array.from(e.target.files);
+        files.forEach((file) => {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setImagePreview(reader.result);
+                setGeneralImages((prev) => [...prev, { file, preview: reader.result }]);
             };
             reader.readAsDataURL(file);
-        }
+        });
+        e.target.value = "";
     };
 
+    const removeGeneralImage = (index) => {
+        setGeneralImages((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    // --- Variant handlers ---
+    const addVariant = (colorPreset) => {
+        if (variants.find((v) => v.color === colorPreset.name)) {
+            toast.error(`${colorPreset.name} variant already added`);
+            return;
+        }
+        setVariants((prev) => [
+            ...prev,
+            { color: colorPreset.name, hex: colorPreset.hex, imageFiles: [], imagePreviews: [] },
+        ]);
+    };
+
+    const removeVariant = (index) => {
+        setVariants((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const handleVariantImageAdd = (variantIndex, e) => {
+        const files = Array.from(e.target.files);
+        files.forEach((file) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setVariants((prev) =>
+                    prev.map((v, i) =>
+                        i === variantIndex
+                            ? {
+                                  ...v,
+                                  imageFiles: [...v.imageFiles, file],
+                                  imagePreviews: [...v.imagePreviews, reader.result],
+                              }
+                            : v
+                    )
+                );
+            };
+            reader.readAsDataURL(file);
+        });
+        e.target.value = "";
+    };
+
+    const removeVariantImage = (variantIndex, imgIndex) => {
+        setVariants((prev) =>
+            prev.map((v, i) =>
+                i === variantIndex
+                    ? {
+                          ...v,
+                          imageFiles: v.imageFiles.filter((_, j) => j !== imgIndex),
+                          imagePreviews: v.imagePreviews.filter((_, j) => j !== imgIndex),
+                      }
+                    : v
+            )
+        );
+    };
+
+    // --- Supabase upload helper ---
+    const uploadToSupabase = async (file) => {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const { error } = await supabase.storage.from("products").upload(fileName, file);
+        if (error) throw error;
+        const { data: { publicUrl } } = supabase.storage.from("products").getPublicUrl(fileName);
+        return publicUrl;
+    };
+
+    // --- Submit ---
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!imageFile) {
-            toast.error("Please upload a product image");
+        const hasVariants = variants.length > 0;
+        const hasGeneralImages = generalImages.length > 0;
+
+        if (!hasVariants && !hasGeneralImages) {
+            toast.error("Please upload at least one product image");
             return;
         }
 
-        if (!formData.category) {
-            toast.error("Please select a category");
-            return;
+        if (hasVariants) {
+            const emptyVariant = variants.find((v) => v.imageFiles.length === 0);
+            if (emptyVariant) {
+                toast.error(`Please add at least one image for the ${emptyVariant.color} variant`);
+                return;
+            }
         }
 
-        // Image is now optional to allow bypassing CORS issues during dev
-        // if (!imageFile) { ... } 
+        const category = showCustomCategory ? customCategory.trim().toLowerCase() : formData.category;
+        if (!category) {
+            toast.error("Please select or enter a category");
+            return;
+        }
 
         setLoading(true);
 
         try {
-            let downloadURL = "";
+            let imageUrl = "";
+            let images = [];
+            let variantsData = [];
 
-            // 1. Upload Image (if exists) - SUPABASE MIGRATION
-            if (imageFile) {
-                try {
-                    console.log("Starting Supabase upload...");
-
-                    // Sanitize filename
-                    const fileExt = imageFile.name.split('.').pop();
-                    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-                    const filePath = `${fileName}`;
-
-                    const { data, error } = await supabase.storage
-                        .from('products')
-                        .upload(filePath, imageFile);
-
-                    if (error) throw error;
-
-                    // Get Public URL
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('products')
-                        .getPublicUrl(filePath);
-
-                    downloadURL = publicUrl;
-                    console.log("Upload complete:", downloadURL);
-
-                } catch (imgErr) {
-                    console.error("Supabase Upload Failed:", imgErr);
-                    toast.error(`Image upload failed: ${imgErr.message}`);
-                    // Optional: return here if image is strictly required
-                    // return; 
+            if (hasVariants) {
+                for (const variant of variants) {
+                    const urls = [];
+                    for (const file of variant.imageFiles) {
+                        const url = await uploadToSupabase(file);
+                        urls.push(url);
+                    }
+                    variantsData.push({ color: variant.color, hex: variant.hex, images: urls });
                 }
+                imageUrl = variantsData[0].images[0];
+                images = variantsData.flatMap((v) => v.images);
+            } else {
+                for (const img of generalImages) {
+                    const url = await uploadToSupabase(img.file);
+                    images.push(url);
+                }
+                imageUrl = images[0];
             }
 
-            // 2. Save to Firestore (Metadata only)
-            // We still use Firestore for product data, just Supabase for image storage
             await addDoc(collection(db, "products"), {
-                ...formData,
+                name: formData.name,
+                model: formData.model || "",
+                category,
                 price: parseFloat(formData.price),
-                imageUrl: downloadURL,
+                description: formData.description,
+                mode: formData.mode,
+                imageUrl,
+                images,
+                variants: variantsData.length > 0 ? variantsData : [],
                 createdAt: serverTimestamp(),
             });
 
@@ -117,8 +224,8 @@ export default function AddProductPage() {
     };
 
     return (
-        <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-br from-[#0b0b0f] via-[#0f0f14] to-[#0f0a06] text-white">
-            <div className="max-w-5xl md:max-w-[70%] mx-auto px-6 py-14" style={{padding: "2vw 1vw"}}>
+        <div className="min-h-screen w-full flex justify-center items-start bg-gradient-to-br from-[#0b0b0f] via-[#0f0f14] to-[#0f0a06] text-white">
+            <div className="max-w-5xl md:max-w-[70%] w-full mx-auto px-6 py-14" style={{ padding: "2vw 1vw" }}>
                 <div className="mb-8 flex items-center gap-4">
                     <Link href="/admin">
                         <Button variant="ghost" className="text-gray-400 hover:text-white">
@@ -131,170 +238,160 @@ export default function AddProductPage() {
                     </div>
                 </div>
 
-                <Card className="bg-[#121214] border border-white/10 shadow-2xl shadow-black/50 rounded-2xl" style={{padding: "2vw 1vw"}}>
+                <Card className="bg-[#121214] border border-white/10 shadow-2xl shadow-black/50 rounded-2xl" style={{ padding: "2vw 1vw" }}>
                     <CardHeader className="space-y-2">
                         <CardTitle className="text-2xl">Product Details</CardTitle>
                         <CardDescription>Upload imagery and metadata for the catalog.</CardDescription>
                     </CardHeader>
-                    <CardContent style={{padding: "2vw 1vw"}} >
-                    <form onSubmit={handleSubmit} className="space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                            {/* Left Column: Image Upload */}
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-sm">Product Image</Label>
-                                    <span className="text-xs text-gray-500">Required</span>
+                    <CardContent style={{ padding: "2vw 1vw" }}>
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            {/* --- Basic Info --- */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Product Name *</Label>
+                                    <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Rollie Date Just Watch" required style={{ padding: "1vw" }} />
                                 </div>
-
-                                <div className="border-2 border-dashed border-white/10 rounded-xl p-6 flex flex-col items-center justify-center min-h-[340px] relative bg-gradient-to-br from-black/50 via-black/30 to-black/50 hover:border-gold/60 transition-colors group">
-                                    {imagePreview ? (
-                                        <>
-                                            <img
-                                                src={imagePreview}
-                                                alt="Preview"
-                                                className="w-full h-full object-contain max-h-[400px]"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={(e) => { 
-                                                    e.stopPropagation(); 
-                                                    setImageFile(null); 
-                                                    setImagePreview(null); 
-                                                }}
-                                                className="absolute top-2 right-2 cursor-pointer bg-red-500 rounded-full p-1 text-white hover:bg-red-600 transition-colors z-50"
-                                            >
-                                                <X size={26} />
+                                <div className="space-y-2">
+                                    <Label htmlFor="model">Model Number</Label>
+                                    <Input id="model" value={formData.model} onChange={(e) => setFormData({ ...formData, model: e.target.value })} placeholder="e.g. RLX-3499" style={{ padding: "1vw" }} />
+                                    <p className="text-xs text-gray-500">Displayed on the product page.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="price">Price (PKR) *</Label>
+                                    <Input id="price" type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} placeholder="e.g. 5000" required style={{ padding: "1vw" }} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="category">Category *</Label>
+                                    {!showCustomCategory ? (
+                                        <div className="space-y-2">
+                                            <div className="relative">
+                                                <select id="category" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="flex h-10 w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold appearance-none cursor-pointer capitalize" style={{ padding: "0vw 1vw" }}>
+                                                    <option value="" disabled>Select Category</option>
+                                                    {allCategories.map((cat) => (
+                                                        <option key={cat} value={cat} className="capitalize">{cat}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
+                                            </div>
+                                            <button type="button" onClick={() => setShowCustomCategory(true)} className="text-xs text-gold hover:text-gold-light transition-colors">
+                                                + Add new category
                                             </button>
-                                        </>
+                                        </div>
                                     ) : (
-                                        <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full py-8">
-                                            <Upload size={40} className="text-gray-500 mb-3 group-hover:text-gold transition-colors" />
-                                            <span className="text-gray-300 text-sm">Drag & drop or click to upload</span>
-                                            <span className="text-gray-600 text-xs mt-1">PNG/JPG up to 5MB</span>
-                                            <input
-                                                type="file"
-                                                className="hidden"
-                                                accept="image/*"
-                                                onChange={handleImageChange}
-                                            />
-                                        </label>
+                                        <div className="space-y-2">
+                                            <Input value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} placeholder="Type new category name" style={{ padding: "1vw" }} />
+                                            <button type="button" onClick={() => { setShowCustomCategory(false); setCustomCategory(""); }} className="text-xs text-gray-400 hover:text-white transition-colors">
+                                                ← Back to existing categories
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
-                                <p className="text-xs text-gray-500 text-center">
-                                    Image will be displayed in full width on details page.
-                                </p>
-                            </div>
-
-                            {/* Right Column: Details */}
-                            <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Product Name</Label>
-                                    <Input
-                                        id="name"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        placeholder="e.g. Royal SV-7513"
-                                        required
-                                        style={{padding: "1vw 1vw"}}
-                                    />
-                                    <p className="text-xs text-gray-500">Visible in listings and product page.</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="price">Price (PKR)</Label>
-                                    <Input
-                                        id="price"
-                                        type="number"
-                                        value={formData.price}
-                                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                        placeholder="e.g. 5000"
-                                        required    
-                                        style={{padding: "1vw 1vw"}}
-                                    />
-                                    <p className="text-xs text-gray-500">Enter numeric value only.</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="category">Category</Label>
+                                    <Label htmlFor="mode">Badge / Mode</Label>
                                     <div className="relative">
-                                        <select
-                                            id="category"
-                                            value={formData.category}
-                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                            className="flex h-10 w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold appearance-none cursor-pointer capitalize"
-                                            required
-                                            style={{padding: "0vw 1vw 0vw 1vw"}}
-                                        >
-                                            <option value="" disabled>Select Category</option>
-                                            {categories.map(cat => (
-                                                <option key={cat} value={cat}>{cat}</option>
-                                            ))}
+                                        <select id="mode" value={formData.mode} onChange={(e) => setFormData({ ...formData, mode: e.target.value })} className="flex h-10 w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold appearance-none cursor-pointer" style={{ padding: "0vw 1vw" }}>
+                                            <option value="new">New</option>
+                                            <option value="sale">Sale</option>
+                                            <option value="featured">Featured</option>
                                         </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">v</div>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
                                     </div>
-                                    <p className="text-xs text-gray-500">Used for gallery filters.</p>
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <Label htmlFor="description">Description (Optional)</Label>
+                                    <textarea id="description" className="flex min-h-[100px] w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Product details..." style={{ padding: "1vw" }} />
+                                </div>
+                            </div>
+
+                            {/* --- Color Variants Section --- */}
+                            <div className="space-y-4 border-t border-white/10 pt-8">
+                                <div>
+                                    <h3 className="text-lg font-serif text-white mb-1">Color Variants</h3>
+                                    <p className="text-xs text-gray-500">Add color variants with separate images for each. If you don&apos;t need color variants, skip this and add general images below.</p>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="description">Description (Optional)</Label>
-                                    <textarea
-                                        id="description"
-                                        className="flex min-h-[100px] w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="Product details..."
-                                        style={{padding: "1vw 1vw"}}
-                                    />
-                                    <p className="text-xs text-gray-500">Tip: keep it short and benefits-focused.</p>
+                                    <Label>Select Colors to Add</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {COLOR_PRESETS.map((preset) => {
+                                            const isAdded = variants.some((v) => v.color === preset.name);
+                                            return (
+                                                <button key={preset.name} type="button" onClick={() => !isAdded && addVariant(preset)} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs transition-all ${isAdded ? "border-gold/50 bg-gold/10 text-gold cursor-default" : "border-white/10 text-gray-300 hover:border-gold hover:text-gold cursor-pointer"}`}>
+                                                    <span className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0" style={{ backgroundColor: preset.hex }} />
+                                                    {preset.name}
+                                                    {isAdded && <span className="text-gold">✓</span>}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
 
-                                {/* <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="color">Color (Hex)</Label>
-                                        <div className="flex gap-2">
-                                            <Input
-                                                id="color"
-                                                value={formData.color}
-                                                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                                                placeholder="#000000"
-                                            />
-                                            <div
-                                                className="w-10 h-10 rounded border border-white/20 shrink-0"
-                                                style={{ backgroundColor: formData.color }}
-                                            />
-                                        </div>
+                                {variants.length > 0 && (
+                                    <div className="space-y-4">
+                                        {variants.map((variant, vIdx) => (
+                                            <div key={variant.color} className="border border-white/10 rounded-lg p-4 space-y-3 bg-white/[0.02]">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: variant.hex }} />
+                                                        <span className="text-sm font-medium text-white">{variant.color}</span>
+                                                        <span className="text-xs text-gray-500">({variant.imagePreviews.length} images)</span>
+                                                    </div>
+                                                    <button type="button" onClick={() => removeVariant(vIdx)} className="text-red-400 hover:text-red-300 transition-colors cursor-pointer">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {variant.imagePreviews.map((preview, iIdx) => (
+                                                        <div key={iIdx} className="relative w-20 h-20 rounded-md overflow-hidden border border-white/10 group">
+                                                            <img src={preview} alt="" className="w-full h-full object-cover" />
+                                                            <button type="button" onClick={() => removeVariantImage(vIdx, iIdx)} className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                                                                <X size={16} className="text-red-400" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                    <label className="w-20 h-20 rounded-md border-2 border-dashed border-white/10 hover:border-gold/50 flex items-center justify-center cursor-pointer transition-colors">
+                                                        <Plus size={20} className="text-gray-500" />
+                                                        <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => handleVariantImageAdd(vIdx, e)} />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="space-y-2" style={{padding: "1vw 1vw"}}>
-                                        <Label htmlFor="accent">Accent (Hex)</Label>
-                                        <div className="flex gap-2">
-                                            <Input
-                                                id="accent"
-                                                value={formData.accent}
-                                                onChange={(e) => setFormData({ ...formData, accent: e.target.value })}
-                                                placeholder="#c9a96e"
-                                            />
-                                            <div
-                                                className="w-10 h-10 rounded border border-white/20 shrink-0"
-                                                style={{ backgroundColor: formData.accent }}
-                                            />
-                                        </div>
-                                    </div>
-                                </div> */}
+                                )}
                             </div>
-                        </div>
 
-                        <div className="pt-4 flex justify-center">
-                            <Button
-                                type="submit"
-                                size="lg"
-                                className="bg-gold cursor-pointer text-black hover:bg-gold-light font-bold shadow-lg shadow-gold/20"
-                                disabled={loading}
-                                style={{padding: "1vw 1vw", marginTop: "2vw"}}
-                            >
-                                {loading ? "Creating..." : "Create Product"}
-                            </Button>
-                        </div>
-                    </form>
+                            {/* --- General Images (when no variants) --- */}
+                            {variants.length === 0 && (
+                                <div className="space-y-4 border-t border-white/10 pt-8">
+                                    <div>
+                                        <h3 className="text-lg font-serif text-white mb-1">Product Images *</h3>
+                                        <p className="text-xs text-gray-500">Upload one or more images. First image will be the main thumbnail.</p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3">
+                                        {generalImages.map((img, idx) => (
+                                            <div key={idx} className={`relative w-28 h-28 rounded-lg overflow-hidden border group ${idx === 0 ? "border-gold/50 ring-2 ring-gold/20" : "border-white/10"}`}>
+                                                <img src={img.preview} alt="" className="w-full h-full object-cover" />
+                                                {idx === 0 && <span className="absolute top-1 left-1 bg-gold text-black text-[9px] font-bold px-1.5 py-0.5 rounded">MAIN</span>}
+                                                <button type="button" onClick={() => removeGeneralImage(idx)} className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                                                    <X size={18} className="text-red-400" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <label className="w-28 h-28 rounded-lg border-2 border-dashed border-white/10 hover:border-gold/50 flex flex-col items-center justify-center cursor-pointer transition-colors gap-1">
+                                            <Upload size={24} className="text-gray-500" />
+                                            <span className="text-[10px] text-gray-500">Add Image</span>
+                                            <input type="file" className="hidden" accept="image/*" multiple onChange={handleGeneralImageAdd} />
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="pt-4 flex justify-center">
+                                <Button type="submit" size="lg" className="bg-gold cursor-pointer text-black hover:bg-gold-light font-bold shadow-lg shadow-gold/20" disabled={loading} style={{ padding: "1vw 2vw", marginTop: "2vw" }}>
+                                    {loading ? "Creating..." : "Create Product"}
+                                </Button>
+                            </div>
+                        </form>
                     </CardContent>
                 </Card>
             </div>

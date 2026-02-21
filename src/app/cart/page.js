@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Minus, Plus } from "lucide-react";
+import { Trash2, Minus, Plus, CloudCog } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -22,13 +22,17 @@ export default function CartPage() {
         setMounted(true);
     }, []);
 
-    if (!mounted || !contextMounted) return null;
-
     const subtotal = getCartTotal();
     const total = subtotal - discount;
 
-    const handleApplyCoupon = () => {
-        if (coupon.trim().toUpperCase() === "SAVE10") {
+    useEffect(() => {
+        if (!mounted || !contextMounted) return;
+        localStorage.setItem("total", total);
+    }, [mounted, contextMounted, total]);
+
+    const handleApplyCoupon = (e) => {
+        e.preventDefault();
+        if (coupon.trim().toUpperCase() === "SAVE10" || coupon.trim().toUpperCase() === "RAMADAN") {
             const disc = subtotal * 0.10;
             setDiscount(disc);
             toast.success("Coupon applied: 10% off");
@@ -64,7 +68,7 @@ export default function CartPage() {
                             <div className="lg:col-span-2 space-y-6" style={{ paddingTop: "2vw" }}>
                                 {cart.map((item) => (
                                     <div
-                                        key={item.id}
+                                        key={item.cartKey || item.id}
                                         className="flex flex-col sm:flex-row items-center gap-6 bg-dark-card p-6 rounded-lg border border-white/5"
                                         style={{margin: "0vw 0vw 1vw 0vw"}}
                                     >
@@ -85,18 +89,19 @@ export default function CartPage() {
                                             <div className="flex justify-between items-start mb-2">
                                                 <h3 className="font-serif text-xl text-white">{item.name}</h3>
                                                 <button
-                                                    onClick={() => removeFromCart(item.id)}
+                                                    onClick={() => removeFromCart(item.cartKey || item.id)}
                                                     className="text-red-500 hover:text-red-400 p-2 transition-colors sm:hidden"
                                                 >
                                                     <Trash2 size={24} />
                                                 </button>
                                             </div>
                                             <p className="text-gold mb-4">{item.price} PKR</p>
+                                            {item.selectedColor && <p className="text-gray-400 text-sm mb-2">Color: {item.selectedColor}</p>}
 
                                             <div className="flex items-center justify-between sm:justify-start gap-6">
                                                 <div className="flex items-center border border-white/10 rounded overflow-hidden">
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        onClick={() => updateQuantity(item.cartKey || item.id, item.quantity - 1)}
                                                         className="p-2 hover:bg-white/5 text-white transition-colors disabled:opacity-50"
                                                         disabled={item.quantity <= 1}
                                                     >
@@ -104,14 +109,14 @@ export default function CartPage() {
                                                     </button>
                                                     <div className="w-8 text-center text-white text-sm bg-white/5 py-2">{item.quantity}</div>
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        onClick={() => updateQuantity(item.cartKey || item.id, item.quantity + 1)}
                                                         className="p-2 hover:bg-white/5 text-white transition-colors"
                                                     >
                                                         <Plus size={24} />
                                                     </button>
                                                 </div>
                                                 <button
-                                                    onClick={() => removeFromCart(item.id)}
+                                                    onClick={() => removeFromCart(item.cartKey || item.id)}
                                                     className="text-red-500 hover:text-red-400 p-2 transition-colors hidden sm:block"
                                                 >
                                                     <Trash2 size={24} />

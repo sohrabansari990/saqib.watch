@@ -8,21 +8,44 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useFavorites } from "@/context/FavoritesContext";
+import { Heart } from "lucide-react";
 
-const categories = ["all", "men", "women", "couples", "monitor", "other"];
+const DEFAULT_CATEGORIES = ["all", "men", "women", "couples"];
 
 function GalleryContent() {
     const [products, setProducts] = useState([]);
     const [filter, setFilter] = useState("all");
     const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
     const searchParams = useSearchParams();
     const router = useRouter();
     const hasSyncedQuery = useRef(false);
+    const { toggleFavorite, isFavorite } = useFavorites();
+
+    // Fetch dynamic categories from all products
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const snapshot = await getDocs(collection(db, "products"));
+                const cats = new Set();
+                snapshot.docs.forEach((d) => {
+                    const cat = d.data().category;
+                    if (cat) cats.add(cat.toLowerCase());
+                });
+                const dynamicCats = ["all", ...([...cats].sort())];
+                setCategories(dynamicCats);
+            } catch (err) {
+                console.error("Error fetching categories:", err);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     // Sync initial filter from URL query
     useEffect(() => {
         const qp = searchParams.get("category");
-        if (qp && categories.includes(qp)) {
+        if (qp) {
             setFilter(qp);
         }
     }, [searchParams]);
@@ -104,42 +127,59 @@ function GalleryContent() {
                             </div>
                         ) : (
                             products.map((watch) => (
-                                <Link
-                                    key={watch.id}
-                                    href={`/product/${watch.id}`}
-                                    className="group cursor-pointer block"
-                                >
-                                    <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[3/4] mb-4 border border-white/5">
-                                        {watch.imageUrl ? (
-                                            <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
-                                                <img
-                                                    src={watch.imageUrl}
-                                                    alt={watch.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-white/5">
-                                                <span className="text-gray-600 text-xs">No Image</span>
-                                            </div>
-                                        )}
+                                <div key={watch.id} className="group cursor-pointer block relative">
+                                    <Link href={`/product/${watch.id}`}>
+                                        <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[3/4] mb-4 border border-white/5">
+                                            {watch.imageUrl ? (
+                                                <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
+                                                    <img
+                                                        src={watch.imageUrl}
+                                                        alt={watch.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-white/5">
+                                                    <span className="text-gray-600 text-xs">No Image</span>
+                                                </div>
+                                            )}
 
-                                        {/* Overlay */}
-                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                                            {/* Overlay */}
+                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
 
-                                        {watch.mode && watch.mode !== 'new' && (
-                                            <span className="absolute top-4 left-4 bg-gold text-black text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
-                                                {watch.mode}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <h3 className="font-serif text-lg text-center text-white group-hover:text-gold transition-colors duration-300">
-                                        {watch.name}
-                                    </h3>
-                                    <p className="text-center text-gold text-sm mt-1">
-                                        Rs. {watch.price?.toLocaleString()}
-                                    </p>
-                                </Link>
+                                            {watch.mode && watch.mode !== 'new' && (
+                                                <span className="absolute top-4 left-4 bg-gold text-black text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
+                                                    {watch.mode}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Link>
+
+                                    {/* Favorite icon - always visible on top-right of image */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            toggleFavorite(watch);
+                                        }}
+                                        className={`absolute top-6 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                                            isFavorite(watch.id)
+                                                ? "bg-white/90 text-red-500 opacity-100"
+                                                : "bg-black/40 text-white opacity-0 group-hover:opacity-100 hover:bg-white/90 hover:text-red-500"
+                                        }`}
+                                    >
+                                        <Heart size={18} fill={isFavorite(watch.id) ? "currentColor" : "none"} />
+                                    </button>
+
+                                    <Link href={`/product/${watch.id}`}>
+                                        <h3 className="font-serif text-lg text-center text-white group-hover:text-gold transition-colors duration-300">
+                                            {watch.name}
+                                        </h3>
+                                        <p className="text-center text-gold text-sm mt-1">
+                                            Rs. {watch.price?.toLocaleString()}
+                                        </p>
+                                    </Link>
+                                </div>
                             ))
                         )}
                     </div>

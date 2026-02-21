@@ -1,10 +1,14 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import VideoModal from "@/components/VideoModal";
+
+const INTRO_VIDEO_URL = "/Intro.mp4";
 
 export default function HeroSection() {
     const heroRef = useRef(null);
     const [offset, setOffset] = useState(0);
+    const [videoOpen, setVideoOpen] = useState(false);
 
     useEffect(() => {
         const onScroll = () => {
@@ -174,7 +178,7 @@ export default function HeroSection() {
                 >
                     Discover
                     <br />
-                    <span className="text-gold">Sveston</span> Watches
+                    <span className="text-gold">Lahza</span> Watches
                 </motion.h1>
 
                 <motion.p
@@ -198,17 +202,24 @@ export default function HeroSection() {
                     >
                         Explore Collection
                     </a>
-                    <a
-                        href="#"
-                        className="px-8 py-3 text-gray-muted text-sm tracking-[0.2em] uppercase hover:text-white transition-colors duration-300 flex items-center gap-2"
+                    <button
+                        onClick={() => setVideoOpen(true)}
+                        className="px-8 py-3 text-gray-muted text-sm tracking-[0.2em] uppercase hover:text-white transition-colors duration-300 flex items-center gap-2 cursor-pointer"
                     >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                         </svg>
                         Watch Full Video
-                    </a>
+                    </button>
                 </motion.div>
             </div>
+
+            {/* Video Modal */}
+            <VideoModal
+                isOpen={videoOpen}
+                onClose={() => setVideoOpen(false)}
+                videoUrl={INTRO_VIDEO_URL}
+            />
 
             {/* Scroll indicator */}
             <motion.div

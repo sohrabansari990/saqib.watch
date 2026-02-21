@@ -29,31 +29,32 @@ export function CartProvider({ children }) {
         }
     }, [cart, mounted]);
 
-    const addToCart = (product, quantity = 1) => {
+    const addToCart = (product, quantity = 1, color = null) => {
         setCart((prev) => {
-            const existing = prev.find((item) => item.id === product.id);
+            const cartKey = color ? `${product.id}_${color}` : product.id;
+            const existing = prev.find((item) => item.cartKey === cartKey);
             if (existing) {
                 toast.success("Updated cart quantity");
                 return prev.map((item) =>
-                    item.id === product.id
+                    item.cartKey === cartKey
                         ? { ...item, quantity: item.quantity + quantity }
                         : item
                 );
             }
             toast.success("Added to cart");
-            return [...prev, { ...product, quantity }];
+            return [...prev, { ...product, cartKey, selectedColor: color, quantity }];
         });
     };
 
-    const removeFromCart = (id) => {
-        setCart((prev) => prev.filter((item) => item.id !== id));
+    const removeFromCart = (cartKey) => {
+        setCart((prev) => prev.filter((item) => (item.cartKey || item.id) !== cartKey));
         toast.error("Removed from cart");
     };
 
-    const updateQuantity = (id, quantity) => {
+    const updateQuantity = (cartKey, quantity) => {
         if (quantity < 1) return;
         setCart((prev) =>
-            prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+            prev.map((item) => ((item.cartKey || item.id) === cartKey ? { ...item, quantity } : item))
         );
     };
 
