@@ -9,23 +9,40 @@ export function FavoritesProvider({ children }) {
     const [favorites, setFavorites] = useState([]);
     const [mounted, setMounted] = useState(false);
 
-    // Load from localStorage
+    // LocalStorage keys (migrate from old key if present)
     useEffect(() => {
-        const saved = localStorage.getItem("lahza_favorites");
-        if (saved) {
-            try {
-                setFavorites(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to parse favorites", e);
+        const NEW_KEY = "saqib_favorites";
+        const OLD_KEY = "lahza_favorites";
+
+        try {
+            const savedNew = localStorage.getItem(NEW_KEY);
+            if (savedNew) {
+                setFavorites(JSON.parse(savedNew));
+            } else {
+                const savedOld = localStorage.getItem(OLD_KEY);
+                if (savedOld) {
+                    const parsed = JSON.parse(savedOld);
+                    setFavorites(parsed);
+                    // Migrate to new key and remove old
+                    localStorage.setItem(NEW_KEY, JSON.stringify(parsed));
+                    localStorage.removeItem(OLD_KEY);
+                }
             }
+        } catch (e) {
+            console.error("Failed to load favorites from localStorage", e);
         }
+
         setMounted(true);
     }, []);
 
-    // Save to localStorage
+    // Save to localStorage (new key)
     useEffect(() => {
         if (mounted) {
-            localStorage.setItem("lahza_favorites", JSON.stringify(favorites));
+            try {
+                localStorage.setItem("saqib_favorites", JSON.stringify(favorites));
+            } catch (e) {
+                console.error("Failed to save favorites", e);
+            }
         }
     }, [favorites, mounted]);
 

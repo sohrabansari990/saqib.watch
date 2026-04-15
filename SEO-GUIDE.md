@@ -1,4 +1,4 @@
-# SEO Guide — LAHZA Timepieces
+# SEO Guide — Saqib Watches
 
 ## 1. Meta Tags (Already Configured)
 
@@ -16,7 +16,7 @@ In any `page.js`, export a `metadata` object:
 
 ```js
 export const metadata = {
-  title: "Gallery", // Renders as "Gallery | LAHZA Timepieces"
+  title: "Gallery", // Renders as "Gallery | Saqib Watches"
   description: "Browse our complete collection of luxury watches.",
 };
 ```
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }) {
 Place a `1200×630px` image at `/public/og-image.jpg`.
 
 Recommended content:
-- Brand logo "LAHZA TIMEPIECES"
+- Brand logo "Saqib Watches"
 - Tagline "Precious in Your Wrist"
 - A hero watch image
 - Dark background with gold (#c9a96e) accents
@@ -61,7 +61,7 @@ const jsonLd = {
   name: product.name,
   image: product.imageUrl,
   description: product.description,
-  brand: { "@type": "Brand", name: "LAHZA Timepieces" },
+  brand: { "@type": "Brand", name: "Saqib Watches" },
   offers: {
     "@type": "Offer",
     price: product.price,

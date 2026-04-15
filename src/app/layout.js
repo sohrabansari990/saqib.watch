@@ -18,19 +18,20 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata = {
   icons: {
-    icon: "/lahza-logo.png",
-    shortcut: "/lahza-logo.png",
-    apple: "/lahza-logo.png",
+    
+    icon: "/main_logo-removebg.png",
+    shortcut: "/main_logo-removebg.png",
+    apple: "/main_logo-removebg.png",
   },
   title: {
-    default: "LAHZA | Timepieces - Precious in Your Wrist",
-    template: "%s | LAHZA Timepieces",
+    default: "Saqib Watches - Precious in Your Wrist",
+    template: "%s | Saqib Watches",
   },
   description:
-    "Discover LAHZA Timepieces — premium luxury watches for men, women & couples. Elegant designs, affordable prices. Shop the finest watch collection in Pakistan.",
+    "Discover Saqib Watches — premium luxury watches for men, women & couples. Elegant designs, affordable prices. Shop the finest watch collection in Pakistan.",
   keywords: [
-    "LAHZA",
-    "LAHZA Timepieces",
+    "Saqib",
+    "Saqib Watches",
     "luxury watches Pakistan",
     "buy watches online Pakistan",
     "men watches",
@@ -40,9 +41,9 @@ export const metadata = {
     "wrist watches Pakistan",
     "online watch store",
   ],
-  authors: [{ name: "LAHZA Timepieces" }],
-  creator: "LAHZA Timepieces",
-  publisher: "LAHZA Timepieces",
+  authors: [{ name: "Saqib Watches" }],
+  creator: "Saqib Watches",
+  publisher: "Saqib Watches",
   robots: {
     index: true,
     follow: true,
@@ -51,24 +52,24 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "LAHZA Timepieces",
-    title: "LAHZA | Timepieces - Precious in Your Wrist",
+    siteName: "Saqib Watches",
+    title: "Saqib | Timepieces - Precious in Your Wrist",
     description:
-      "Discover LAHZA Timepieces — premium luxury watches for men, women & couples. Elegant designs, affordable prices.",
+      "Discover Saqib Watches — premium luxury watches for men, women & couples. Elegant designs, affordable prices.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "LAHZA Timepieces",
+        alt: "Saqib Watches",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "LAHZA | Timepieces - Precious in Your Wrist",
+    title: "Saqib | Timepieces - Precious in Your Wrist",
     description:
-      "Discover LAHZA Timepieces — premium luxury watches for men, women & couples.",
+      "Discover Saqib Watches — premium luxury watches for men, women & couples.",
     images: ["/og-image.jpg"],
   },
   metadataBase: new URL("https://lahza.watch"),

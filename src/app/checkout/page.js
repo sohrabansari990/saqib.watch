@@ -87,7 +87,7 @@ export default function CheckoutPage() {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", "easypaisa");
-        formData.append("folder", "lahza-orders");
+        formData.append("folder", "saqib-orders");
 
         const res = await fetch(
             "https://api.cloudinary.com/v1_1/dsqrekouz/image/upload",
