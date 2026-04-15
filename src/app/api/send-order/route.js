@@ -23,7 +23,7 @@ export async function POST(request) {
     const paymentLabel =
       paymentMethod === "cod" ? "💵 Cash on Delivery" : "📱 EasyPaisa / JazzCash";
 
-    const message = `🛒 *NEW ORDER — LAHZA TIMEPIECES*
+    const message = `🛒 *NEW ORDER — Saqib Watches*
 ━━━━━━━━━━━━━━━━━━━━
 👤 *Customer:* ${customerName}
 📞 *WhatsApp:* ${customerWhatsApp}

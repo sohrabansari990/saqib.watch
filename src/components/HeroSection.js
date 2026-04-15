@@ -178,7 +178,7 @@ export default function HeroSection() {
                 >
                     Discover
                     <br />
-                    <span className="text-gold">Lahza</span> Watches
+                    <span className="text-gold">Saqib</span> Watches
                 </motion.h1>
 
                 <motion.p

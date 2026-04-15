@@ -37,10 +37,8 @@ export default function Header() {
                 <div className="w-full flex items-center justify-between pl-6 pr-12 md:pl-12 md:pr-24 2xl:pl-20 2xl:pr-40 py-4">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3 group">
-                        <Image src="/lahza-logo.png" alt="Logo" width={60} height={60} className="w-12 h-12 hover:scale-110 transition-all duration-300" />
-                        <span className="font-serif text-2xl md:text-3xl tracking-[0.3em] text-white font-light">
-                            LAHZA
-                        </span>
+                        <Image src="/main%20logo.jpeg" alt="Saqib Watches" width={60} height={60} className="w-12 h-12 hover:scale-110 transition-all duration-300" />
+                        <span className="sr-only">Saqib Watches</span>
                     </Link>
 
                     {/* Desktop Navigation */}

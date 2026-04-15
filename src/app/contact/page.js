@@ -85,7 +85,7 @@ export default function ContactPage() {
                                             Email Us
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            lahza.timepieces@gmail.com
+                                            saqib.timepieces@gmail.com
                                         </p>
                                     </div>
                                 </div>
