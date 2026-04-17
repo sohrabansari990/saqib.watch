@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { clsx } from "clsx";
 import emailjs from "@emailjs/browser";
@@ -62,8 +62,24 @@ export default function CheckoutPage() {
     const [loading, setLoading] = useState(false);
     const [isOrdered, setIsOrdered] = useState(false);
 
+    // City Dropdown State
+    const [showCityDropdown, setShowCityDropdown] = useState(false);
+    const [citySearch, setCitySearch] = useState("");
+    const cityInputRef = useRef(null);
+
+    const filteredCities = cities.filter((c) =>
+        c.toLowerCase().includes(citySearch.toLowerCase())
+    );
+
     useEffect(() => {
         setMounted(true);
+        const handleClickOutside = (event) => {
+            if (cityInputRef.current && !cityInputRef.current.contains(event.target)) {
+                setShowCityDropdown(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     if (!mounted || !contextMounted) return null;
@@ -224,23 +240,44 @@ export default function CheckoutPage() {
                                                 style={{ padding: "1vw" }}
                                             />
                                         </div>
-                                        <div className="space-y-2 md:col-span-2">
+                                        <div className="space-y-2 md:col-span-2" ref={cityInputRef}>
                                             <Label htmlFor="city">City *</Label>
                                             <div className="relative">
-                                                <select
+                                                <Input
                                                     id="city"
-                                                    className="flex h-10 w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold appearance-none cursor-pointer"
-                                                    value={formData.city}
-                                                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                                    required
-                                                    style={{ padding: "0vw 1vw 0vw 1vw" }}
-
-                                                >
-                                                    <option value="" disabled>Select City</option>
-                                                    {cities.map((city) => (
-                                                        <option key={city} value={city}>{city}</option>
-                                                    ))}
-                                                </select>
+                                                    placeholder="Search or select a city..."
+                                                    value={citySearch}
+                                                    onChange={(e) => {
+                                                        setCitySearch(e.target.value);
+                                                        setShowCityDropdown(true);
+                                                        setFormData({ ...formData, city: "" }); // Reset selected city if searching
+                                                    }}
+                                                    onFocus={() => setShowCityDropdown(true)}
+                                                    className="w-full"
+                                                    required={!formData.city}
+                                                    autoComplete="off"
+                                                />
+                                                {showCityDropdown && (
+                                                    <div className="absolute z-10 w-full mt-1 bg-dark-lighter border border-gold/30 rounded-md shadow-xl max-h-48 overflow-y-auto">
+                                                        {filteredCities.length > 0 ? (
+                                                            filteredCities.map((city) => (
+                                                                <div
+                                                                    key={city}
+                                                                    className="px-4 py-2 text-sm text-white hover:bg-gold/20 cursor-pointer"
+                                                                    onClick={() => {
+                                                                        setFormData({ ...formData, city });
+                                                                        setCitySearch(city);
+                                                                        setShowCityDropdown(false);
+                                                                    }}
+                                                                >
+                                                                    {city}
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div className="px-4 py-2 text-sm text-gray-500">No cities found.</div>
+                                                        )}
+                                                    </div>
+                                                )}
                                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                                                     ▼
                                                 </div>

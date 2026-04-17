@@ -1,7 +1,7 @@
 "use client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { FaPhoneAlt, FaEnvelope, FaWhatsapp } from "react-icons/fa";
+import { FaPhoneAlt, FaEnvelope, FaWhatsapp, FaClock } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
 import { toast } from "sonner";
 
@@ -89,6 +89,45 @@ export default function ContactPage() {
                                         </p>
                                     </div>
                                 </div>
+
+                                <div className="flex items-center gap-4 bg-dark-card p-6 rounded-lg border border-white/5" style={{ marginBottom: "0.5vw", padding: "0.5vw" }}>
+                                    <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold text-xl">
+                                        <FaClock />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-muted uppercase tracking-wider mb-1">
+                                            Store Hours
+                                        </p>
+                                        <p className="text-white font-medium text-sm md:text-base leading-relaxed">
+                                            Monday – Saturday: 10:00 AM – 9:00 PM<br/>
+                                            Sunday: 12:00 PM – 6:00 PM
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Map Embed */}
+                            <div className="pt-6 w-full">
+                                <h3 className="text-gold uppercase tracking-widest text-sm font-semibold mb-4">FIND OUR STORE</h3>
+                                <div className="border border-[#333] rounded-[8px] overflow-hidden w-full relative h-[300px]">
+                                    <iframe 
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.4!2d71.5785!3d34.0151!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38d917b31a79e8b5%3A0x9f0a8ef17ec285c0!2sKhyber%20Bazaar%2C%20Peshawar!5e0!3m2!1sen!2s!4v1"
+                                    width="100%" 
+                                    height="100%" 
+                                    className="absolute inset-0"
+                                    style={{ border: 0 }} 
+                                    allowFullScreen="" 
+                                    loading="lazy"
+                                    ></iframe>
+                                </div>
+                                <a 
+                                    href="https://maps.google.com/?q=Khyber+Bazar+Peshawar+Pakistan" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="mt-6 w-full inline-block text-center border-2 border-gold text-gold py-4 uppercase tracking-[0.2em] font-bold text-sm hover:bg-gold hover:text-black transition-colors"
+                                >
+                                    Get Directions
+                                </a>
                             </div>
                         </div>
 

@@ -5,21 +5,35 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Minus, Plus, CloudCog } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Trash2, Minus, Plus, Truck } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { collection, query, limit, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function CartPage() {
     const { cart, removeFromCart, updateQuantity, getCartTotal, mounted: contextMounted } = useCart();
     const [mounted, setMounted] = useState(false);
     const [coupon, setCoupon] = useState("");
     const [discount, setDiscount] = useState(0);
-
+    const [crossSells, setCrossSells] = useState([]);
 
     useEffect(() => {
         setMounted(true);
+        const fetchCrossSells = async () => {
+            try {
+                const q = query(collection(db, "products"), limit(8));
+                const snap = await getDocs(q);
+                const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                const shuffled = list.sort(() => 0.5 - Math.random()).slice(0, 4);
+                setCrossSells(shuffled);
+            } catch (err) {
+                console.error("Error fetching cross sells:", err);
+            }
+        };
+        fetchCrossSells();
     }, []);
 
     const subtotal = getCartTotal();
@@ -171,6 +185,42 @@ export default function CartPage() {
                                         </Button>
                                     </Link>
                                 </div>
+
+                                {/* Delivery Estimate */}
+                                <div className="flex items-center gap-3 bg-dark-card border border-white/5 p-4 rounded-lg mt-6">
+                                    <Truck size={18} className="text-gray-400" />
+                                    <p className="text-gray-400 text-sm">
+                                        Estimated Delivery: <strong className="text-white">2-4 business days</strong> | FREE for all orders
+                                    </p>
+                                </div>
+
+                                {/* You Might Also Like */}
+                                {crossSells.length > 0 && (
+                                    <div className="mt-12 mb-8">
+                                        <h3 className="text-gold uppercase tracking-[0.2em] text-xs font-semibold mb-4">You Might Also Like</h3>
+                                        <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                                            {crossSells.map((product) => (
+                                                <Link 
+                                                    key={product.id} 
+                                                    href={`/product/${product.id}`}
+                                                    className="shrink-0 w-64 bg-[#111] border border-white/5 rounded-lg flex items-center p-3 hover:border-gold/30 transition-colors"
+                                                >
+                                                    <div className="w-20 h-20 shrink-0 bg-[#1a1a1a] rounded flex items-center justify-center overflow-hidden">
+                                                        {product.imageUrl ? (
+                                                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <span className="text-[10px] text-gray-600">No Image</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="ml-4 overflow-hidden">
+                                                        <h4 className="font-serif text-white text-sm truncate">{product.name}</h4>
+                                                        <p className="text-gold text-xs mt-1">Rs. {product.price?.toLocaleString()}</p>
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
