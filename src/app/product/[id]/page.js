@@ -7,6 +7,8 @@ import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 import ProductActions from "@/components/ProductActions";
 import { useFavorites } from "@/context/FavoritesContext";
 import { Heart, ShieldCheck, Truck, RotateCcw, Star } from "lucide-react";
@@ -25,6 +27,9 @@ export default function ProductPage() {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedThumbIndex, setSelectedThumbIndex] = useState(0);
   const [similarProducts, setSimilarProducts] = useState([]);
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [swiper, setSwiper] = useState(null);
   const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
@@ -99,8 +104,11 @@ export default function ProductPage() {
     return (
       <>
         <Header />
-        <main className="pt-24 min-h-screen bg-dark flex items-center justify-center">
-          <div className="text-white animate-pulse">Loading Product...</div>
+        <main className="pt-24 min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-white/10 border-t-gold rounded-full animate-spin"></div>
+            <div className="text-gold uppercase tracking-[0.3em] text-xs font-bold animate-pulse">Loading Collection</div>
+          </div>
         </main>
         <Footer />
       </>
@@ -123,7 +131,10 @@ export default function ProductPage() {
   const handleColorChange = (color) => {
     setSelectedColor(color);
     const firstIdx = allImages.findIndex((img) => img.color === color);
-    if (firstIdx !== -1) setSelectedThumbIndex(firstIdx);
+    if (firstIdx !== -1) {
+        setSelectedThumbIndex(firstIdx);
+        if (swiper) swiper.slideTo(firstIdx);
+    }
   };
 
   return (
@@ -284,16 +295,29 @@ export default function ProductPage() {
               >
                 ← Back to Collection
               </Link>
-              <h1
-                className="font-serif text-white"
-                style={{
-                  fontSize: "clamp(28px, 3vw, 48px)",
-                  fontWeight: 300,
-                  marginBottom: "12px",
-                }}
-              >
-                {product.name}
-              </h1>
+              <div className="flex items-center justify-between mb-4">
+                  <h1
+                    className="font-serif text-white"
+                    style={{
+                      fontSize: "clamp(28px, 3vw, 48px)",
+                      fontWeight: 300,
+                    }}
+                  >
+                    {product.name}
+                  </h1>
+                  <button 
+                    onClick={() => {
+                        const url = window.location.href;
+                        window.open(`https://wa.me/?text=Check out this masterpiece: ${url}`, '_blank');
+                    }}
+                    className="text-gray-400 hover:text-[#25D366] transition-colors p-3 bg-[#111] border border-white/5 hover:border-[#25D366]/30 rounded-full flex items-center justify-center group shadow-lg"
+                    title="Share on WhatsApp"
+                  >
+                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+                        </svg>
+                  </button>
+              </div>
               <p
                 style={{
                   fontSize: "24px",
@@ -418,29 +442,29 @@ export default function ProductPage() {
               </div>
 
               {/* Trust Badges & Delivery Estimate */}
-              <div className="mt-8 mb-6">
-                {/* Badges */}
-                <div className="flex items-center justify-between border border-white/10 rounded-lg p-4 bg-white/5 backdrop-blur-sm">
-                  <div className="flex flex-col items-center gap-2">
-                    <ShieldCheck size={18} className="text-gray-400" />
-                    <span className="text-[10px] text-gray-400 uppercase tracking-widest text-center">Authentic<br/>Product</span>
+              <div style={{ paddingTop: "10px", paddingBottom: "10px" }} className="mt-10 mb-8 border-y border-white/10 py-6">
+                <div className="grid grid-cols-1 gap-4 mb-2">
+                  {/* Delivery Estimate */}
+                  <div className="flex items-center gap-4 text-gray-300 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center text-gold">
+                        <Truck size={16} />
+                    </div>
+                    <span>Order before 5PM — <strong className="text-white font-medium">Ships Tomorrow</strong></span>
                   </div>
-                  <div className="w-px h-10 bg-white/10" />
-                  <div className="flex flex-col items-center gap-2">
-                    <Truck size={18} className="text-gray-400" />
-                    <span className="text-[10px] text-gray-400 uppercase tracking-widest text-center">Free<br/>Shipping</span>
+                  {/* Authenticate */}
+                  <div className="flex items-center gap-4 text-gray-300 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center text-gold">
+                        <ShieldCheck size={16} />
+                    </div>
+                    <span>100% Authentic <strong className="text-white font-medium">Guaranteed</strong></span>
                   </div>
-                  <div className="w-px h-10 bg-white/10" />
-                  <div className="flex flex-col items-center gap-2">
-                    <RotateCcw size={18} className="text-gray-400" />
-                    <span className="text-[10px] text-gray-400 uppercase tracking-widest text-center">Easy<br/>Returns</span>
+                  {/* Returns */}
+                  <div className="flex items-center gap-4 text-gray-300 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center text-gold">
+                        <RotateCcw size={16} />
+                    </div>
+                    <span>7-Day <strong className="text-white font-medium">Hassle-Free Returns</strong></span>
                   </div>
-                </div>
-
-                {/* Delivery Estimate */}
-                <div className="flex items-center gap-3 mt-4 text-gray-300 text-sm bg-white/5 p-3 rounded-lg border border-white/5">
-                  <Truck size={18} className="text-gold" />
-                  <span>Order before 5PM — <strong className="text-white font-medium">Ships Tomorrow</strong></span>
                 </div>
               </div>
 
@@ -528,6 +552,7 @@ export default function ProductPage() {
                       modules={[Navigation, Pagination]}
                       navigation
                       pagination={{ clickable: true }}
+                      onSwiper={setSwiper}
                       onSlideChange={(swiper) => {
                         setSelectedThumbIndex(swiper.activeIndex);
                         const img = allImages[swiper.activeIndex];
@@ -588,16 +613,28 @@ export default function ProductPage() {
               >
                 ← Back to Collection
               </Link>
-              <h1
-                className="font-serif text-white"
-                style={{
-                  fontSize: "clamp(24px, 6vw, 36px)",
-                  fontWeight: 300,
-                  marginBottom: "8px",
-                }}
-              >
-                {product.name}
-              </h1>
+              <div className="flex items-center justify-between mb-2">
+                  <h1
+                    className="font-serif text-white"
+                    style={{
+                      fontSize: "clamp(24px, 6vw, 36px)",
+                      fontWeight: 300,
+                    }}
+                  >
+                    {product.name}
+                  </h1>
+                  <button 
+                    onClick={() => {
+                        const url = window.location.href;
+                        window.open(`https://wa.me/?text=Check out this masterpiece: ${url}`, '_blank');
+                    }}
+                    className="text-gray-400 hover:text-[#25D366] transition-colors p-2.5 bg-[#111] border border-white/5 rounded-full flex items-center justify-center shrink-0"
+                  >
+                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+                        </svg>
+                  </button>
+              </div>
               <p
                 style={{
                   fontSize: "22px",
@@ -722,29 +759,26 @@ export default function ProductPage() {
               </div>
 
               {/* Trust Badges & Delivery Estimate (Mobile) */}
-              <div className="mt-6 mb-4">
-                {/* Badges */}
-                <div className="flex items-center justify-between border border-white/10 rounded-lg p-3 bg-white/5 backdrop-blur-sm">
-                  <div className="flex flex-col items-center gap-1.5 w-1/3">
-                    <ShieldCheck size={16} className="text-gray-400" />
-                    <span className="text-[9px] text-gray-400 uppercase tracking-widest text-center">Authentic<br />Product</span>
+              <div className="mt-8 mb-6 border-y border-white/10 py-5">
+                <div className="flex flex-col gap-3 mb-2">
+                  <div className="flex items-center gap-3 text-gray-300 text-xs">
+                    <div className="w-6 h-6 rounded-full bg-gold/10 flex items-center justify-center shrink-0 text-gold">
+                        <Truck size={14} />
+                    </div>
+                    <span>Order before 5PM — <strong className="text-white font-medium">Ships Tomorrow</strong></span>
                   </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="flex flex-col items-center gap-1.5 w-1/3">
-                    <Truck size={16} className="text-gray-400" />
-                    <span className="text-[9px] text-gray-400 uppercase tracking-widest text-center">Free<br />Shipping</span>
+                  <div className="flex items-center gap-3 text-gray-300 text-xs">
+                    <div className="w-6 h-6 rounded-full bg-gold/10 flex items-center justify-center shrink-0 text-gold">
+                        <ShieldCheck size={14} />
+                    </div>
+                    <span>100% Authentic <strong className="text-white font-medium">Guaranteed</strong></span>
                   </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="flex flex-col items-center gap-1.5 w-1/3">
-                    <RotateCcw size={16} className="text-gray-400" />
-                    <span className="text-[9px] text-gray-400 uppercase tracking-widest text-center">Easy<br />Returns</span>
+                  <div className="flex items-center gap-3 text-gray-300 text-xs">
+                    <div className="w-6 h-6 rounded-full bg-gold/10 flex items-center justify-center shrink-0 text-gold">
+                        <RotateCcw size={14} />
+                    </div>
+                    <span>7-Day <strong className="text-white font-medium">Hassle-Free Returns</strong></span>
                   </div>
-                </div>
-
-                {/* Delivery Estimate */}
-                <div className="flex items-center justify-center gap-3 mt-3 text-gray-300 text-sm bg-white/5 p-3 rounded-lg border border-white/5">
-                  <Truck size={16} className="text-gold" />
-                  <span className="text-xs">Order before 5PM — <strong className="text-white font-medium">Ships Tomorrow</strong></span>
                 </div>
               </div>
 
@@ -753,56 +787,144 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* Customer Reviews Section Placeholder */}
-        <section className="border-t border-white/10 py-20 px-6 mt-10">
-          <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
-            <h2 className="font-serif text-3xl md:text-4xl text-white mb-6">Customer Reviews</h2>
-            <div className="flex items-center justify-center gap-2 mb-6">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={28} className="text-gold" strokeWidth={1} />
-              ))}
+        {/* Customer Reviews Section */}
+        <section 
+            className="w-full bg-[#0a0a0a] border-t border-white/5 flex justify-center"
+            style={{ padding: "8vw 0vw", marginTop: "4vw" }}
+        >
+            <div className="max-w-3xl flex flex-col items-center text-center px-6">
+                <h2 className="font-serif text-3xl md:text-4xl text-white mb-6">Customer Reviews</h2>
+                <div className="flex items-center justify-center gap-4 mb-8">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                            key={star}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            onClick={() => setUserRating(star)}
+                            className="relative group transition-transform duration-300 hover:scale-125 focus:outline-none"
+                        >
+                            <Star 
+                                size={32} 
+                                className={cn(
+                                    "transition-all duration-300",
+                                    (hoverRating || userRating) >= star 
+                                        ? "text-gold fill-gold drop-shadow-[0_0_12px_rgba(201,169,76,0.5)]" 
+                                        : "text-white/10 hover:text-white/30"
+                                )}
+                                strokeWidth={1}
+                            />
+                            {userRating === star && (
+                                <motion.div
+                                    layoutId="selectedRating"
+                                    className="absolute -inset-2 border border-gold/30 rounded-full z-0"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.4 }}
+                                />
+                            )}
+                        </button>
+                    ))}
+                </div>
+                <AnimatePresence mode="wait">
+                    {userRating > 0 ? (
+                        <motion.p 
+                            key="rating-text"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-gold text-sm tracking-widest uppercase font-bold"
+                            style={{ textAlign: "center", width: "100%" }}
+                        >
+                            Thank you for your {userRating}-star rating!
+                        </motion.p>
+                    ) : (
+                        <motion.p 
+                            key="placeholder-text"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="text-white text-lg md:text-xl font-light mb-2"
+                            style={{ textAlign: "center", width: "100%" }}
+                        >
+                            Be the first to review this Masterpiece
+                        </motion.p>
+                    )}
+                </AnimatePresence>
+                <p className="text-gray-500 text-sm uppercase tracking-widest mt-6">Verified purchase reviews coming soon</p>
+                <div className="mt-12 w-full max-w-sm h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent opacity-50"></div>
             </div>
-            <p className="text-white text-lg mb-2">Be the first to review this product</p>
-            <p className="text-gray-500 text-sm">Verified purchase reviews coming soon</p>
-          </div>
         </section>
 
         {/* You May Also Like Section */}
         {similarProducts.length > 0 && (
-          <section className="bg-[#0a0a0a] border-t border-white/5 py-20 px-6 md:px-12 2xl:px-20">
-            <div className="max-w-7xl mx-auto text-center">
-              <p className="text-gold tracking-[0.3em] text-[10px] md:text-xs uppercase mb-3">
-                You May Also Like
-              </p>
-              <h2 className="font-serif text-3xl md:text-4xl text-white font-light mb-12">
-                Similar Masterpieces
-              </h2>
+          <section 
+            className="border-t flex justify-center border-white/5 px-6 md:px-12 2xl:px-20 relative"
+            style={{ padding: "3vw 0vw" }}
+          >
+            <div className="max-w-7xl mx-auto flex flex-col items-center justify-center relative z-10">
+                <p 
+                    className="text-gold tracking-[0.4em] text-xs font-semibold uppercase mb-4 opacity-80 decoration-gold/50 underline-offset-[12px] underline decoration-px"
+                    style={{ textAlign: "center", width: "100%" }}
+                >
+                  Similar Masterpieces
+                </p>
+                <h2 
+                    className="font-serif text-4xl md:text-6xl text-white font-light mb-20 leading-tight"
+                    style={{ textAlign: "center",paddingTop: "10px", width: "100%" }}
+                >
+                  You Might Also Like
+                </h2>
+              {/* </div> */}
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-left">
+              <div 
+                style={{ 
+                    display: "flex", 
+                    justifyContent: "center", 
+                    flexWrap: "wrap", 
+                    gap: "3rem", 
+                    width: "100%",
+                    marginTop: "2rem"
+                }}
+              >
                 {similarProducts.map((simProduct) => (
-                  <Link href={`/product/${simProduct.id}`} key={simProduct.id} className="group block border border-white/5 rounded-lg overflow-hidden bg-[#111] hover:border-gold/30 transition-all">
-                    <div className="aspect-[4/5] relative bg-[#1a1a1a]">
+                  <Link 
+                    href={`/product/${simProduct.id}`} 
+                    key={simProduct.id} 
+                    style={{ width: "280px", display: "flex", flexDirection: "column", alignItems: "center" }}
+                    className="group cursor-pointer"
+                  >
+                    <div 
+                        style={{ width: "100%", aspectRatio: "3/4", position: "relative", borderRadius: "1rem", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}
+                    >
                       {simProduct.imageUrl ? (
                         <Image
                           src={simProduct.imageUrl}
                           alt={simProduct.name}
                           fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-600">No Image</div>
+                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-600 bg-dark">No Image</div>
                       )}
+                      {/* Gradient overlay mimicking shadcn/21st.dev luxury overlays */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
+                      
+                      {/* View Button Overlay inside Image Frame */}
+                      <div className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]">
+                         <span style={{padding: "10px"}} className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-black font-semibold text-xs tracking-widest uppercase px-8 py-3 rounded-full transition-colors shadow-xl">
+                            View Details
+                         </span>
+                      </div>
                     </div>
-                    <div className="p-4 md:p-6 text-center">
-                      <h3 className="font-serif text-white text-sm md:text-base mb-1 group-hover:text-gold transition-colors">{simProduct.name}</h3>
-                      <p className="text-gold text-xs md:text-sm mb-4">Rs. {simProduct.price?.toLocaleString()}</p>
-                      <span className="inline-block border border-white/20 text-white text-[10px] md:text-xs uppercase px-4 py-2 group-hover:bg-gold group-hover:text-black group-hover:border-gold transition-colors">
-                        View
-                      </span>
+                    <div className="text-center w-full">
+                      <h3 className="font-serif text-white text-lg mb-1 group-hover:text-gold transition-colors">{simProduct.name}</h3>
+                      <p className="text-gold text-sm tracking-wide">Rs. {simProduct.price?.toLocaleString()}</p>
                     </div>
                   </Link>
                 ))}
               </div>
+            </div>
+            {/* Ambient luxury glow bounds */}
+            <div className="absolute inset-0 pointer-events-none flex justify-center opacity-30">
+                <div className="w-[80vw] h-full bg-[radial-gradient(ellipse_at_center,_rgba(201,169,76,0.15)_0%,_rgba(0,0,0,0)_70%)]" />
             </div>
           </section>
         )}

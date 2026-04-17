@@ -162,7 +162,7 @@ export default function NewArrivals() {
                                 1280: { slidesPerView: 5 },
                                 1600: { slidesPerView: 6 },
                             }}
-                            style={{ padding: "0vw 0vw 4vw 0vw" }}
+                            style={{ padding: "0vw 0vw clamp(20px, 7vw, 40px) 0vw" }}
                         >
                             {products.map((watch) => (
                                 <SwiperSlide key={watch.id}>

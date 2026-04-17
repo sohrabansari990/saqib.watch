@@ -6,12 +6,15 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Minus, Plus, Truck } from "lucide-react";
+import { Trash2, Minus, Plus, Truck, ArrowLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { collection, query, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function CartPage() {
     const { cart, removeFromCart, updateQuantity, getCartTotal, mounted: contextMounted } = useCart();
@@ -58,175 +61,266 @@ export default function CartPage() {
 
 
     return (
-        <>
+        <div className="bg-[#0a0a0a] min-h-screen text-white font-sans selection:bg-gold/30">
             <Header />
-            <main className="min-h-screen bg-dark pb-20" style={{ padding: "10vw 2vw 0vw 2.5vw" }}>
-                <div className="w-full px-8 md:px-12  lg:px-32 xl:px-64">
-                    <div className="mb-8">
-                        <Link href="/" className="text-gray-400 hover:text-gold transition-colors text-sm uppercase tracking-widest flex items-center gap-2">
-                            <span>←</span> Back to Home
-                        </Link>
-                    </div>
-                    <h1 className="font-serif text-4xl text-white mb-12">Shopping Cart</h1>
-
-                    {cart.length === 0 ? (
-                        <div className="text-center py-20 bg-dark-card rounded-lg border border-white/5" style={{ padding: "1vw" }}>
-                            <p className="text-gray-muted text-lg mb-6">Your cart is empty.</p>
-                            <Link href="/gallery">
-                                <Button variant="outline" style={{ padding: "1vw" }}>Continue Shopping</Button>
-                            </Link>
+            
+            <main 
+                style={{ padding: "120px 5vw 80px 5vw", maxWidth: "1600px", margin: "0 auto" }}
+            >
+                {/* Breadcrumb / Back Link */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "48px" }}>
+                    <Link 
+                        href="/" 
+                        className="group flex items-center gap-2 text-gray-500 hover:text-gold transition-all duration-300 transform hover:-translate-x-1"
+                    >
+                        <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:border-gold/50 group-hover:bg-gold/5 transition-all">
+                            <ArrowLeft size={16} />
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                            {/* Cart Items */}
-                            <div className="lg:col-span-2 space-y-6" style={{ paddingTop: "2vw" }}>
-                                {cart.map((item) => (
-                                    <div
-                                        key={item.cartKey || item.id}
-                                        className="flex flex-col sm:flex-row items-center gap-6 bg-dark-card p-6 rounded-lg border border-white/5"
-                                        style={{margin: "0vw 0vw 1vw 0vw"}}
-                                    >
-                                        {/* Product Image */}
-                                        <Link href={`/product/${item.id}`} className="w-24 h-32 bg-dark-lighter rounded flex items-center justify-center shrink-0 border border-white/10 overflow-hidden hover:border-gold/50 transition-colors">
-                                            {item.imageUrl ? (
-                                                <img 
-                                                    src={item.imageUrl} 
-                                                    alt={item.name} 
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <span className="text-xs text-gray-500">No Image</span>
-                                            )}
-                                        </Link>
+                        <span className="text-[10px] uppercase tracking-[0.3em] font-medium">Return to Boutique</span>
+                    </Link>
+                    
+                    <div className="hidden md:flex items-center gap-4 text-[10px] uppercase tracking-[0.2em] font-semibold text-gray-600">
+                        <span className="text-gold">01. Shopping Bag</span>
+                        <ChevronRight size={12} />
+                        <span>02. Checkout Details</span>
+                        <ChevronRight size={12} />
+                        <span>03. Completion</span>
+                    </div>
+                </div>
 
-                                        <div className="flex-1 text-center sm:text-left w-full">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="font-serif text-xl text-white">{item.name}</h3>
-                                                <button
-                                                    onClick={() => removeFromCart(item.cartKey || item.id)}
-                                                    className="text-red-500 hover:text-red-400 p-2 transition-colors sm:hidden"
-                                                >
-                                                    <Trash2 size={24} />
-                                                </button>
-                                            </div>
-                                            <p className="text-gold mb-4">{item.price} PKR</p>
-                                            {item.selectedColor && <p className="text-gray-400 text-sm mb-2">Color: {item.selectedColor}</p>}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "64px", alignItems: "flex-start" }}>
+                    {/* Left Side: Cart Items */}
+                    <div style={{ flex: "1 1 60%" }}>
+                        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "40px", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "32px" }}>
+                            <h1 className="font-serif text-4xl md:text-5xl font-light">Your Shopping Bag</h1>
+                            <span className="text-gray-500 text-xs tracking-widest uppercase">
+                                {cart.length} {cart.length === 1 ? 'Masterpiece' : 'Masterpieces'}
+                            </span>
+                        </div>
 
-                                            <div className="flex items-center justify-between sm:justify-start gap-6">
-                                                <div className="flex items-center border border-white/10 rounded overflow-hidden">
-                                                    <button
-                                                        onClick={() => updateQuantity(item.cartKey || item.id, item.quantity - 1)}
-                                                        className="p-2 hover:bg-white/5 text-white transition-colors disabled:opacity-50"
-                                                        disabled={item.quantity <= 1}
-                                                    >
-                                                        <Minus size={24} />
-                                                    </button>
-                                                    <div className="w-8 text-center text-white text-sm bg-white/5 py-2">{item.quantity}</div>
-                                                    <button
-                                                        onClick={() => updateQuantity(item.cartKey || item.id, item.quantity + 1)}
-                                                        className="p-2 hover:bg-white/5 text-white transition-colors"
-                                                    >
-                                                        <Plus size={24} />
-                                                    </button>
-                                                </div>
-                                                <button
-                                                    onClick={() => removeFromCart(item.cartKey || item.id)}
-                                                    className="text-red-500 hover:text-red-400 p-2 transition-colors hidden sm:block"
-                                                >
-                                                    <Trash2 size={24} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Order Summary */}
-                            <div className="lg:col-span-1" style={{ marginBottom: "3vw" }}>
-                                <div className="sticky top-32">
-                                    <Card style={{ padding: "1vw", margin: "1vw 0vw", marginTop: "2vw" }}>
-                                        <CardHeader>
-                                            <CardTitle className="text-xl">Order Summary</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-6">
-                                            <div className="space-y-3 text-sm">
-                                                <div className="flex justify-between text-gray-300">
-                                                    <span>Subtotal</span>
-                                                    <span>{subtotal.toFixed(2)} PKR</span>
-                                                </div>
-                                                {discount > 0 && (
-                                                    <div className="flex justify-between text-gold">
-                                                        <span>Discount</span>
-                                                        <span>- {discount.toFixed(2)} PKR</span>
-                                                    </div>
+                        {cart.length === 0 ? (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="py-32 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-3xl bg-white/[0.02]"
+                            >
+                                <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/5">
+                                    <ShoppingBag size={32} className="text-gray-600" />
+                                </div>
+                                <p className="text-gray-400 text-lg font-light mb-8">Your bag is currently empty</p>
+                                <Link href="/gallery">
+                                    <Button className="bg-gold hover:bg-gold/90 text-black font-bold px-10 py-6 rounded-full transition-all duration-300 hover:shadow-[0_0_30px_rgba(201,169,76,0.2)]">
+                                        Explore the Collection
+                                    </Button>
+                                </Link>
+                            </motion.div>
+                        ) : (
+                            <div className="space-y-8">
+                                <AnimatePresence mode="popLayout">
+                                    {cart.map((item) => (
+                                        <motion.div
+                                            layout
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                                            key={item.cartKey || item.id}
+                                            style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "32px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", padding: "32px", borderRadius: "24px", marginBottom: "32px", position: "relative" }}
+                                            className="group hover:bg-white/[0.05] transition-all duration-500 backdrop-blur-sm"
+                                        >
+                                            {/* Image */}
+                                            <Link 
+                                                href={`/product/${item.id}`} 
+                                                style={{ width: "160px", aspectRatio: "3/4", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", position: "relative", flexShrink: 0 }}
+                                                className="group-hover:border-gold/30 transition-all duration-500"
+                                            >
+                                                {item.imageUrl ? (
+                                                    <Image 
+                                                        src={item.imageUrl} 
+                                                        alt={item.name} 
+                                                        fill
+                                                        className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-[#151515] flex items-center justify-center text-gray-700">NO IMG</div>
                                                 )}
-                                                <div className="border-t border-white/10 pt-4 flex justify-between text-white font-medium text-lg">
-                                                    <span>Total</span>
-                                                    <span>{total.toFixed(2)} PKR</span>
+                                            </Link>
+
+                                            {/* Details */}
+                                            <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "16px" }}>
+                                                <div style={{ display: "flex", flexDirection: "column" }}>
+                                                    <h3 className="font-serif text-2xl font-light text-white mb-1 group-hover:text-gold transition-colors duration-300">{item.name}</h3>
+                                                    {item.selectedColor && (
+                                                        <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#6b7280", fontWeight: "bold" }}>
+                                                            Edition: {item.selectedColor}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div style={{ display: "flex", alignItems: "center", gap: "32px", marginTop: "8px" }}>
+                                                    <div style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "9999px", padding: "4px", height: "48px" }}>
+                                                        <button
+                                                            onClick={() => updateQuantity(item.cartKey || item.id, item.quantity - 1)}
+                                                            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-white transition-all disabled:opacity-20 disabled:pointer-events-none"
+                                                            disabled={item.quantity <= 1}
+                                                        >
+                                                            <Minus size={16} />
+                                                        </button>
+                                                        <span className="w-12 text-center text-sm font-bold tracking-widest">{item.quantity}</span>
+                                                        <button
+                                                            onClick={() => updateQuantity(item.cartKey || item.id, item.quantity + 1)}
+                                                            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-white transition-all"
+                                                        >
+                                                            <Plus size={16} />
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <button
+                                                        onClick={() => removeFromCart(item.cartKey || item.id)}
+                                                        className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors text-[10px] uppercase tracking-widest font-bold"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                        <span className="hidden sm:inline">Remove Piece</span>
+                                                    </button>
                                                 </div>
                                             </div>
 
-                                            <div className="flex gap-2" style={{ padding: "1vw 0vw" }}>
-                                                <Input
-                                                    placeholder="Coupon code"
-                                                    value={coupon}
-                                                    onChange={(e) => setCoupon(e.target.value)}
-                                                    className="uppercase "
-                                                    style={{ padding: "1vw" }}
-                                                />
-                                                <Button variant="outline" onClick={handleApplyCoupon} style={{ padding: "1vw" }}>Apply</Button>
+                                            {/* Price */}
+                                            <div className="flex flex-col items-end gap-1 shrink-0 px-4">
+                                                <span className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Price</span>
+                                                <span className="text-xl font-bold text-gold tracking-tight">{item.price?.toLocaleString()} PKR</span>
                                             </div>
-                                        </CardContent>
-                                    </Card>
-
-                                    <Link href="/checkout" className="block mt-4">
-                                        <Button size="lg" className="w-full py-6 cursor-pointer uppercase tracking-widest font-bold text-sm">
-                                            Proceed to Checkout
-                                        </Button>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                                
+                                <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-6 border-t border-white/5">
+                                    <Link href="/gallery" className="text-gray-500 hover:text-white transition-colors text-[10px] uppercase tracking-widest font-bold underline underline-offset-8">
+                                        Continue Curating
                                     </Link>
                                 </div>
+                            </div>
+                        )}
+                    </div>
 
-                                {/* Delivery Estimate */}
-                                <div className="flex items-center gap-3 bg-dark-card border border-white/5 p-4 rounded-lg mt-6">
-                                    <Truck size={18} className="text-gray-400" />
-                                    <p className="text-gray-400 text-sm">
-                                        Estimated Delivery: <strong className="text-white">2-4 business days</strong> | FREE for all orders
-                                    </p>
+                    {/* Right Side: Order Summary */}
+                    <div style={{ width: "100%", maxWidth: "450px", position: "sticky", top: "128px" }}>
+                        <div style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(24px)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "32px", padding: "40px", overflow: "hidden", position: "relative" }} className="group">
+                            {/* Decorative background circle */}
+                            <div style={{ position: "absolute", top: "-96px", right: "-96px", width: "256px", height: "256px", background: "rgba(201,169,76,0.05)", borderRadius: "50%", filter: "blur(80px)" }} />
+                            
+                            <h2 style={{ fontFamily: "serif", fontSize: "1.875rem", fontWeight: "300", marginBottom: "40px", paddingBottom: "24px", borderBottom: "1px solid rgba(255,255,255,0.05)", position: "relative", zIndex: "10" }}>Purchase Summary</h2>
+                            
+                            <div style={{ display: "flex", flexDirection: "column", gap: "24px", position: "relative", zIndex: "10" }}>
+                                <div className="flex justify-between items-center group/row">
+                                    <span className="text-gray-500 text-xs tracking-widest uppercase">Subtotal Selection</span>
+                                    <span className="text-lg font-light text-white transition-colors group-hover/row:text-gold">{subtotal.toLocaleString()}.00 PKR</span>
                                 </div>
-
-                                {/* You Might Also Like */}
-                                {crossSells.length > 0 && (
-                                    <div className="mt-12 mb-8">
-                                        <h3 className="text-gold uppercase tracking-[0.2em] text-xs font-semibold mb-4">You Might Also Like</h3>
-                                        <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                                            {crossSells.map((product) => (
-                                                <Link 
-                                                    key={product.id} 
-                                                    href={`/product/${product.id}`}
-                                                    className="shrink-0 w-64 bg-[#111] border border-white/5 rounded-lg flex items-center p-3 hover:border-gold/30 transition-colors"
-                                                >
-                                                    <div className="w-20 h-20 shrink-0 bg-[#1a1a1a] rounded flex items-center justify-center overflow-hidden">
-                                                        {product.imageUrl ? (
-                                                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <span className="text-[10px] text-gray-600">No Image</span>
-                                                        )}
-                                                    </div>
-                                                    <div className="ml-4 overflow-hidden">
-                                                        <h4 className="font-serif text-white text-sm truncate">{product.name}</h4>
-                                                        <p className="text-gold text-xs mt-1">Rs. {product.price?.toLocaleString()}</p>
-                                                    </div>
-                                                </Link>
-                                            ))}
-                                        </div>
+                                
+                                {discount > 0 && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gold text-xs tracking-widest uppercase">Special Allocation</span>
+                                        <span className="text-lg font-bold text-gold">- {discount.toLocaleString()}.00 PKR</span>
                                     </div>
                                 )}
+                                
+                                <div className="flex items-center gap-2 py-4 border-y border-white/5">
+                                    <Input
+                                        placeholder="VOUCHER CODE"
+                                        value={coupon}
+                                        onChange={(e) => setCoupon(e.target.value)}
+                                        className="bg-black/50 border-white/5 h-14 rounded-xl text-center tracking-[0.2em] font-medium text-xs focus:ring-gold/30 uppercase"
+                                    />
+                                    <Button 
+                                    style={{padding: "10px"}}
+                                        variant="outline" 
+                                        onClick={handleApplyCoupon}
+                                        className="h-14 px-8 border-gold/30 text-gold hover:bg-gold hover:text-black transition-all duration-500 font-bold rounded-xl"
+                                    >
+                                        Apply
+                                    </Button>
+                                </div>
+
+                                <div className="flex flex-col gap-1 pt-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-white text-sm tracking-[0.2em] uppercase font-bold">Total Investment</span>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-3xl font-bold text-white tracking-tighter">{total.toLocaleString()}.00</span>
+                                            <span className="text-[10px] text-gold tracking-widest uppercase font-bold">PKR Currency</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Link href="/checkout" className="block mt-8">
+                                    <button className="w-full bg-gold hover:bg-[#d4b55c] text-black h-20 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 hover:scale-[1.02] shadow-[0_20px_40px_rgba(201,169,76,0.2)] group relative overflow-hidden">
+                                        <span className="relative z-10 text-xs uppercase tracking-[0.3em] font-black">Secure Checkout</span>
+                                        <ChevronRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                                        <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                                    </button>
+                                </Link>
+
+                                <div className="mt-8 flex items-start gap-4 p-5 rounded-2xl bg-white/[0.02] border border-white/5">
+                                    <div style={{margin: "10px"}} className="mt-5">
+                                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center">
+                                            <Truck size={14} className="text-gold" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] uppercase tracking-widest text-white font-bold mb-1 underline underline-offset-4 decoration-gold/50">Complimentary Delivery</p>
+                                        <p className="text-[11px] text-gray-500 leading-relaxed">
+                                            Your masterpieces will be delivered in <span className="text-gray-300 font-bold">2-4 business days</span> with complimentary luxury insurance.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
+
+                {/* Full Width Masterpiece Cross-Sells */}
+                {crossSells.length > 0 && (
+                    <section style={{ marginTop: "160px", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "96px" }}>
+                        <div style={{ textAlign: "center", marginBottom: "64px" }}>
+                            <p style={{ color: "#C9A84C", letterSpacing: "0.4em", fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", marginBottom: "16px", textDecoration: "underline", textUnderlineOffset: "12px", textDecorationColor: "rgba(201,169,76,0.3)" }}>Complete Your Collection</p>
+                            <h2 style={{ fontFamily: "serif", fontSize: "3rem", fontWeight: "300", color: "white" }}>You Might Also Like</h2>
+                        </div>
+                        
+                        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "48px", width: "100%" }}>
+                            {crossSells.map((product) => (
+                                <Link 
+                                    key={product.id} 
+                                    href={`/product/${product.id}`}
+                                    style={{ width: "280px", display: "flex", flexDirection: "column", alignItems: "center" }}
+                                    className="group cursor-pointer"
+                                >
+                                    <div style={{ width: "100%", aspectRatio: "3/4", borderRadius: "32px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)", position: "relative", marginBottom: "24px", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }} className="group-hover:border-gold/30 transition-all duration-500">
+                                        {product.imageUrl ? (
+                                            <Image 
+                                                src={product.imageUrl} 
+                                                alt={product.name} 
+                                                fill
+                                                className="object-cover group-hover:scale-110 transition-transform duration-[1500ms] ease-out"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-600">NO IMAGE</div>
+                                        )}
+                                        {/* Luxury overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                        <div className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                                            <span style={{padding: "10px"}} className="text-[10px] uppercase tracking-[0.3em] font-bold text-white bg-gold/80 backdrop-blur px-6 py-3 rounded-full">View Piece</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-center">
+                                        <h4 className="font-serif text-xl font-light text-white mb-2 group-hover:text-gold transition-colors">{product.name}</h4>
+                                        <p className="text-gold text-xs font-bold tracking-[0.1em]">{product.price?.toLocaleString()} PKR</p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </main>
+            
             <Footer />
-        </>
+        </div>
     );
 }

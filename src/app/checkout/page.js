@@ -4,44 +4,93 @@ import { useCart } from "@/context/CartContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { clsx } from "clsx";
 import emailjs from "@emailjs/browser";
 import Image from "next/image";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+    ArrowLeft, 
+    ChevronRight, 
+    Smartphone, 
+    Truck, 
+    ShieldCheck, 
+    CreditCard, 
+    Lock,
+    MapPin,
+    Phone,
+    User,
+    CheckCircle2
+} from "lucide-react";
 
-function RadioOption({ id, value, check, onChange, label, description }) {
+function RadioOption({ id, value, check, onChange, label, description, icon: Icon }) {
     const isChecked = check === value;
     return (
         <div
             onClick={() => onChange(value)}
-            className={clsx(
-                "flex items-start gap-4 p-4 rounded-lg border cursor-pointer transition-all",
-                isChecked ? "border-gold bg-gold/5" : "border-white/10 hover:border-white/20 hover:bg-white/5"
-            )}
+            style={{ 
+                display: "flex", 
+                alignItems: "flex-start", 
+                gap: "24px", 
+                padding: "24px", 
+                borderRadius: "20px", 
+                cursor: "pointer", 
+                transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                background: isChecked ? "rgba(201,169,76,0.08)" : "rgba(255,255,255,0.02)",
+                border: isChecked ? "1px solid rgba(201,169,76,0.5)" : "1px solid rgba(255,255,255,0.05)",
+                position: "relative",
+                overflow: "hidden"
+            }}
+            className="group hover:bg-white/[0.04] backdrop-blur-sm"
         >
-            <div className={clsx(
-                "mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                isChecked ? "border-gold" : "border-gray-500"
-            )}>
-                {isChecked && <div className="w-2.5 h-2.5 rounded-full bg-gold" />}
+            {isChecked && (
+                <motion.div 
+                    layoutId="activePayment"
+                    style={{ position: "absolute", inset: 0, background: "linear-gradient(45deg, rgba(201,169,76,0.05) 0%, transparent 100%)" }}
+                />
+            )}
+            
+            <div style={{ 
+                width: "56px", 
+                height: "56px", 
+                borderRadius: "16px", 
+                background: isChecked ? "rgba(201,169,76,0.2)" : "rgba(255,255,255,0.05)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.5s",
+                border: isChecked ? "1px solid rgba(201,169,76,0.3)" : "1px solid rgba(255,255,255,0.1)"
+            }}>
+                <Icon size={24} className={isChecked ? "text-gold" : "text-gray-500"} />
             </div>
-            <div>
-                <label htmlFor={id} className="text-sm font-medium text-white cursor-pointer block">{label}</label>
-                {description && <p className="text-xs text-gray-400 mt-1">{description}</p>}
+
+            <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+                    <span style={{ fontFamily: "serif", fontSize: "1.125rem", color: isChecked ? "white" : "#9ca3af", transition: "color 0.5s" }}>{label}</span>
+                    <div style={{ 
+                        width: "20px", 
+                        height: "20px", 
+                        borderRadius: "50%", 
+                        border: isChecked ? "2px solid #C9A84C" : "2px solid rgba(255,255,255,0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: isChecked ? "#C9A84C" : "transparent"
+                    }}>
+                        {isChecked && <CheckCircle2 size={12} className="text-black" />}
+                    </div>
+                </div>
+                {description && <p style={{ fontSize: "12px", color: isChecked ? "#d1d5db" : "#6b7280", lineHeight: "1.6" }}>{description}</p>}
             </div>
         </div>
     );
 }
 
 const cities = [
-    "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad",
-    "Multan", "Peshawar", "Quetta", "Sialkot", "Hyderabad",
-    "Gujranwala", "Abbottabad", "Bahawalpur", "Sargodha", "Other"
+    "Karachi", "Lahore", "Islamabad", "Faisalabad", "Rawalpindi", "Multan", "Gujranwala", "Hyderabad", "Peshawar", "Quetta", "Sargodha", "Sialkot", "Bahawalpur", "Sukkur", "Kandhkot", "Sheikhupura", "Mardan", "Gujrat", "Larkana", "Kasur", "Rahim Yar Khan", "Sahiwal", "Okara", "Wah Cantonment", "Dera Ghazi Khan", "Mirpur Khas", "Chiniot", "Nawabshah", "Kamoke", "Burewala", "Jhelum", "Sadiqabad", "Khanewal", "Hafizabad", "Kohat", "Jacobabad", "Shikarpur", "Muzaffargarh", "Khanpur", "Gojra", "Bahawalnagar", "Muridke", "Pakpattan", "Abbottabad", "Tanda Adam", "Jaranwala", "Chishtian", "Muzaffarabad", "Attock", "Vehari", "Kot Abdul Malik", "Ferozwala", "Chakwal", "Gujranwala Cantonment", "Kamalia", "Umerkot", "Ahmedpur East", "Kot Addu", "Wazirabad", "Mansehra", "Layyah", "Mirpur", "Swabi", "Chaman", "Taxila", "Nowshera", "Khushab", "Shahdadkot", "Mianwali", "Kabal", "Lodhran", "Hasilpur", "Charsadda", "Bhakar", "Badin", "Arif Wala", "Ghotki", "Sambrial", "Jauharabad", "Daharki", "Narowal", "Tando Allahyar", "Kasur", "Mandi Bahauddin", "Tando Muhammad Khan", "Pattoki", "Haroonabad", "Skardu", "Murree", "Swat", "Malakand", "Mardan", "Bannu", "Pishin", "Kharan", "Nushki", "Hub", "Gwadar", "Turbat", "Khuzdar", "Dera Murad Jamali", "Chaman", "Lasbela", "Karak", "Hangu", "Risalpur", "Nowshera", "Mingora", "Topi", "Alpurai", "Batagram", "Timergara", "Khar", "Parachinar", "Sadda", "Landi Kotal", "Jamrud", "Ghalanai", "Kalaya", "Wana", "Miran Shah", "Mir Ali", "Tank", "Lakki Marwat", "Hassan Abdal", "Taxila"
 ];
 
 export default function CheckoutPage() {
@@ -54,6 +103,7 @@ export default function CheckoutPage() {
         whatsapp: "",
         address: "",
         city: "",
+        province: ""
     });
 
     const [paymentMethod, setPaymentMethod] = useState("cod");
@@ -65,14 +115,45 @@ export default function CheckoutPage() {
     // City Dropdown State
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [citySearch, setCitySearch] = useState("");
+    const [dynamicCities, setDynamicCities] = useState(cities);
+    const [isSearching, setIsSearching] = useState(false);
     const cityInputRef = useRef(null);
 
-    const filteredCities = cities.filter((c) =>
+    const filteredCities = dynamicCities.filter((c) =>
+        c.toLowerCase().startsWith(citySearch.toLowerCase()) || 
         c.toLowerCase().includes(citySearch.toLowerCase())
-    );
+    ).sort((a, b) => {
+        // Prioritize prefix matches
+        const aStarts = a.toLowerCase().startsWith(citySearch.toLowerCase());
+        const bStarts = b.toLowerCase().startsWith(citySearch.toLowerCase());
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return a.localeCompare(b);
+    });
 
+    // Dynamic "Online" fetching simulation/actual fetch
     useEffect(() => {
         setMounted(true);
+        
+        async function fetchOnlineCities() {
+            try {
+                // Fetching from a comprehensive Pakistan cities repository on GitHub
+                const response = await fetch("https://raw.githubusercontent.com/lutfullah-shafi/Pakistan-Cities-JSON/refs/heads/master/pakistan_cities.json");
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        // Extract names if objects, or use if already strings
+                        const names = data.map(item => typeof item === 'string' ? item : item.name);
+                        setDynamicCities([...new Set([...cities, ...names])].sort());
+                    }
+                }
+            } catch (error) {
+                console.log("Using robust local backup database");
+            }
+        }
+        
+        fetchOnlineCities();
+
         const handleClickOutside = (event) => {
             if (cityInputRef.current && !cityInputRef.current.contains(event.target)) {
                 setShowCityDropdown(false);
@@ -82,9 +163,19 @@ export default function CheckoutPage() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Simulate "Online Search" delay for UX
+    useEffect(() => {
+        if (citySearch) {
+            setIsSearching(true);
+            const timer = setTimeout(() => setIsSearching(false), 300);
+            return () => clearTimeout(timer);
+        } else {
+            setIsSearching(false);
+        }
+    }, [citySearch]);
+
     if (!mounted || !contextMounted) return null;
 
-    
     // Redirect if empty (but not if we just placed an order)
     if (cart.length === 0 && !isOrdered) {
         if (mounted) router.push("/cart");
@@ -98,7 +189,6 @@ export default function CheckoutPage() {
         setImagePreview(URL.createObjectURL(file));
     };
 
-    // Upload image to Cloudinary and return the public URL
     async function uploadToCloudinary(file) {
         const formData = new FormData();
         formData.append("file", file);
@@ -114,8 +204,14 @@ export default function CheckoutPage() {
         return data.secure_url;
     }
 
+    const amount = getCartTotal();
+    const storedTotal = typeof window !== 'undefined' ? localStorage.getItem("total") : null;
+    const finalTotal = storedTotal ? parseFloat(storedTotal) : amount;
+    const discount = Math.max(0, amount - finalTotal);
+    const total = amount - discount;
+
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
 
         if (!formData.name || !formData.whatsapp || !formData.address || !formData.city) {
             toast.error("Please fill in all required fields.");
@@ -130,13 +226,11 @@ export default function CheckoutPage() {
         setLoading(true);
 
         try {
-            // 1. Upload payment screenshot to Cloudinary (if provided)
             let paymentProofUrl = "cash on delivery";
             if (screenshot) {
                 paymentProofUrl = await uploadToCloudinary(screenshot);
             }
 
-            // 2. Build items list string
             const itemsList = cart
                 .map((item) => {
                     const color = item.selectedColor ? ` (${item.selectedColor})` : "";
@@ -144,7 +238,6 @@ export default function CheckoutPage() {
                 })
                 .join(" | ");
 
-            // 3. Send order email via EmailJS
             await emailjs.send(
                 "service_v3f938c",
                 "template_order",
@@ -153,6 +246,7 @@ export default function CheckoutPage() {
                     customer_whatsapp: formData.whatsapp,
                     customer_address: formData.address,
                     customer_city: formData.city,
+                    customer_province: formData.province,
                     payment_method: paymentMethod === "cod" ? "Cash on Delivery" : "EasyPaisa / JazzCash",
                     order_items: itemsList,
                     order_total: `Rs. ${total.toLocaleString()}`,
@@ -177,234 +271,407 @@ export default function CheckoutPage() {
             setLoading(false);
         }
     };
-    const amount = getCartTotal();
-    const storedTotal = typeof window !== 'undefined' ? localStorage.getItem("total") : null;
-    const finalTotal = storedTotal ? parseFloat(storedTotal) : amount;
-    const discount = Math.max(0, amount - finalTotal);
-    const total = amount - discount;
-
 
     return (
         <>
             <Header />
-            <main className="min-h-screen bg-dark pb-20" style={{ padding: "120px 2vw 0px 2vw" }}>
-                <div className="w-full px-4 md:px-12 lg:px-32 xl:px-64">
-                    <div className="mb-8">
-                        <button onClick={() => router.back()} className="text-gray-400 hover:text-gold transition-colors text-sm uppercase tracking-widest flex items-center gap-2">
-                            <span>←</span> Back
-                        </button>
+            <main className="min-h-screen bg-dark pb-32" style={{ padding: "120px 2vw 120px 2vw" }}>
+                <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "0 5vw" }}>
+                    {/* Breadcrumb / Progress Header */}
+                    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", marginBottom: "64px", gap: "24px" }}>
+                        <Link 
+                            href="/cart" 
+                            className="group flex items-center gap-2 text-gray-500 hover:text-gold transition-all duration-300 transform hover:-translate-x-1"
+                        >
+                            <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:border-gold/50 group-hover:bg-gold/5 transition-all">
+                                <ArrowLeft size={16} />
+                            </div>
+                            <span className="text-[10px] uppercase tracking-[0.3em] font-medium">Return to Bag</span>
+                        </Link>
+                        
+                        <div style={{ display: "flex", alignItems: "center", gap: "16px" }} className="text-[10px] uppercase tracking-[0.2em] font-semibold text-gray-600">
+                            <Link href="/cart" className="hover:text-gold transition-colors">01. Bag</Link>
+                            <ChevronRight size={12} />
+                            <span className="text-gold">02. Checkout</span>
+                            <ChevronRight size={12} />
+                            <span>03. Completion</span>
+                        </div>
                     </div>
-                    <h1 className="font-serif text-3xl md:text-5xl text-white mb-12 text-center md:text-left">Checkout</h1>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-20">
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "64px", alignItems: "flex-start" }}>
+                        {/* Left Column: Checkout Forms */}
+                        <div style={{ flex: "1 1 60%", minWidth: "320px" }}>
+                            <div style={{ marginBottom: "56px" }}>
+                                <h1 style={{ fontFamily: "serif", fontSize: "3.5rem", fontWeight: "300", marginBottom: "16px" }}>Checkout</h1>
+                                <p style={{ color: "#6b7280", letterSpacing: "0.1em", fontSize: "14px" }}>Please fulfill the details below to secure your masterpiece.</p>
+                            </div>
 
-                        {/* Left Column: Forms */}
-                        <div className="lg:col-span-2 space-y-12">
-                            <form onSubmit={handleSubmit}>
-                                {/* Shipping Info */}
-                                <div className="space-y-6 mb-12">
-                                    <h2 className="text-xl font-serif text-white border-b border-white/10 pb-2" style={{ padding: "1vw 0" }}>Shipping Information</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2" style={{ padding: "1vw 0" }}>
-                                            <Label htmlFor="name">Full Name *</Label>
-                                            <Input
-                                                id="name"
-                                                placeholder="Enter your full name"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                required
-                                                style={{ padding: "1vw" }}
-                                            />
+                            <div style={{ display: "flex", flexDirection: "column", gap: "56px" }}>
+                                {/* Shipping Information Section */}
+                                <section 
+                                    style={{ 
+                                        background: "rgba(255,255,255,0.02)", 
+                                        backdropFilter: "blur(24px)", 
+                                        border: "1px solid rgba(255,255,255,0.05)", 
+                                        borderRadius: "32px", 
+                                        padding: "48px",
+                                        position: "relative",
+                                        zIndex: showCityDropdown ? 50 : 1, // Elevate when dropdown is open
+                                    }}
+                                >
+                                    {/* Decoration Clipping Container */}
+                                    <div style={{ position: "absolute", inset: 0, borderRadius: "inherit", overflow: "hidden", pointerEvents: "none" }}>
+                                        <div style={{ position: "absolute", top: 0, right: 0, width: "200px", height: "100%", background: "linear-gradient(to left, rgba(201,169,76,0.03), transparent)" }} />
+                                    </div>
+                                    
+                                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "40px" }}>
+                                        <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "rgba(201,169,76,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <MapPin size={20} className="text-gold" />
                                         </div>
-                                        <div className="space-y-2" style={{ padding: "1vw 0" }}>
-                                            <Label htmlFor="whatsapp">WhatsApp Number *</Label>
-                                            <Input
-                                                id="whatsapp"
-                                                placeholder="eg: +92 300 1234567"
-                                                value={formData.whatsapp}
-                                                type="number"
-                                                onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                                                required    
-                                                style={{ padding: "1vw" }}
-                                            />
+                                        <h2 style={{ fontFamily: "serif", fontSize: "1.5rem", fontWeight: "300" }}>Shipping Information</h2>
+                                    </div>
+
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "32px" }}>
+                                        {/* Name */}
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                            <label style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#9ca3af", fontWeight: "bold", marginLeft: "4px" }}>Full Name *</label>
+                                            <div style={{ position: "relative" }}>
+                                                <User size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "#4b5563" }} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter your full name"
+                                                    value={formData.name}
+                                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                    required
+                                                    style={{ width: "100%", height: "56px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", padding: "0 20px 0 48px", color: "white", fontSize: "14px", outline: "none", transition: "all 0.3s" }}
+                                                    className="focus:border-gold/50 focus:bg-black/50"
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="space-y-2 md:col-span-2">
-                                            <Label htmlFor="address">Address *</Label>
+
+                                        {/* WhatsApp */}
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                            <label style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#9ca3af", fontWeight: "bold", marginLeft: "4px" }}>WhatsApp Number *</label>
+                                            <div style={{ position: "relative" }}>
+                                                <Phone size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "#4b5563" }} />
+                                                <input
+                                                    type="number"
+                                                    placeholder="eg: +92 300 1234567"
+                                                    value={formData.whatsapp}
+                                                    onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                                                    required
+                                                    style={{ width: "100%", height: "56px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", padding: "0 20px 0 48px", color: "white", fontSize: "14px", outline: "none", transition: "all 0.3s" }}
+                                                    className="focus:border-gold/50 focus:bg-black/50"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Province Selection */}
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                            <label style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#9ca3af", fontWeight: "bold", marginLeft: "4px" }}>Province / State *</label>
+                                            <div style={{ position: "relative" }}>
+                                                <MapPin size={16} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "#4b5563" }} />
+                                                <select
+                                                    value={formData.province}
+                                                    onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                                                    required
+                                                    style={{ width: "100%", height: "56px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", padding: "0 20px 0 48px", color: "white", fontSize: "14px", outline: "none", transition: "all 0.3s", appearance: "none" }}
+                                                    className="focus:border-gold/50 focus:bg-black/50"
+                                                >
+                                                    <option value="" disabled style={{ background: "#1a1a1a" }}>Select Region</option>
+                                                    <option value="Punjab" style={{ background: "#1a1a1a" }}>Punjab</option>
+                                                    <option value="Sindh" style={{ background: "#1a1a1a" }}>Sindh</option>
+                                                    <option value="KPK" style={{ background: "#1a1a1a" }}>Khyber Pakhtunkhwa (KPK)</option>
+                                                    <option value="Balochistan" style={{ background: "#1a1a1a" }}>Balochistan</option>
+                                                    <option value="Gilgit-Baltistan" style={{ background: "#1a1a1a" }}>Gilgit-Baltistan</option>
+                                                    <option value="Azad Kashmir" style={{ background: "#1a1a1a" }}>Azad Jammu & Kashmir</option>
+                                                </select>
+                                                <ChevronRight size={14} style={{ position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%) rotate(90deg)", color: "#4b5563", pointerEvents: "none" }} />
+                                            </div>
+                                        </div>
+
+                                        {/* Address */}
+                                        <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "12px" }}>
+                                            <label style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#9ca3af", fontWeight: "bold", marginLeft: "4px" }}>Detailed Address *</label>
                                             <textarea
-                                                id="address"
-                                                className="flex min-h-[80px] w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                                                 placeholder="House #, Street, Area"
                                                 value={formData.address}
                                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                                 required
-                                                style={{ padding: "1vw" }}
+                                                style={{ width: "100%", minHeight: "100px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", padding: "16px 20px", color: "white", fontSize: "14px", outline: "none", transition: "all 0.3s", resize: "none" }}
+                                                className="focus:border-gold/50 focus:bg-black/50"
                                             />
                                         </div>
-                                        <div className="space-y-2 md:col-span-2" ref={cityInputRef}>
-                                            <Label htmlFor="city">City *</Label>
-                                            <div className="relative">
-                                                <Input
-                                                    id="city"
+
+                                        {/* City Selection */}
+                                        <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "12px" }} ref={cityInputRef}>
+                                            <label style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#9ca3af", fontWeight: "bold", marginLeft: "4px" }}>City *</label>
+                                            <div style={{ position: "relative" }}>
+                                                <div style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "#4b5563", pointerEvents: "none" }}>
+                                                    <ChevronRight size={16} style={{ transform: "rotate(90deg)" }} />
+                                                </div>
+                                                <input
                                                     placeholder="Search or select a city..."
                                                     value={citySearch}
                                                     onChange={(e) => {
                                                         setCitySearch(e.target.value);
                                                         setShowCityDropdown(true);
-                                                        setFormData({ ...formData, city: "" }); // Reset selected city if searching
+                                                        setFormData({ ...formData, city: "" });
                                                     }}
                                                     onFocus={() => setShowCityDropdown(true)}
-                                                    className="w-full"
                                                     required={!formData.city}
-                                                    autoComplete="off"
+                                                    style={{ width: "100%", height: "56px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", padding: "0 20px 0 48px", color: "white", fontSize: "14px", outline: "none", transition: "all 0.3s" }}
+                                                    className="focus:border-gold/50 focus:bg-black/50"
                                                 />
-                                                {showCityDropdown && (
-                                                    <div className="absolute z-10 w-full mt-1 bg-dark-lighter border border-gold/30 rounded-md shadow-xl max-h-48 overflow-y-auto">
-                                                        {filteredCities.length > 0 ? (
-                                                            filteredCities.map((city) => (
-                                                                <div
-                                                                    key={city}
-                                                                    className="px-4 py-2 text-sm text-white hover:bg-gold/20 cursor-pointer"
-                                                                    onClick={() => {
-                                                                        setFormData({ ...formData, city });
-                                                                        setCitySearch(city);
-                                                                        setShowCityDropdown(false);
-                                                                    }}
-                                                                >
-                                                                    {city}
+                                                <AnimatePresence>
+                                                    {showCityDropdown && (
+                                                        <motion.div 
+                                                            initial={{ opacity: 0, y: 10 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            exit={{ opacity: 0, y: 10 }}
+                                                            style={{ position: "absolute", zIndex: 100, width: "100%", marginTop: "8px", background: "#1a1a1a", border: "1px solid rgba(201,169,76,0.3)", borderRadius: "14px", boxShadow: "0 20px 50px rgba(0,0,0,0.5)", maxHeight: "240px", overflowY: "auto", padding: "8px" }}
+                                                            className="custom-scrollbar"
+                                                        >
+                                                            {isSearching ? (
+                                                                <div style={{ padding: "16px", textAlign: "center", color: "#C9A84C", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                                                                    <div className="w-4 h-4 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
+                                                                    <span>Searching database...</span>
                                                                 </div>
-                                                            ))
-                                                        ) : (
-                                                            <div className="px-4 py-2 text-sm text-gray-500">No cities found.</div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                                                    ▼
-                                                </div>
+                                                            ) : filteredCities.length > 0 ? (
+                                                                filteredCities.map((city) => (
+                                                                    <div
+                                                                        key={city}
+                                                                        style={{ padding: "12px 16px", borderRadius: "8px", fontSize: "14px", color: "white", cursor: "pointer", transition: "all 0.2s" }}
+                                                                        className="hover:bg-gold/10 hover:text-gold"
+                                                                        onClick={() => {
+                                                                            setFormData({ ...formData, city });
+                                                                            setCitySearch(city);
+                                                                            setShowCityDropdown(false);
+                                                                        }}
+                                                                    >
+                                                                        {city}
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <div style={{ padding: "16px", textAlign: "center", color: "#6b7280", fontSize: "14px" }}>No cities found in online database.</div>
+                                                            )}
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </section>
 
-                                {/* Payment Method */}
-                                <div className="space-y-6" style={{ padding: "1vw 0vw 1vw 0vw" }}>
-                                    <h2 className="text-xl font-serif text-white border-b border-white/10 pb-2">Payment Method</h2>
-                                    <div className="space-y-4" >
+                                {/* Payment Method Section */}
+                                <section 
+                                    style={{ 
+                                        background: "rgba(255,255,255,0.02)", 
+                                        backdropFilter: "blur(24px)", 
+                                        border: "1px solid rgba(255,255,255,0.05)", 
+                                        borderRadius: "32px", 
+                                        padding: "48px",
+                                        position: "relative",
+                                    }}
+                                >
+                                    {/* Decoration Clipping Container */}
+                                    <div style={{ position: "absolute", inset: 0, borderRadius: "inherit", overflow: "hidden", pointerEvents: "none" }}>
+                                        <div style={{ position: "absolute", top: 0, right: 0, width: "200px", height: "100%", background: "linear-gradient(to left, rgba(201,169,76,0.03), transparent)" }} />
+                                    </div>
+                                    
+                                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "40px" }}>
+                                        <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "rgba(201,169,76,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <CreditCard size={20} className="text-gold" />
+                                        </div>
+                                        <h2 style={{ fontFamily: "serif", fontSize: "1.5rem", fontWeight: "300" }}>Payment Method</h2>
+                                    </div>
+
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                                         <RadioOption
                                             id="cod"
                                             value="cod"
                                             label="Cash on Delivery"
-                                            description="Pay with cash upon delivery."
+                                            description="Standard delivery experience. Fulfill payment upon arrival of your masterpiece."
+                                            icon={Truck}
                                             check={paymentMethod}
                                             onChange={setPaymentMethod}
-                                            
                                         />
                                         <RadioOption
                                             id="online"
                                             value="online"
-                                            label="EasyPaisa / JazzCash"
-                                            description="Direct Bank Transfer / Mobile Wallet"
+                                            label="Digital Transfer (EasyPaisa / JazzCash)"
+                                            description="Direct secure transfer. Recommended for faster processing and delivery."
+                                            icon={Smartphone}
                                             check={paymentMethod}
                                             onChange={setPaymentMethod}
                                         />
                                     </div>
 
-                                    {paymentMethod === "online" && (
-                                        <div className="bg-dark-card border border-gold/30 rounded-lg p-6 space-y-6 animate-in fade-in slide-in-from-top-4" style={{ padding: "1vw" }}>
-                                            <div className="text-center space-y-2">
-                                                <p className="text-sm text-gray-400 uppercase tracking-widest">Send Payment To</p>
-                                                <p className="text-2xl text-white font-bold tracking-widest">0334 5062546</p>
-                                                <p className="text-gold font-medium">Erfan Khan</p>
-                                            </div>
-
-                                            <div className="space-y-3">
-                                                <Label htmlFor="screenshot">Upload Payment Screenshot *</Label>
-                                                <div className="flex items-center justify-center w-full">
-                                                    <label htmlFor="screenshot" className="flex flex-col items-center justify-center w-full h-32 border-2 border-white/10 border-dashed rounded-lg cursor-pointer bg-dark hover:bg-white/5 transition-colors">
-                                                        <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                                                            <p className="mb-2 text-sm text-gray-400"><span className="font-semibold text-gold">Click to upload</span></p>
-                                                            <p className="text-xs text-gray-500">{screenshot ? screenshot.name : "SVG, PNG, JPG"}</p>
-                                                        </div>
-                                                        <input id="screenshot" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-                                                    </label>
-                                                </div>
-                                                {imagePreview && (
-                                                    <div style={{ marginTop: "12px", display: "flex", justifyContent: "center" }}>
-                                                        <Image
-                                                            src={imagePreview}
-                                                            alt="Payment proof preview"
-                                                            style={{
-                                                                width: "160px",
-                                                                height: "160px",
-                                                                objectFit: "cover",
-                                                                borderRadius: "8px",
-                                                                border: "1px solid rgba(201,169,110,0.3)",
-                                                            }}
-                                                        />
+                                    <AnimatePresence>
+                                        {paymentMethod === "online" && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: "auto" }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                style={{ overflow: "hidden" }}
+                                            >
+                                                <div style={{ marginTop: "32px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,169,76,0.2)", borderRadius: "24px", padding: "32px" }}>
+                                                    <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                                                        <p style={{ color: "#6b7280", letterSpacing: "0.2em", fontSize: "10px", textTransform: "uppercase", marginBottom: "8px" }}>Send Precise Amount To</p>
+                                                        <h3 style={{ fontSize: "2rem", fontWeight: "bold", color: "white", letterSpacing: "0.1em" }}>0334 5062546</h3>
+                                                        <p style={{ color: "#C9A84C", fontWeight: "600", fontSize: "14px" }}>Erfan Khan</p>
                                                     </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
 
-                                <Button
-                                    type="submit"
-                                    size="lg"
-                                    className="w-full mt-10 py-6 text-sm uppercase cursor-pointer tracking-widest font-bold bg-gold text-black hover:bg-gold-light transition-all shadow-lg hover:shadow-gold/20"
-                                    disabled={loading}
-                                    style={{ marginBottom: "1vw" }}
-                                >
-                                    {loading ? "Processing..." : `Place Order — PKR ${total.toFixed(2)}`}
-                                </Button>
-                            </form>
+                                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                                        <label style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#9ca3af", fontWeight: "bold", marginLeft: "4px" }}>Upload Receipt Screenshot *</label>
+                                                        <div style={{ position: "relative" }}>
+                                                            <label 
+                                                                htmlFor="screenshot" 
+                                                                style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "140px", border: "2px dashed rgba(255,255,255,0.1)", borderRadius: "20px", cursor: "pointer", background: "rgba(255,255,255,0.02)", transition: "all 0.3s" }}
+                                                                className="hover:bg-white/5 hover:border-gold/30"
+                                                            >
+                                                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                                                                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(201,169,76,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                                        <Smartphone size={20} className="text-gold" />
+                                                                    </div>
+                                                                    <p style={{ fontSize: "13px", color: "#9ca3af" }}>
+                                                                        {screenshot ? <span className="text-gold font-medium">{screenshot.name}</span> : <span>Tap to upload transfer receipt</span>}
+                                                                    </p>
+                                                                </div>
+                                                                <input id="screenshot" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                                                            </label>
+                                                        </div>
+                                                        {imagePreview && (
+                                                            <motion.div 
+                                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                                animate={{ opacity: 1, scale: 1 }}
+                                                                style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
+                                                            >
+                                                                <Image
+                                                                    src={imagePreview}
+                                                                    alt="Payment proof preview"
+                                                                    width={200}
+                                                                    height={200}
+                                                                    style={{ objectFit: "cover", borderRadius: "16px", border: "1px solid rgba(201,169,110,0.3)", boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}
+                                                                />
+                                                            </motion.div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </section>
+
+                                {/* Footer Security Note */}
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", padding: "24px 12px", borderTop: "1px solid rgba(255,255,255,0.05)", marginTop: "16px" }}>
+                                    <ShieldCheck size={18} className="text-gold/50" />
+                                    <p style={{ fontSize: "12px", color: "#4b5563", letterSpacing: "0.05em" }}>Your connection is secure and your data is encrypted.</p>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Right Column: Summary */}
-                        <div className="lg:col-span-1" style={{ marginBottom: "2vw" }}>
-                            <Card className="sticky top-32 border-white/10 bg-dark-lighter" style={{ padding: "1vw" }}>
-                                <CardContent className="p-8 space-y-6">
-                                    <h3 style={{ padding: "1vw 0" }} className="font-serif text-xl text-white mb-4">Your Order</h3>
-                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        {/* Right Column: Order Summary (Sticky) */}
+                        <div style={{ flex: "1 1 35%", minWidth: "320px", position: "sticky", top: "128px" }}>
+                            <Card 
+                                style={{ 
+                                    background: "rgba(255,255,255,0.03)", 
+                                    backdropFilter: "blur(24px)", 
+                                    border: "1px solid rgba(255,255,255,0.05)", 
+                                    borderRadius: "32px", 
+                                    padding: "40px",
+                                    overflow: "hidden"
+                                }}
+                            >
+                                <div style={{ position: "absolute", top: "-96px", right: "-96px", width: "256px", height: "256px", background: "rgba(201,169,76,0.05)", borderRadius: "50%", filter: "blur(80px)" }} />
+                                
+                                <CardContent style={{ padding: 0, position: "relative", zIndex: 10 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px", paddingBottom: "24px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                                        <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(201,169,76,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <Lock size={16} className="text-gold" />
+                                        </div>
+                                        <h3 style={{ fontFamily: "serif", fontSize: "1.5rem", fontWeight: "300" }}>Your Order</h3>
+                                    </div>
+
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "24px", maxHeight: "360px", overflowY: "auto", paddingRight: "16px", marginBottom: "32px" }} className="custom-scrollbar">
                                         {cart.map((item) => (
-                                            <div style={{ padding: "1vw 0" }} key={item.cartKey || item.id} className="flex gap-4 items-start border-b border-white/5 pb-4 last:border-0 last:pb-0">
-                                                <div className="w-16 h-16 bg-white/5 rounded flex items-center justify-center shrink-0 overflow-hidden border border-white/10">
+                                            <div key={item.cartKey || item.id} style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+                                                <div style={{ width: "72px", aspectRatio: "3/4", background: "rgba(255,255,255,0.03)", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
                                                     {item.imageUrl ? (
-                                                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                                                        <img src={item.imageUrl} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                                     ) : (
-                                                        <div className="w-10 h-10 rounded-full" style={{ backgroundColor: item.color }}></div>
+                                                        <div style={{ width: "100%", height: "100%", backgroundColor: item.color }} />
                                                     )}
                                                 </div>
-                                                <div className="flex-1">
-                                                    <p className="text-white text-sm font-medium line-clamp-2">{item.name}</p>
-                                                    {item.selectedColor && <p className="text-xs text-gray-500">Color: {item.selectedColor}</p>}
-                                                    <div className="flex justify-between items-center mt-1">
-                                                        <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
-                                                        <p className="text-gold text-sm">{item.price}</p>
+                                                <div style={{ flex: 1 }}>
+                                                    <p style={{ fontSize: "14px", fontWeight: "500", color: "white", marginBottom: "4px" }} className="line-clamp-1">{item.name}</p>
+                                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                                        <p style={{ fontSize: "11px", color: "#6b7280" }}>Qty: {item.quantity}</p>
+                                                        <p style={{ fontSize: "13px", color: "#C9A84C", fontWeight: "600" }}>{item.price.toLocaleString()} PKR</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
 
-                                    <div style={{ padding: "1vw 0" }} className="border-t border-white/10 pt-4 space-y-2">
-                                        <div className="flex justify-between text-gray-400 text-sm">
-                                            <span>Discount</span>
-                                            <span>PKR {discount}</span>
+                                    <div style={{ padding: "32px 0", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column", gap: "16px" }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Selection Total</span>
+                                            <span style={{ fontSize: "14px", color: "white" }}>{amount.toLocaleString()} PKR</span>
                                         </div>
-                                        <div className="flex justify-between text-gray-400 text-sm">
-                                            <span>Subtotal</span>
-                                            <span>PKR {total.toFixed(2)}</span>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Luxury Discount</span>
+                                            <span style={{ fontSize: "14px", color: "#10b981" }}>- {discount.toLocaleString()} PKR</span>
                                         </div>
-                                        <div className="flex justify-between text-gray-400 text-sm">
-                                            <span>Shipping</span>
-                                            <span className="text-gold">Free</span>
-                                        </div>
-                                        <div style={{ padding: "1vw 0" }} className="border-t border-white/10 pt-4 flex justify-between text-white font-bold text-lg">
-                                            <span>Total</span>
-                                            <span>PKR {total.toFixed(2)}</span>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Global Shipping</span>
+                                            <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#C9A84C", fontWeight: "bold" }}>Complimentary</span>
                                         </div>
                                     </div>
+
+                                    <div style={{ padding: "32px 0", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "32px" }}>
+                                        <span style={{ fontFamily: "serif", fontSize: "1.25rem", color: "white" }}>Total Investment</span>
+                                        <div style={{ textAlign: "right" }}>
+                                            <span style={{ fontSize: "2rem", fontWeight: "bold", color: "white" }}>{total.toLocaleString()}</span>
+                                            <span style={{ fontSize: "10px", color: "#6b7280", marginLeft: "8px", textTransform: "uppercase", letterSpacing: "0.1em" }}>PKR Currency</span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={handleSubmit}
+                                        disabled={loading}
+                                        style={{ 
+                                            width: "100%", 
+                                            height: "72px", 
+                                            background: "linear-gradient(135deg, #C9A84C 0%, #a68b3d 100%)", 
+                                            color: "black", 
+                                            borderRadius: "18px", 
+                                            fontSize: "14px", 
+                                            fontWeight: "bold", 
+                                            textTransform: "uppercase", 
+                                            letterSpacing: "0.2em", 
+                                            display: "flex", 
+                                            alignItems: "center", 
+                                            justifyContent: "center", 
+                                            gap: "12px",
+                                            transition: "all 0.5s",
+                                            boxShadow: "0 20px 40px rgba(201,169,76,0.2)",
+                                            cursor: loading ? "not-allowed" : "pointer"
+                                        }}
+                                        className="hover:scale-[1.02] hover:shadow-gold/40 active:scale-[0.98]"
+                                    >
+                                        {loading ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                                <span>Processing...</span>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                                <span>Confirm & Place Order</span>
+                                                <ShieldCheck size={20} />
+                                            </div>
+                                        )}
+                                    </button>
                                 </CardContent>
                             </Card>
                         </div>

@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useCart } from "@/context/CartContext";
-import { Heart, X } from "lucide-react";
+import { Heart, X, Check, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const DEFAULT_CATEGORIES = ["all", "men", "women", "couples"];
 
@@ -19,6 +20,9 @@ function GalleryContent() {
     const [filter, setFilter] = useState("all");
     const [sortBy, setSortBy] = useState("default");
     const [quickViewProduct, setQuickViewProduct] = useState(null);
+    const [selectedQuickViewColor, setSelectedQuickViewColor] = useState(null);
+    const [isImageLoading, setIsImageLoading] = useState(false);
+    const [isSortOpen, setIsSortOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
     const searchParams = useSearchParams();
@@ -119,40 +123,87 @@ function GalleryContent() {
                 {/* Filters and Sorting Row */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-16">
                     {/* Category Filter */}
-                    <div className="flex flex-wrap justify-center gap-4">
+                    <div style={{ padding: "0.5vw 0.5vw 0.5vw 0.5vw" }} className="flex cursor-pointer flex-wrap justify-center gap-2 p-1 bg-[#1a1a1a] rounded-full border border-white/5">
                         {categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setFilter(cat)}
+                                style={{ padding: "10px 32px" }}
                                 className={cn(
-                                    "px-6 py-2 text-sm uppercase tracking-widest border transition-all duration-200",
-                                    filter === cat
-                                        ? "bg-gold text-black border-transparent font-bold"
-                                        : "bg-transparent border-white/10 text-gray-400 hover:border-gold hover:text-gold"
+                                    "relative text-[10px] md:text-xs uppercase tracking-[0.2em] transition-colors duration-300 z-10",
+                                    filter === cat ? "text-black font-bold" : "text-gray-400 hover:text-white"
                                 )}
                             >
-                                {cat}
+                                <span className="relative z-10">{cat}</span>
+                                {filter === cat && (
+                                    <motion.div
+                                        
+                                        layoutId="activeTab"
+                                        className="absolute inset-0 bg-gold rounded-full z-0 shadow-[0_0_20px_rgba(201,169,76,0.2)]"
+                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                    />
+                                )}
                             </button>
                         ))}
                     </div>
 
                     {/* Sort Dropdown */}
-                    <div className="relative">
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="appearance-none bg-[#1a1a1a] border border-gold text-gold py-2 pl-4 pr-10 rounded focus:outline-none focus:ring-1 focus:ring-gold text-sm tracking-wide uppercase cursor-pointer"
+                    <div className="relative z-40">
+                        <button
+                            onClick={() => setIsSortOpen(!isSortOpen)}
+                            style={{ padding: "14px 28px" }}
+                            className="flex items-center justify-between min-w-[200px] bg-[#1a1a1a] border border-white/10 text-white rounded-full focus:outline-none focus:ring-1 focus:ring-gold text-[10px] tracking-[0.2em] uppercase transition-all duration-300 hover:border-gold/50 group shadow-xl"
                         >
-                            <option value="default">Default</option>
-                            <option value="price_asc">Price: Low to High</option>
-                            <option value="price_desc">Price: High to Low</option>
-                            <option value="newest">Newest First</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gold">
-                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                            </svg>
-                        </div>
+                            <span className="opacity-60 mr-2">Sort:</span>
+                            <span className="font-bold">
+                                {sortBy === "default" && "Default"}
+                                {sortBy === "price_asc" && "Price: Low to High"}
+                                {sortBy === "price_desc" && "Price: High to Low"}
+                                {sortBy === "newest" && "Newest First"}
+                            </span>
+                            <ChevronDown size={14} className={cn("ml-3 transition-transform duration-300", isSortOpen ? "rotate-180" : "")} />
+                        </button>
+
+                        <AnimatePresence>
+                            {isSortOpen && (
+                                <>
+                                    <div 
+                                        className="fixed inset-0 z-30" 
+                                        onClick={() => setIsSortOpen(false)} 
+                                    />
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                        className="absolute right-0 mt-3 w-64 bg-[#111] border border-white/5 rounded-2xl shadow-2xl overflow-hidden z-40 backdrop-blur-xl"
+                                    >
+                                        {[
+                                            { id: "default", label: "Default" },
+                                            { id: "price_asc", label: "Price: Low to High" },
+                                            { id: "price_desc", label: "Price: High to Low" },
+                                            { id: "newest", label: "Newest First" }
+                                        ].map((opt) => (
+                                            <button
+                                                key={opt.id}
+                                                onClick={() => {
+                                                    setSortBy(opt.id);
+                                                    setIsSortOpen(false);
+                                                }}
+                                                style={{ padding: "16px 24px" }}
+                                                className={cn(
+                                                    "w-full text-left text-[10px] tracking-[0.2em] uppercase transition-all duration-200 border-b border-white/5 last:border-none flex items-center justify-between group",
+                                                    sortBy === opt.id ? "text-gold bg-gold/5" : "text-gray-400 hover:text-white hover:bg-white/5"
+                                                )}
+                                            >
+                                                {opt.label}
+                                                {sortBy === opt.id && <Check size={12} />}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
 
@@ -193,14 +244,16 @@ function GalleryContent() {
                                             )}
 
                                             {/* Quick View Button Hover overlay */}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                                            <div  className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-20">
                                                 <button
+                                                style={{padding : "10px"}}
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
                                                         setQuickViewProduct(watch);
+                                                        setSelectedQuickViewColor(watch.variants?.[0]?.color || null);
                                                     }}
-                                                    className="bg-black/80 text-white border border-gold px-6 py-2 text-xs uppercase tracking-[0.2em] hover:bg-gold hover:text-black transition-colors backdrop-blur-sm"
+                                                    className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-black font-semibold text-[10px] tracking-[0.2em] uppercase px-8 py-3 rounded-full transition-all duration-300 shadow-xl"
                                                 >
                                                     Quick View
                                                 </button>
@@ -250,34 +303,70 @@ function GalleryContent() {
                         </button>
                         
                         {/* Modal Image */}
-                        <div className="w-full md:w-1/2 min-h-[300px] md:min-h-[400px] bg-black relative flex items-center justify-center">
-                             {quickViewProduct.imageUrl ? (
-                                <img
-                                    src={quickViewProduct.imageUrl}
+                        <div className="w-full md:w-1/2 min-h-[300px] md:min-h-[500px] bg-dark relative flex items-center justify-center overflow-hidden">
+                             <AnimatePresence mode="wait">
+                                <motion.img
+                                    key={selectedQuickViewColor || "default"}
+                                    initial={{ opacity: 0, scale: 1.1 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 1.05 }}
+                                    onLoadStart={() => setIsImageLoading(true)}
+                                    onLoad={() => setIsImageLoading(false)}
+                                    transition={{ duration: 0.5, ease: "easeOut" }}
+                                    src={
+                                        selectedQuickViewColor 
+                                            ? quickViewProduct.variants?.find(v => v.color === selectedQuickViewColor)?.images?.[0] || quickViewProduct.imageUrl
+                                            : quickViewProduct.imageUrl
+                                    }
                                     alt={quickViewProduct.name}
-                                    className="object-contain w-full h-[300px] md:h-[500px]"
+                                    className="object-cover w-full h-full absolute inset-0"
                                 />
-                             ) : (
-                                <span className="text-gray-600">No Image</span>
+                             </AnimatePresence>
+                             
+                             {/* Loading Spinner */}
+                             {isImageLoading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] z-10 transition-opacity duration-300">
+                                    <div className="w-12 h-12 border-2 border-white/5 border-t-gold rounded-full animate-spin shadow-[0_0_15px_rgba(201,169,76,0.2)]"></div>
+                                </div>
                              )}
+                             
+                             <div className="absolute inset-0 bg-gradient-to-t from-dark/60 via-transparent to-transparent pointer-events-none" />
                         </div>
 
                         {/* Modal Content */}
-                        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                            <h2 className="font-serif text-3xl text-white mb-2">{quickViewProduct.name}</h2>
-                            <p className="text-2xl text-gold mb-6">Rs. {quickViewProduct.price?.toLocaleString()}</p>
+                        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-[#0a0a0a]">
+                            <h2 className="font-serif text-3xl md:text-4xl text-white mb-2">{quickViewProduct.name}</h2>
+                            <p className="text-xl md:text-2xl text-gold mb-8">Rs. {quickViewProduct.price?.toLocaleString()}</p>
                             
                             {quickViewProduct.variants && quickViewProduct.variants.length > 0 && (
-                                <div className="mb-8">
-                                    <span className="text-xs text-gray-400 uppercase tracking-widest block mb-3">Color Options</span>
-                                    <div className="flex gap-2">
+                                <div className="mb-10">
+                                    <span className="text-xs text-gray-400 uppercase tracking-widest block mb-4">
+                                        Color: <span className="text-white ml-2">{selectedQuickViewColor || "Select"}</span>
+                                    </span>
+                                    <div className="flex gap-3">
                                         {quickViewProduct.variants.map((v) => (
-                                            <div
+                                            <button
                                                 key={v.color}
-                                                className="w-8 h-8 rounded-full border border-white/20"
+                                                onClick={() => {
+                                                    if (v.color !== selectedQuickViewColor) {
+                                                        setIsImageLoading(true);
+                                                        setSelectedQuickViewColor(v.color);
+                                                    }
+                                                }}
+                                                className={`w-10 h-10 rounded-full border-2 transition-all duration-300 relative flex items-center justify-center ${
+                                                    selectedQuickViewColor === v.color 
+                                                        ? "border-gold scale-110 shadow-[0_0_15px_rgba(201,169,76,0.3)]" 
+                                                        : "border-white/20 hover:border-white/50"
+                                                }`}
                                                 style={{ backgroundColor: v.hex }}
                                                 title={v.color}
-                                            />
+                                            >
+                                                {selectedQuickViewColor === v.color && (
+                                                    <Check size={14} className={cn(
+                                                        v.color.toLowerCase() === 'white' ? 'text-black' : 'text-white'
+                                                    )} />
+                                                )}
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
@@ -285,16 +374,16 @@ function GalleryContent() {
 
                             <button
                                 onClick={() => {
-                                    addToCart(quickViewProduct, 1, quickViewProduct.variants?.[0]?.color || null);
+                                    addToCart(quickViewProduct, 1, selectedQuickViewColor || quickViewProduct.variants?.[0]?.color || null);
                                     setQuickViewProduct(null);
                                 }}
-                                className="w-full bg-gold text-black font-bold uppercase tracking-widest py-4 mb-4 hover:bg-[#b0923d] transition-colors"
+                                className="w-full bg-gold text-black font-bold uppercase tracking-widest py-4 mb-4 hover:bg-white hover:text-black transition-all duration-300 shadow-lg hover:shadow-gold/20"
                             >
                                 Add to Cart
                             </button>
                             <Link
                                 href={`/product/${quickViewProduct.id}`}
-                                className="text-center text-gray-400 hover:text-gold text-xs uppercase tracking-[0.2em] transition-colors border-b border-transparent hover:border-gold pb-1 self-center"
+                                className="text-center text-gray-400 hover:text-white text-[10px] uppercase tracking-[0.3em] transition-colors border-b border-white/10 hover:border-gold pb-1 self-center inline-block"
                             >
                                 View Full Details
                             </Link>

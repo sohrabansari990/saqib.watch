@@ -153,9 +153,9 @@ export default function Header({ topOffset = 0 }) {
                             ))}
                         </nav>
 
-                        <div className="absolute bottom-10 text-gray-muted text-xs tracking-[0.3em] uppercase text-center px-4">
+                        {/* <div className="absolute bottom-10 text-gray-muted text-xs tracking-[0.3em] uppercase text-center px-4">
                             Est. 1978 — Luxury Horizon
-                        </div>
+                        </div> */}
                     </motion.div>
                 )}
             </AnimatePresence>
