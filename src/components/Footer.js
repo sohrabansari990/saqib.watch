@@ -26,22 +26,22 @@ const footerLinks = [
 const socialLinks = [
     {
         icon: FaFacebookF,
-        href: "https://facebook.com/svestonofficial",
+        href: "https://www.facebook.com/saqib.khan.723464/",
         label: "Facebook",
     },
     {
         icon: FaInstagram,
-        href: "https://instagram.com/svestonofficial",
+        href: "https://www.instagram.com/saqibkhan.champ/?hl=en",
         label: "Instagram",
     },
-    {
-        icon: FaYoutube,
-        href: "https://www.youtube.com/@SvestonWatchesOfficial",
-        label: "YouTube",
-    },
+    // {
+    //     icon: FaYoutube,
+    //     href: "https://www.youtube.com/@SvestonWatchesOfficial",
+    //     label: "YouTube",
+    // },
     {
         icon: FaTiktok,
-        href: "https://www.tiktok.com/@svestonwatch",
+        href: "https://www.tiktok.com/@saqibkhan0489",
         label: "TikTok",
     },
 ];
@@ -61,7 +61,7 @@ export default function Footer() {
                     {/* Brand Column */}
                     <div className="lg:col-span-1">
                         <div className="flex items-center gap-3 mb-6">
-                            <Image src="/saqib%20watches.jpeg" alt="Saqib Watches" width={50} height={50} className="w-10 h-10 hover:scale-110 transition-all duration-300" />
+                            <Image src="/main_logo-removebg.png" alt="Saqib Watches" width={50} height={50} className="w-10 h-10 hover:scale-110 transition-all duration-300" />
                             <span className="font-serif text-2xl tracking-[0.3em] text-white font-light">
                                 Saqib Watches
                             </span>

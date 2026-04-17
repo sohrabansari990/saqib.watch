@@ -9,7 +9,7 @@ import { ShoppingBag, Heart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Header() {
+export default function Header({ topOffset = 0 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { cart, mounted } = useCart();
@@ -29,10 +29,10 @@ export default function Header() {
     return (
         <>
             <header
-                className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
+                className={`fixed left-0 w-full z-50 transition-all duration-500 ${scrolled
                     ? "bg-black/90 backdrop-blur-md shadow-lg shadow-black/30"
                     : "bg-transparent"
-                    }`} style={{ padding: "1vw 2vw 1vw 2vw" }}
+                    }`} style={{ padding: "1vw 2vw 1vw 2vw", top: `${topOffset}px` }}
             >
                 <div className="w-full flex items-center justify-between pl-6 pr-12 md:pl-12 md:pr-24 2xl:pl-20 2xl:pr-40 py-4">
                     {/* Logo */}

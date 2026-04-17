@@ -11,9 +11,23 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 
 function WatchCard({ watch }) {
+    const hasDiscount =
+        watch.originalPrice &&
+        watch.price &&
+        Number(watch.originalPrice) > Number(watch.price);
+
     return (
         <Link href={`/product/${watch.id}`} className="group cursor-pointer block h-full">
             <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[3/4] mb-4 border border-white/5">
+                {/* SALE badge */}
+                {hasDiscount && (
+                    <div className="absolute top-3 left-3 z-20">
+                        <span className="inline-block bg-red-600 text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-sm">
+                            SALE
+                        </span>
+                    </div>
+                )}
+
                 {watch.imageUrl ? (
                     <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
                         <img
@@ -36,6 +50,7 @@ function WatchCard({ watch }) {
 
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
+                {/* View Details overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                     <span className="text-xs tracking-[0.2em] text-gold uppercase">
                         View Details
@@ -47,9 +62,16 @@ function WatchCard({ watch }) {
             <h3 className="font-serif text-lg text-center text-white group-hover:text-gold transition-colors duration-300">
                 {watch.name}
             </h3>
-            <p className="text-center text-gold text-sm mt-1">
-                {typeof watch.price === "number" ? `Rs. ${watch.price.toLocaleString()}` : watch.price}
-            </p>
+            <div className="text-center mt-1">
+                {hasDiscount && (
+                    <span className="text-gray-muted text-xs line-through mr-2">
+                        Rs. {Number(watch.originalPrice).toLocaleString()}
+                    </span>
+                )}
+                <span className="text-gold text-sm">
+                    {typeof watch.price === "number" ? `Rs. ${watch.price.toLocaleString()}` : watch.price}
+                </span>
+            </div>
         </Link>
     );
 }

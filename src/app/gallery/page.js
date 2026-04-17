@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense, useMemo } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
@@ -9,19 +9,23 @@ import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
-import { Heart } from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { Heart, X } from "lucide-react";
 
 const DEFAULT_CATEGORIES = ["all", "men", "women", "couples"];
 
 function GalleryContent() {
     const [products, setProducts] = useState([]);
     const [filter, setFilter] = useState("all");
+    const [sortBy, setSortBy] = useState("default");
+    const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
     const searchParams = useSearchParams();
     const router = useRouter();
     const hasSyncedQuery = useRef(false);
     const { toggleFavorite, isFavorite } = useFavorites();
+    const { addToCart } = useCart();
 
     // Fetch dynamic categories from all products
     useEffect(() => {
@@ -86,6 +90,19 @@ function GalleryContent() {
         fetchProducts();
     }, [filter]);
 
+    // Apply sorting in memo
+    const displayedProducts = useMemo(() => {
+        let sorted = [...products];
+        if (sortBy === "price_asc") {
+            sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+        } else if (sortBy === "price_desc") {
+            sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+        } else if (sortBy === "newest") {
+            sorted.reverse(); // Simplified newest logic tracking default insert order inversed
+        }
+        return sorted;
+    }, [products, sortBy]);
+
     return (
         <main className="pt-24 min-h-screen bg-dark" style={{ padding: "8.5vw 2vw 3vw 2vw" }}>
             <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
@@ -99,22 +116,44 @@ function GalleryContent() {
                     <div className="mt-6 w-16 h-px bg-gold mx-auto" />
                 </div>
 
-                {/* Category Filter */}
-                <div className="flex flex-wrap justify-center gap-4 mb-16">
-                    {categories.map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => setFilter(cat)}
-                            className={cn(
-                                "px-6 py-2 text-sm uppercase tracking-widest border transition-all duration-300",
-                                filter === cat
-                                    ? "border-gold bg-gold text-black font-semibold"
-                                    : "border-white/10 text-gray-400 hover:border-gold hover:text-gold"
-                            )}
+                {/* Filters and Sorting Row */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-16">
+                    {/* Category Filter */}
+                    <div className="flex flex-wrap justify-center gap-4">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setFilter(cat)}
+                                className={cn(
+                                    "px-6 py-2 text-sm uppercase tracking-widest border transition-all duration-200",
+                                    filter === cat
+                                        ? "bg-gold text-black border-transparent font-bold"
+                                        : "bg-transparent border-white/10 text-gray-400 hover:border-gold hover:text-gold"
+                                )}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Sort Dropdown */}
+                    <div className="relative">
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="appearance-none bg-[#1a1a1a] border border-gold text-gold py-2 pl-4 pr-10 rounded focus:outline-none focus:ring-1 focus:ring-gold text-sm tracking-wide uppercase cursor-pointer"
                         >
-                            {cat}
-                        </button>
-                    ))}
+                            <option value="default">Default</option>
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="price_desc">Price: High to Low</option>
+                            <option value="newest">Newest First</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gold">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -126,7 +165,7 @@ function GalleryContent() {
                                 No products found in this category.
                             </div>
                         ) : (
-                            products.map((watch) => (
+                            displayedProducts.map((watch) => (
                                 <div key={watch.id} className="group cursor-pointer block relative">
                                     <Link href={`/product/${watch.id}`}>
                                         <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[3/4] mb-4 border border-white/5">
@@ -152,6 +191,20 @@ function GalleryContent() {
                                                     {watch.mode}
                                                 </span>
                                             )}
+
+                                            {/* Quick View Button Hover overlay */}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setQuickViewProduct(watch);
+                                                    }}
+                                                    className="bg-black/80 text-white border border-gold px-6 py-2 text-xs uppercase tracking-[0.2em] hover:bg-gold hover:text-black transition-colors backdrop-blur-sm"
+                                                >
+                                                    Quick View
+                                                </button>
+                                            </div>
                                         </div>
                                     </Link>
 
@@ -185,6 +238,70 @@ function GalleryContent() {
                     </div>
                 )}
             </div>
+            {/* Quick View Modal */}
+            {quickViewProduct && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
+                    <div className="bg-[#111] border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl relative flex flex-col md:flex-row">
+                        <button
+                            onClick={() => setQuickViewProduct(null)}
+                            className="absolute top-4 right-4 z-20 text-gray-400 hover:text-white bg-black/50 p-2 rounded-full backdrop-blur transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                        
+                        {/* Modal Image */}
+                        <div className="w-full md:w-1/2 min-h-[300px] md:min-h-[400px] bg-black relative flex items-center justify-center">
+                             {quickViewProduct.imageUrl ? (
+                                <img
+                                    src={quickViewProduct.imageUrl}
+                                    alt={quickViewProduct.name}
+                                    className="object-contain w-full h-[300px] md:h-[500px]"
+                                />
+                             ) : (
+                                <span className="text-gray-600">No Image</span>
+                             )}
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                            <h2 className="font-serif text-3xl text-white mb-2">{quickViewProduct.name}</h2>
+                            <p className="text-2xl text-gold mb-6">Rs. {quickViewProduct.price?.toLocaleString()}</p>
+                            
+                            {quickViewProduct.variants && quickViewProduct.variants.length > 0 && (
+                                <div className="mb-8">
+                                    <span className="text-xs text-gray-400 uppercase tracking-widest block mb-3">Color Options</span>
+                                    <div className="flex gap-2">
+                                        {quickViewProduct.variants.map((v) => (
+                                            <div
+                                                key={v.color}
+                                                className="w-8 h-8 rounded-full border border-white/20"
+                                                style={{ backgroundColor: v.hex }}
+                                                title={v.color}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => {
+                                    addToCart(quickViewProduct, 1, quickViewProduct.variants?.[0]?.color || null);
+                                    setQuickViewProduct(null);
+                                }}
+                                className="w-full bg-gold text-black font-bold uppercase tracking-widest py-4 mb-4 hover:bg-[#b0923d] transition-colors"
+                            >
+                                Add to Cart
+                            </button>
+                            <Link
+                                href={`/product/${quickViewProduct.id}`}
+                                className="text-center text-gray-400 hover:text-gold text-xs uppercase tracking-[0.2em] transition-colors border-b border-transparent hover:border-gold pb-1 self-center"
+                            >
+                                View Full Details
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

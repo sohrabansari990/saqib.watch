@@ -2,31 +2,38 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 const categories = [
     {
         id: "men",
-        title: "Saqib Watches For Men",
-        subtitle: "Make a bold statement with Saqib's timepieces for Men",
-        gradient: "from-[#1a2a3a] via-[#0d1520] to-black",
+        title: "For Men",
+        tagline: "Bold. Classic. Powerful.",
+        badge: "24 Watches",
+        gradient: "from-[#0a0a0a] via-[#0d1525] to-[#1a2a4a]",
         iconColor: "#4a6a8a",
         accentColor: "#c9a96e",
+        imagePath: "/men watches.jpg",
     },
     {
         id: "women",
-        title: "Saqib Watches For Women",
-        subtitle: "Unleash your feminine charm with Saqib's timepieces for Women",
-        gradient: "from-[#3a1a2a] via-[#200d15] to-black",
+        title: "For Women",
+        tagline: "Elegant. Refined. Timeless.",
+        badge: "18 Watches",
+        gradient: "from-[#0a0a0a] via-[#200d18] to-[#3a1a2a]",
         iconColor: "#8a4a6a",
         accentColor: "#e0c88a",
+        imagePath: "/women watches.jpg",
     },
     {
         id: "couples",
-        title: "Saqib Watches For Couples",
-        subtitle: "Celebrate togetherness with matching Saqib timepieces",
-        gradient: "from-[#2a2a1a] via-[#15150d] to-black",
+        title: "For Couples",
+        tagline: "Together. Always.",
+        badge: "12 Sets",
+        gradient: "from-[#0a0a0a] via-[#1a1a0d] to-[#2a2a1a]",
         iconColor: "#6a6a4a",
         accentColor: "#c9a96e",
+        imagePath: "/couple watches.jpg",
     },
 ];
 
@@ -40,69 +47,50 @@ function CategoryCard({ category, index }) {
             initial={{ opacity: 0, y: 60 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: index * 0.2 }}
-            className="group relative overflow-hidden rounded-xl cursor-pointer"
+            className="group relative overflow-hidden rounded-2xl cursor-pointer border border-white/5 hover:border-gold/60 transition-all duration-500 ease-in-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-gold/10"
         >
             <Link href={`/gallery?category=${category.id}`} className="block h-full">
                 <div
-                    className={`relative bg-gradient-to-b ${category.gradient} aspect-[3/4] md:aspect-[2/3] flex flex-col items-center justify-center p-8 transition-all duration-700 h-full`}
+                    className={`relative bg-gradient-to-b ${category.gradient} flex flex-col justify-end p-8 md:p-10 transition-all duration-500 ease-in-out`}
+                    style={{ minHeight: "500px" }}
                 >
-                    {/* Background watch silhouette */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-700">
-                        <svg viewBox="0 0 200 200" className="w-64 h-64">
-                            <circle
-                                cx="100"
-                                cy="100"
-                                r="80"
-                                fill="none"
-                                stroke={category.iconColor}
-                                strokeWidth="1"
-                            />
-                            <circle
-                                cx="100"
-                                cy="100"
-                                r="70"
-                                fill="none"
-                                stroke={category.iconColor}
-                                strokeWidth="0.5"
-                            />
-                            {Array.from({ length: 12 }).map((_, i) => {
-                                const angle = (i * 30 * Math.PI) / 180;
-                                const x1 = 100 + 65 * Math.sin(angle);
-                                const y1 = 100 - 65 * Math.cos(angle);
-                                const x2 = 100 + 70 * Math.sin(angle);
-                                const y2 = 100 - 70 * Math.cos(angle);
-                                return (
-                                    <line
-                                        key={i}
-                                        x1={x1}
-                                        y1={y1}
-                                        x2={x2}
-                                        y2={y2}
-                                        stroke={category.iconColor}
-                                        strokeWidth={i % 3 === 0 ? 2 : 0.8}
-                                    />
-                                );
-                            })}
-                            <circle cx="100" cy="100" r="3" fill={category.iconColor} />
-                        </svg>
+                    {/* Item count badge — top right */}
+                    <div className="absolute top-6 right-6 z-20">
+                        <span className="inline-block rounded bg-gold/10 border border-gold/30 px-3 py-1 text-gold text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold backdrop-blur-md">
+                            {category.badge}
+                        </span>
                     </div>
 
-                    {/* Content */}
-                    <div className="relative z-10 text-center">
-                        <h3 className="font-serif text-2xl md:text-3xl text-white mb-3 group-hover:text-gold transition-colors duration-500">
+                    {/* Background watch image */}
+                    <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-60 group-hover:scale-[1.03] transition-all duration-700 pointer-events-none">
+                        <Image
+                            src={category.imagePath}
+                            alt={category.title}
+                            fill
+                            className="object-cover object-center"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                        {/* Gradient mask to blend image into the dark card edges */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-dark/60 via-transparent to-transparent" />
+                    </div>
+
+                    {/* Content — bottom left (absolutely positioned to perfectly match badge padding) */}
+                    <div className="absolute bottom-6 left-6 right-6 z-20 text-left">
+                        <h3 className="font-serif text-3xl md:text-4xl lg:text-5xl text-white mb-3 group-hover:text-gold transition-colors duration-500">
                             {category.title}
                         </h3>
-                        <p className="text-gray-muted text-sm md:text-base max-w-xs mx-auto mb-8 leading-relaxed">
-                            {category.subtitle}
+                        <p className="text-gray-400 text-sm md:text-base tracking-wide mb-6">
+                            {category.tagline}
                         </p>
-                        <span className="inline-block px-8 py-3 border border-gold/50 text-gold text-xs tracking-[0.3em] uppercase group-hover:bg-gold group-hover:text-black transition-all duration-500">
-                            Explore
+                        <span className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 text-white text-xs tracking-[0.25em] uppercase group-hover:border-gold group-hover:bg-gold group-hover:text-black transition-all duration-500 font-medium cursor-pointer">
+                            Explore Collection <span className="text-lg leading-none">→</span>
                         </span>
                     </div>
 
                     {/* Hover glow */}
                     <div
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-30 transition-opacity duration-700"
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[150%] h-64 rounded-t-[100%] blur-[100px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"
                         style={{ background: category.accentColor }}
                     />
                 </div>
@@ -137,7 +125,7 @@ export default function CategoryCards() {
                 {/* Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {categories.map((cat, i) => (
-                        <CategoryCard key={cat.id} category={cat} index={i} />
+                        <CategoryCard key={cat.id} category={cat}  index={i} />
                     ))}
                 </div>
             </div>

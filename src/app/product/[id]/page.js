@@ -2,14 +2,14 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductActions from "@/components/ProductActions";
 import { useFavorites } from "@/context/FavoritesContext";
-import { Heart } from "lucide-react";
+import { Heart, ShieldCheck, Truck, RotateCcw, Star } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -24,6 +24,7 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedThumbIndex, setSelectedThumbIndex] = useState(0);
+  const [similarProducts, setSimilarProducts] = useState([]);
   const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
@@ -39,6 +40,25 @@ export default function ProductPage() {
           setProduct(data);
           if (data.variants && data.variants.length > 0) {
             setSelectedColor(data.variants[0].color);
+          }
+
+          // Fetch Similar Products
+          if (data.category) {
+            try {
+              const q = query(
+                collection(db, "products"),
+                where("category", "==", data.category),
+                limit(5)
+              );
+              const simSnap = await getDocs(q);
+              const simList = simSnap.docs
+                .map((d) => ({ id: d.id, ...d.data() }))
+                .filter((d) => d.id !== id)
+                .slice(0, 4);
+              setSimilarProducts(simList);
+            } catch (err) {
+              console.error("Failed to fetch similar:", err);
+            }
           }
         } else {
           router.push("/gallery");
@@ -397,6 +417,33 @@ export default function ProductPage() {
                 ))}
               </div>
 
+              {/* Trust Badges & Delivery Estimate */}
+              <div className="mt-8 mb-6">
+                {/* Badges */}
+                <div className="flex items-center justify-between border border-white/10 rounded-lg p-4 bg-white/5 backdrop-blur-sm">
+                  <div className="flex flex-col items-center gap-2">
+                    <ShieldCheck size={18} className="text-gray-400" />
+                    <span className="text-[10px] text-gray-400 uppercase tracking-widest text-center">Authentic<br/>Product</span>
+                  </div>
+                  <div className="w-px h-10 bg-white/10" />
+                  <div className="flex flex-col items-center gap-2">
+                    <Truck size={18} className="text-gray-400" />
+                    <span className="text-[10px] text-gray-400 uppercase tracking-widest text-center">Free<br/>Shipping</span>
+                  </div>
+                  <div className="w-px h-10 bg-white/10" />
+                  <div className="flex flex-col items-center gap-2">
+                    <RotateCcw size={18} className="text-gray-400" />
+                    <span className="text-[10px] text-gray-400 uppercase tracking-widest text-center">Easy<br/>Returns</span>
+                  </div>
+                </div>
+
+                {/* Delivery Estimate */}
+                <div className="flex items-center gap-3 mt-4 text-gray-300 text-sm bg-white/5 p-3 rounded-lg border border-white/5">
+                  <Truck size={18} className="text-gold" />
+                  <span>Order before 5PM — <strong className="text-white font-medium">Ships Tomorrow</strong></span>
+                </div>
+              </div>
+
               <ProductActions product={product} selectedColor={selectedColor} />
             </div>
           </div>
@@ -674,10 +721,91 @@ export default function ProductPage() {
                 ))}
               </div>
 
+              {/* Trust Badges & Delivery Estimate (Mobile) */}
+              <div className="mt-6 mb-4">
+                {/* Badges */}
+                <div className="flex items-center justify-between border border-white/10 rounded-lg p-3 bg-white/5 backdrop-blur-sm">
+                  <div className="flex flex-col items-center gap-1.5 w-1/3">
+                    <ShieldCheck size={16} className="text-gray-400" />
+                    <span className="text-[9px] text-gray-400 uppercase tracking-widest text-center">Authentic<br />Product</span>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="flex flex-col items-center gap-1.5 w-1/3">
+                    <Truck size={16} className="text-gray-400" />
+                    <span className="text-[9px] text-gray-400 uppercase tracking-widest text-center">Free<br />Shipping</span>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="flex flex-col items-center gap-1.5 w-1/3">
+                    <RotateCcw size={16} className="text-gray-400" />
+                    <span className="text-[9px] text-gray-400 uppercase tracking-widest text-center">Easy<br />Returns</span>
+                  </div>
+                </div>
+
+                {/* Delivery Estimate */}
+                <div className="flex items-center justify-center gap-3 mt-3 text-gray-300 text-sm bg-white/5 p-3 rounded-lg border border-white/5">
+                  <Truck size={16} className="text-gold" />
+                  <span className="text-xs">Order before 5PM — <strong className="text-white font-medium">Ships Tomorrow</strong></span>
+                </div>
+              </div>
+
               <ProductActions product={product} selectedColor={selectedColor} />
             </div>
           </div>
         </div>
+
+        {/* Customer Reviews Section Placeholder */}
+        <section className="border-t border-white/10 py-20 px-6 mt-10">
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
+            <h2 className="font-serif text-3xl md:text-4xl text-white mb-6">Customer Reviews</h2>
+            <div className="flex items-center justify-center gap-2 mb-6">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={28} className="text-gold" strokeWidth={1} />
+              ))}
+            </div>
+            <p className="text-white text-lg mb-2">Be the first to review this product</p>
+            <p className="text-gray-500 text-sm">Verified purchase reviews coming soon</p>
+          </div>
+        </section>
+
+        {/* You May Also Like Section */}
+        {similarProducts.length > 0 && (
+          <section className="bg-[#0a0a0a] border-t border-white/5 py-20 px-6 md:px-12 2xl:px-20">
+            <div className="max-w-7xl mx-auto text-center">
+              <p className="text-gold tracking-[0.3em] text-[10px] md:text-xs uppercase mb-3">
+                You May Also Like
+              </p>
+              <h2 className="font-serif text-3xl md:text-4xl text-white font-light mb-12">
+                Similar Masterpieces
+              </h2>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-left">
+                {similarProducts.map((simProduct) => (
+                  <Link href={`/product/${simProduct.id}`} key={simProduct.id} className="group block border border-white/5 rounded-lg overflow-hidden bg-[#111] hover:border-gold/30 transition-all">
+                    <div className="aspect-[4/5] relative bg-[#1a1a1a]">
+                      {simProduct.imageUrl ? (
+                        <Image
+                          src={simProduct.imageUrl}
+                          alt={simProduct.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-600">No Image</div>
+                      )}
+                    </div>
+                    <div className="p-4 md:p-6 text-center">
+                      <h3 className="font-serif text-white text-sm md:text-base mb-1 group-hover:text-gold transition-colors">{simProduct.name}</h3>
+                      <p className="text-gold text-xs md:text-sm mb-4">Rs. {simProduct.price?.toLocaleString()}</p>
+                      <span className="inline-block border border-white/20 text-white text-[10px] md:text-xs uppercase px-4 py-2 group-hover:bg-gold group-hover:text-black group-hover:border-gold transition-colors">
+                        View
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </>

@@ -42,11 +42,14 @@ body {
 }
 
 .swiper-pagination-bullet {
-  background: var(--color-gold) !important;
+  background: #4b5563 !important;
+  opacity: 1 !important;
+  width: 12px !important;
+  height: 12px !important;
 }
 
 .swiper-pagination-bullet-active {
-  background: var(--color-gold-light) !important;
+  background: var(--color-gold) !important;
 }
 
 /* Product page carousel */
@@ -91,4 +94,25 @@ body {
 
 *::-webkit-scrollbar-thumb:hover {
   background: var(--color-gold-light);
+}
+
+/* Marquee Animation for Announcement Bar */
+@keyframes marquee {
+  0% {
+    transform: translateX(100vw);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+  white-space: nowrap;
+  display: inline-block;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }

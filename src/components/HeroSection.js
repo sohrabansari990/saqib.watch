@@ -2,11 +2,15 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import VideoModal from "@/components/VideoModal";
+import gsap from "gsap";
 
 const INTRO_VIDEO_URL = "/Intro.mp4";
 
 export default function HeroSection() {
     const heroRef = useRef(null);
+    const hourHandRef = useRef(null);
+    const minuteHandRef = useRef(null);
+    const clockCircleRef = useRef(null);
     const [offset, setOffset] = useState(0);
     const [videoOpen, setVideoOpen] = useState(false);
 
@@ -18,6 +22,46 @@ export default function HeroSection() {
         };
         window.addEventListener("scroll", onScroll);
         return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    // GSAP clock animations
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            // Rotate hour hand slowly
+            if (hourHandRef.current) {
+                gsap.to(hourHandRef.current, {
+                    rotation: 360,
+                    svgOrigin: "200 200",
+                    duration: 120,
+                    repeat: -1,
+                    ease: "none",
+                });
+            }
+
+            // Rotate minute hand
+            if (minuteHandRef.current) {
+                gsap.to(minuteHandRef.current, {
+                    rotation: 360,
+                    svgOrigin: "200 200",
+                    duration: 30,
+                    repeat: -1,
+                    ease: "none",
+                });
+            }
+
+            // Pulsing glow on outer clock circle
+            if (clockCircleRef.current) {
+                gsap.to(clockCircleRef.current, {
+                    opacity: 0.3,
+                    duration: 3,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut",
+                });
+            }
+        });
+
+        return () => ctx.revert();
     }, []);
 
     return (
@@ -52,15 +96,16 @@ export default function HeroSection() {
                         viewBox="0 0 400 400"
                         className="w-[500px] h-[500px] md:w-[700px] md:h-[700px]"
                     >
-                        {/* Outer ring */}
+                        {/* Outer ring — pulsing glow */}
                         <circle
+                            ref={clockCircleRef}
                             cx="200"
                             cy="200"
                             r="180"
                             fill="none"
                             stroke="#c9a96e"
                             strokeWidth="0.5"
-                            opacity="0.3"
+                            opacity="0.15"
                         />
                         <circle
                             cx="200"
@@ -100,8 +145,9 @@ export default function HeroSection() {
                                 />
                             );
                         })}
-                        {/* Hour hand */}
+                        {/* Hour hand — GSAP animated */}
                         <line
+                            ref={hourHandRef}
                             x1="200"
                             y1="200"
                             x2="200"
@@ -111,8 +157,9 @@ export default function HeroSection() {
                             strokeLinecap="round"
                             opacity="0.7"
                         />
-                        {/* Minute hand */}
+                        {/* Minute hand — GSAP animated */}
                         <line
+                            ref={minuteHandRef}
                             x1="200"
                             y1="200"
                             x2="260"
@@ -160,23 +207,14 @@ export default function HeroSection() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 z-10" />
 
             {/* Content */}
-            <div className="relative z-20 text-center px-6">
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.8 }}
-                    className="text-gold tracking-[0.4em] text-xs md:text-sm uppercase mb-4"
-                >
-                    EST. 1978
-                </motion.p>
-
+            <div className="relative z-20 text-center px-6 flex flex-col items-center justify-center">
                 <motion.h1
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5, duration: 0.8 }}
                     className="font-serif text-5xl md:text-7xl lg:text-8xl text-white font-light tracking-wide leading-tight"
                 >
-                    Discover
+                    Worn by Champions.
                     <br />
                     <span className="text-gold">Saqib</span> Watches
                 </motion.h1>
@@ -185,9 +223,10 @@ export default function HeroSection() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.8 }}
-                    className="mt-6 text-gray-muted text-sm md:text-base tracking-widest max-w-md mx-auto"
+                    className="mt-6 text-gray-muted text-sm md:text-base tracking-widest max-w-lg mx-10"
+                    
                 >
-                    The Perfect Blend of Luxury, Beauty, and Elegance
+                    Curated by Pakistan&apos;s Physique Champion. Built for everyone who values precision.
                 </motion.p>
 
                 <motion.div
@@ -198,7 +237,7 @@ export default function HeroSection() {
                 >
                     <a
                         href="#arrivals"
-                        className="px-8 py-3 border border-gold text-gold text-sm tracking-[0.2em] uppercase hover:bg-gold hover:text-black transition-all duration-500"
+                        className="px-7 py-3 border border-gold text-gold text-sm tracking-[0.2em] uppercase hover:bg-gold hover:text-black transition-all duration-300"
                     >
                         Explore Collection
                     </a>
