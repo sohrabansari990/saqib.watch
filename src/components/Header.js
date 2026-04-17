@@ -37,14 +37,14 @@ export default function Header() {
                 <div className="w-full flex items-center justify-between pl-6 pr-12 md:pl-12 md:pr-24 2xl:pl-20 2xl:pr-40 py-4">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3 group">
-                        <Image src="/main%20logo.jpeg" alt="Saqib Watches" width={60} height={60} className="w-12 h-12 hover:scale-110 transition-all duration-300" />
+                        <Image src="/main_logo-removebg.png" alt="Saqib Watches" width={60} height={60} className="w-12 h-12 hover:scale-110 transition-all duration-300" />
                         <span className="sr-only">Saqib Watches</span>
                     </Link>
 
                     {/* Desktop Navigation */}
                     <nav className="hidden lg:flex items-center gap-8">
                         {[
-                            { name: "Home", href: "/" },
+                            // { name: "Home", href: "/" },
                             { name: "About Us", href: "/about" },
                             { name: "Product Gallery", href: "/gallery" },
                             { name: "Contact Us", href: "/contact" },
