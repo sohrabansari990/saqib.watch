@@ -2,6 +2,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
+import { FaArrowRight } from "react-icons/fa";
 
 export default function Heritage() {
     const sectionRef = useRef(null);
@@ -42,10 +43,10 @@ export default function Heritage() {
                         const angle = (i * 6 * Math.PI) / 180;
                         const r1 = i % 5 === 0 ? 250 : 245;
                         const r2 = 260;
-                        const x1 = 300 + r1 * Math.sin(angle);
-                        const y1 = 300 - r1 * Math.cos(angle);
-                        const x2 = 300 + r2 * Math.sin(angle);
-                        const y2 = 300 - r2 * Math.cos(angle);
+                        const x1 = (300 + r1 * Math.sin(angle)).toFixed(2);
+                        const y1 = (300 - r1 * Math.cos(angle)).toFixed(2);
+                        const x2 = (300 + r2 * Math.sin(angle)).toFixed(2);
+                        const y2 = (300 - r2 * Math.cos(angle)).toFixed(2);
                         return (
                             <line
                                 key={i}
@@ -104,14 +105,14 @@ export default function Heritage() {
             </div>
 
             {/* Content */}
-            <div className="relative z-10 w-full px-6 md:px-12 2xl:px-20 text-center">
+            <div className="relative z-10 flex justify-center flex-col items-center w-full px-6 md:px-12 2xl:px-20 text-center">
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.8 }}
                     className="text-gold tracking-[0.5em] text-xs uppercase mb-6"
                 >
-                    Heritage
+                    THE BRAND
                 </motion.p>
 
                 <motion.h2
@@ -120,55 +121,62 @@ export default function Heritage() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="font-serif text-5xl md:text-7xl lg:text-8xl text-white font-light mb-6"
                 >
-                    Precision
+                    Precision Meets Passion
                 </motion.h2>
 
                 <motion.div
                     initial={{ opacity: 0, scaleX: 0 }}
                     animate={isInView ? { opacity: 1, scaleX: 1 } : {}}
                     transition={{ duration: 0.8, delay: 0.4 }}
-                    className="w-24 h-px bg-gold mx-auto mb-8"
+                    className="w-24 h-px bg-gold mx-auto mb-12"
                 />
 
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.8, delay: 0.5 }}
-                    className="font-serif text-2xl md:text-3xl text-gold-light mb-4"
-                >
-                    46 years in watch-making
-                </motion.p>
-
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                    className="text-gray-muted text-sm tracking-[0.3em] uppercase mb-12"
-                >
-                    EST. 1978
-                </motion.p>
-
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.8, delay: 0.7 }}
-                    className="text-gray-muted text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-12"
+                    className="text-gray-muted text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-12 "
                 >
-                    With over four decades of experience in watchmaking, Saqib Watches
-                    represents the perfect blend of traditional craftsmanship and modern
-                    design. Every timepiece is a testament to our commitment to precision,
-                    beauty, and elegance.
+                    Saqib Watches was born from a champion's obsession with quality.
+                    Every timepiece in our collection is handpicked for its craftsmanship,
+                    authenticity, and style — curated by someone who understands what
+                    it means to pursue excellence.
                 </motion.p>
 
-                <motion.a
-                    href="/about"
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.8, delay: 0.8 }}
-                    className="inline-block px-10 py-4 border border-gold text-gold text-xs tracking-[0.3em] uppercase hover:bg-gold hover:text-black transition-all duration-500"
                 >
-                    More About Us
-                </motion.a>
+                    <Link 
+                        href="/about" 
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '1.5rem',
+                            padding: '1.25rem 3rem',
+                            background: 'transparent',
+                            border: '1px solid #C9A94C',
+                            color: '#C9A94C',
+                            fontWeight: '700',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.4em',
+                            fontSize: '0.75rem',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            transition: 'all 0.5s cubic-bezier(0.19, 1, 0.22, 1)',
+                            boxShadow: '0 0 20px rgba(201,169,76,0.1)'
+                        }}
+                        className="group hover:bg-gold hover:text-black"
+                    >
+                        <span className="relative z-10 group-hover:text-black">Our Story</span>
+                        <FaArrowRight className="relative z-10 transition-transform duration-500 group-hover:translate-x-2 group-hover:text-black" />
+                        <div 
+                            className="absolute inset-0 bg-gold translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
+                            style={{ zIndex: 0 }}
+                        />
+                    </Link>
+                </motion.div>
 
                 {/* Stats */}
                 <motion.div
@@ -178,16 +186,16 @@ export default function Heritage() {
                     className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8"
                 >
                     {[
-                        { value: "46+", label: "Years" },
-                        { value: "10M+", label: "Customers" },
-                        { value: "50+", label: "Countries" },
-                        { value: "1978", label: "Est." },
+                        { value: "500+", label: "WATCHES SOLD" },
+                        { value: "20+", label: "CITIES DELIVERED" },
+                        { value: "31K+", label: "INSTAGRAM FOLLOWERS" },
+                        { value: "4", label: "COLLECTION CATEGORIES" },
                     ].map((stat) => (
                         <div key={stat.label} className="text-center">
                             <p className="font-serif text-3xl md:text-4xl text-gold mb-1">
                                 {stat.value}
                             </p>
-                            <p className="text-gray-muted text-xs tracking-[0.2em] uppercase">
+                            <p className="text-gray-muted text-[10px] md:text-xs tracking-[0.2em] uppercase">
                                 {stat.label}
                             </p>
                         </div>

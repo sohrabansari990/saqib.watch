@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import VideoModal from "@/components/VideoModal";
 import gsap from "gsap";
+import Link from "next/link";
+import { FaArrowRight, FaPlay } from "react-icons/fa";
 
 const INTRO_VIDEO_URL = "/Intro.mp4";
 
@@ -128,10 +130,10 @@ export default function HeroSection() {
                         {/* Hour markers */}
                         {Array.from({ length: 12 }).map((_, i) => {
                             const angle = (i * 30 * Math.PI) / 180;
-                            const x1 = 200 + 145 * Math.sin(angle);
-                            const y1 = 200 - 145 * Math.cos(angle);
-                            const x2 = 200 + 155 * Math.sin(angle);
-                            const y2 = 200 - 155 * Math.cos(angle);
+                            const x1 = (200 + 145 * Math.sin(angle)).toFixed(2);
+                            const y1 = (200 - 145 * Math.cos(angle)).toFixed(2);
+                            const x2 = (200 + 155 * Math.sin(angle)).toFixed(2);
+                            const y2 = (200 - 155 * Math.cos(angle)).toFixed(2);
                             return (
                                 <line
                                     key={i}
@@ -235,20 +237,59 @@ export default function HeroSection() {
                     transition={{ delay: 1.1, duration: 0.8 }}
                     className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
                 >
-                    <a
-                        href="#arrivals"
-                        className="px-7 py-3 border border-gold text-gold text-sm tracking-[0.2em] uppercase hover:bg-gold hover:text-black transition-all duration-300"
+                    <Link 
+                        href="/gallery" 
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '1.5rem',
+                            padding: '1.25rem 3rem',
+                            background: 'transparent',
+                            border: '1px solid #C9A94C',
+                            color: '#C9A94C',
+                            fontWeight: '700',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.4em',
+                            fontSize: '0.75rem',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            transition: 'all 0.5s cubic-bezier(0.19, 1, 0.22, 1)',
+                            boxShadow: '0 0 20px rgba(201,169,76,0.1)'
+                        }}
+                        className="group hover:bg-gold hover:text-black hidden sm:inline-flex"
                     >
-                        Explore Collection
-                    </a>
+                        <span className="relative z-10 group-hover:text-black">Explore Collection</span>
+                        <FaArrowRight className="relative z-10 transition-transform duration-500 group-hover:translate-x-2 group-hover:text-black" />
+                        <div 
+                            className="absolute inset-0 bg-gold translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
+                            style={{ zIndex: 0 }}
+                        />
+                    </Link>
+
+                    {/* Mobile optimized version of Explore Collection without fixed padding issues */}
+                    {/* <Link 
+                        href="/gallery" 
+                        className="sm:hidden group relative inline-flex items-center gap-4 border border-gold px-8 py-4 text-gold hover:text-black overflow-hidden transition-all duration-500 shadow-[0_0_15px_rgba(201,169,76,0.1)]"
+                    >
+                        <span className="relative z-10 text-xs tracking-[0.3em] uppercase font-bold group-hover:text-black">Explore Collection</span>
+                        <FaArrowRight className="relative z-10 text-[10px] transition-transform duration-500 group-hover:translate-x-1 group-hover:text-black" />
+                        <div 
+                            className="absolute inset-0 bg-gold translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
+                            style={{ zIndex: 0 }}
+                        />
+                    </Link> */}
+
                     <button
-                        onClick={() => setVideoOpen(true)}
-                        className="px-8 py-3 text-gray-muted text-sm tracking-[0.2em] uppercase hover:text-white transition-colors duration-300 flex items-center gap-2 cursor-pointer"
+                        onClick={() => setVideoOpen(true)} style={{ padding: "15px" }}
+                        className="group  relative inline-flex items-center gap-4 px-6 sm:px-8 py-3 sm:py-[1.15rem] bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-gold/30 transition-all duration-500 cursor-pointer"
                     >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z" />
-                        </svg>
-                        Watch Full Video
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-gold text-gold group-hover:bg-gold group-hover:text-black transition-colors duration-500 relative shrink-0">
+                            <FaPlay className="text-[10px] ml-0.5" />
+                            <div className="absolute inset-0 rounded-full border border-gold animate-ping opacity-30 group-hover:opacity-0 transition-opacity duration-300" />
+                        </div>
+                        <span className="text-white text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.3em] uppercase font-semibold">
+                            Full Experience
+                        </span>
                     </button>
                 </motion.div>
             </div>

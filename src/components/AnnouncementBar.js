@@ -20,7 +20,7 @@ export default function AnnouncementBar({ onVisibilityChange }) {
                 <p className="animate-marquee px-8 inline-block pr-12">
                     <span className="font-medium mr-2">🔥 Free Delivery Across All of Pakistan — New Arrivals Just Dropped! </span>
                     <a
-                        href="#arrivals"
+                        href="/gallery"
                         className="font-bold underline underline-offset-2 hover:no-underline transition-all whitespace-nowrap"
                     >
                         Shop Now →

@@ -21,6 +21,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
 }
 
 body {
@@ -28,6 +30,23 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
+}
+
+/* GPU-accelerated animations — prevent layout thrashing */
+.group,
+[class*="transition-transform"],
+[class*="hover:scale"],
+[class*="hover:translate"],
+[class*="animate-"] {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Below-fold sections: skip rendering until visible */
+section:not(:first-of-type) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
 }
 
 ::selection {

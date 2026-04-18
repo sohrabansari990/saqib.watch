@@ -69,6 +69,8 @@ function CategoryCard({ category, index }) {
                             fill
                             className="object-cover object-center"
                             sizes="(max-width: 768px) 100vw, 33vw"
+                            priority={index === 0}
+                            quality={75}
                         />
                         {/* Gradient mask to blend image into the dark card edges */}
                         <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/40 to-transparent" />

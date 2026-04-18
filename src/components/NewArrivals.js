@@ -4,13 +4,14 @@ import { motion, useInView } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import Link from "next/link";
+import Image from "next/image";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 
-function WatchCard({ watch }) {
+function WatchCard({ watch, index }) {
     const hasDiscount =
         watch.originalPrice &&
         watch.price &&
@@ -30,10 +31,14 @@ function WatchCard({ watch }) {
 
                 {watch.imageUrl ? (
                     <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
-                        <img
+                        <Image
                             src={watch.imageUrl}
                             alt={watch.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                            loading={index < 4 ? "eager" : "lazy"}
+                            quality={75}
                         />
                     </div>
                 ) : (
@@ -164,9 +169,9 @@ export default function NewArrivals() {
                             }}
                             style={{ padding: "0vw 0vw clamp(20px, 7vw, 40px) 0vw" }}
                         >
-                            {products.map((watch) => (
+                            {products.map((watch, idx) => (
                                 <SwiperSlide key={watch.id}>
-                                    <WatchCard watch={watch} />
+                                    <WatchCard watch={watch} index={idx} />
                                 </SwiperSlide>
                             ))}
                         </Swiper>
