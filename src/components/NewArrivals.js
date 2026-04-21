@@ -12,6 +12,7 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 
 function WatchCard({ watch, index }) {
+    const [imageLoaded, setImageLoaded] = useState(false);
     const hasDiscount =
         watch.originalPrice &&
         watch.price &&
@@ -19,7 +20,7 @@ function WatchCard({ watch, index }) {
 
     return (
         <Link href={`/product/${watch.id}`} className="group cursor-pointer block h-full">
-            <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[3/4] mb-4 border border-white/5">
+            <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-3/4 mb-4 border border-white/5">
                 {/* SALE badge */}
                 {hasDiscount && (
                     <div className="absolute top-3 left-3 z-20">
@@ -39,6 +40,8 @@ function WatchCard({ watch, index }) {
                             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                             loading={index < 4 ? "eager" : "lazy"}
                             quality={75}
+                            onLoadingComplete={() => setImageLoaded(true)}
+                            onError={() => setImageLoaded(true)}
                         />
                     </div>
                 ) : (
@@ -53,10 +56,27 @@ function WatchCard({ watch, index }) {
                     </div>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                {!imageLoaded && watch.imageUrl && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0b0b0b]/85 backdrop-blur-sm">
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                            className="mb-4 h-10 w-10 rounded-full border border-gold/20 border-t-gold"
+                        />
+                        <div className="h-2 w-24 overflow-hidden rounded-full bg-white/5">
+                            <motion.div
+                                animate={{ x: ["-100%", "200%"] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                className="h-full w-1/2 bg-linear-to-r from-transparent via-gold/40 to-transparent"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                 {/* View Details overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-black/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                     <span className="text-xs tracking-[0.2em] text-gold uppercase">
                         View Details
                     </span>
@@ -149,7 +169,30 @@ export default function NewArrivals() {
                     style={{ padding: "0vw 0vw 2vw 0vw" }}
                 >
                     {loading ? (
-                        <div className="text-center text-white py-10 animate-pulse">Loading arrivals...</div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                            {Array.from({ length: 4 }).map((_, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 16 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.35, delay: index * 0.06 }}
+                                    className="group"
+                                >
+                                    <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-3/4 mb-4 border border-white/5">
+                                        <div className="absolute inset-0 bg-[#0e0e0e]" />
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                                            <motion.div
+                                                animate={{ rotate: 360 }}
+                                                transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
+                                                className="h-10 w-10 rounded-full border border-gold/20 border-t-gold"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="mx-auto h-4 w-4/5 rounded-full bg-white/6" />
+                                    <div className="mx-auto mt-3 h-3 w-1/2 rounded-full bg-white/5" />
+                                </motion.div>
+                            ))}
+                        </div>
                     ) : products.length === 0 ? (
                         <div className="text-center text-gray-500 py-10">No products available yet.</div>
                     ) : (

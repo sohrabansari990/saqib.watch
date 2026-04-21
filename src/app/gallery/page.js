@@ -6,6 +6,8 @@ import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Image from "next/image";
+import CollectionLoader from "@/components/CollectionLoader";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
@@ -123,7 +125,7 @@ function GalleryContent() {
                 {/* Filters and Sorting Row */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-16">
                     {/* Category Filter */}
-                    <div style={{ padding: "0.5vw 0.5vw 0.5vw 0.5vw" }} className="flex cursor-pointer flex-wrap justify-center gap-2 p-1 bg-[#1a1a1a] rounded-full border border-white/5">
+                    <div style={{ padding: "0.5vw 0.5vw 0.5vw 0.5vw" }} className="flex cursor-pointer flex-wrap justify-center gap-2 p-1 bg-dark-card rounded-full border border-white/5">
                         {categories.map((cat) => (
                             <button
                                 key={cat}
@@ -152,7 +154,7 @@ function GalleryContent() {
                         <button
                             onClick={() => setIsSortOpen(!isSortOpen)}
                             style={{ padding: "14px 28px" }}
-                            className="flex items-center justify-between min-w-[200px] bg-[#1a1a1a] border border-white/10 text-white rounded-full focus:outline-none focus:ring-1 focus:ring-gold text-[10px] tracking-[0.2em] uppercase transition-all duration-300 hover:border-gold/50 group shadow-xl"
+                            className="flex items-center justify-between min-w-50 bg-dark-card border border-white/10 text-white rounded-full focus:outline-none focus:ring-1 focus:ring-gold text-[10px] tracking-[0.2em] uppercase transition-all duration-300 hover:border-gold/50 group shadow-xl"
                         >
                             <span className="opacity-60 mr-2">Sort:</span>
                             <span className="font-bold">
@@ -208,7 +210,7 @@ function GalleryContent() {
                 </div>
 
                 {loading ? (
-                    <div className="text-center text-white py-20 animate-pulse">Loading Collection...</div>
+                    <CollectionLoader variant="gallery" />
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {products.length === 0 ? (
@@ -219,13 +221,17 @@ function GalleryContent() {
                             displayedProducts.map((watch) => (
                                 <div key={watch.id} className="group cursor-pointer block relative">
                                     <Link href={`/product/${watch.id}`}>
-                                        <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[3/4] mb-4 border border-white/5">
+                                        <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-3/4 mb-4 border border-white/5">
                                             {watch.imageUrl ? (
                                                 <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
-                                                    <img
+                                                    <Image
                                                         src={watch.imageUrl}
                                                         alt={watch.name}
+                                                        fill
+                                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                                                         className="w-full h-full object-cover"
+                                                        loading="lazy"
+                                                        quality={80}
                                                     />
                                                 </div>
                                             ) : (
@@ -293,7 +299,7 @@ function GalleryContent() {
             </div>
             {/* Quick View Modal */}
             {quickViewProduct && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
+                <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
                     <div className="bg-[#111] border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl relative flex flex-col md:flex-row">
                         <button
                             onClick={() => setQuickViewProduct(null)}
@@ -303,7 +309,7 @@ function GalleryContent() {
                         </button>
                         
                         {/* Modal Image */}
-                        <div className="w-full md:w-1/2 min-h-[300px] md:min-h-[500px] bg-dark relative flex items-center justify-center overflow-hidden">
+                        <div className="w-full md:w-1/2 min-h-75 md:min-h-125 bg-dark relative flex items-center justify-center overflow-hidden">
                              <AnimatePresence mode="wait">
                                 <motion.img
                                     key={selectedQuickViewColor || "default"}
@@ -330,7 +336,7 @@ function GalleryContent() {
                                 </div>
                              )}
                              
-                             <div className="absolute inset-0 bg-gradient-to-t from-dark/60 via-transparent to-transparent pointer-events-none" />
+                             <div className="absolute inset-0 bg-linear-to-t from-dark/60 via-transparent to-transparent pointer-events-none" />
                         </div>
 
                         {/* Modal Content */}
@@ -400,9 +406,11 @@ export default function GalleryPage() {
         <>
             <Header />
             <Suspense fallback={
-                <div className="min-h-screen bg-dark flex items-center justify-center text-gold uppercase tracking-widest animate-pulse">
-                    Initializing Gallery...
-                </div>
+                <main className="pt-24 min-h-screen bg-dark" style={{ padding: "8.5vw 2vw 3vw 2vw" }}>
+                    <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
+                        <CollectionLoader variant="gallery" />
+                    </div>
+                </main>
             }>
                 <GalleryContent />
             </Suspense>

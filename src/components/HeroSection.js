@@ -6,7 +6,7 @@ import gsap from "gsap";
 import Link from "next/link";
 import { FaArrowRight, FaPlay } from "react-icons/fa";
 
-const INTRO_VIDEO_URL = "/Intro.mp4";
+const INTRO_VIDEO_URL = "/saqib_into.MOV";
 
 export default function HeroSection() {
     const heroRef = useRef(null);

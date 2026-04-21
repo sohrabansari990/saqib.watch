@@ -107,7 +107,7 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
         <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="anonymous" />
         {/* Preload intro video for instant playback */}
-        <link rel="preload" href="/Intro.mp4" as="video" type="video/mp4" />
+        <link rel="preload" href="/saqib_into.MOV" as="video" type="video/quicktime" />
         {/* JSON-LD Structured Data for Google Rich Results */}
         <script
           type="application/ld+json"

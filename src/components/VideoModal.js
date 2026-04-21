@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 export default function VideoModal({ isOpen, onClose, videoUrl }) {
     const overlayRef = useRef(null);
     const videoRef = useRef(null);
+    const preloadType = videoUrl?.toLowerCase()?.endsWith(".mov") ? "video/quicktime" : "video/mp4";
 
     // Preload video as soon as component mounts (even before modal opens)
     useEffect(() => {
@@ -15,13 +16,13 @@ export default function VideoModal({ isOpen, onClose, videoUrl }) {
             link.rel = "preload";
             link.as = "video";
             link.href = videoUrl;
-            link.type = "video/mp4";
+            link.type = preloadType;
             // Only add if not already present
             if (!document.querySelector(`link[href="${videoUrl}"]`)) {
                 document.head.appendChild(link);
             }
         }
-    }, [videoUrl]);
+    }, [preloadType, videoUrl]);
 
     // Close on Escape key & lock body scroll
     useEffect(() => {
@@ -67,14 +68,14 @@ export default function VideoModal({ isOpen, onClose, videoUrl }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md cursor-pointer"
+                        className="fixed inset-0 z-9999 flex items-center justify-center bg-black/80 backdrop-blur-md cursor-pointer"
                     >
                         <motion.div
                             initial={{ scale: 0.85, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.85, opacity: 0 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
-                            className="relative w-[90vw] max-w-4xl md:aspect-video aspect-[9/16] max-h-[85vh] bg-black rounded-lg overflow-hidden shadow-2xl cursor-default"
+                            className="relative w-[90vw] max-w-4xl md:aspect-video aspect-9/16 max-h-[85vh] bg-black rounded-lg overflow-hidden shadow-2xl cursor-default"
                         >
                             {/* Close button */}
                             <button

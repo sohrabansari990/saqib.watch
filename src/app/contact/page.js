@@ -40,7 +40,7 @@ export default function ContactPage() {
                         {/* Contact Info */}
                         <div className="space-y-8">
                             <h2 className="font-serif text-3xl text-white">
-                                We're here to help
+                                We&apos;re here to help
                             </h2>
                             <p className="text-gray-muted text-lg leading-relaxed">
                                 Have a question about our timepieces or need assistance with your
@@ -85,7 +85,7 @@ export default function ContactPage() {
                                             Email Us
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            saqib.timepieces@gmail.com
+                                            saqib.watches@gmail.com
                                         </p>
                                     </div>
                                 </div>
@@ -109,7 +109,7 @@ export default function ContactPage() {
                             {/* Map Embed */}
                             <div className="pt-6 w-full">
                                 <h3 className="text-gold uppercase tracking-widest text-sm font-semibold mb-4">FIND OUR STORE</h3>
-                                <div className="border border-[#333] rounded-[8px] overflow-hidden w-full relative h-[300px]">
+                                <div className="border border-[#333] rounded-lg overflow-hidden w-full relative h-75">
                                     <iframe 
                                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.4!2d71.5785!3d34.0151!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38d917b31a79e8b5%3A0x9f0a8ef17ec285c0!2sKhyber%20Bazaar%2C%20Peshawar!5e0!3m2!1sen!2s!4v1"
                                     width="100%" 

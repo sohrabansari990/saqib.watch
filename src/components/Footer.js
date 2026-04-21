@@ -10,6 +10,9 @@ import {
     FaMapMarkerAlt,
     FaArrowRight,
 } from "react-icons/fa";
+import { buildWhatsAppUrl } from "@/lib/order";
+
+const ORDER_WHATSAPP_MESSAGE = "Hi! I'd like to place an order from Saqib Watches. Please share the best available options with me.";
 
 const quickLinks = [
     { label: "Home", href: "/" },
@@ -51,7 +54,7 @@ export default function Footer() {
     return (
         <footer className="relative bg-black border-t border-white/5 overflow-hidden w-full flex flex-col justify-center items-center">
             {/* Top Luxury Accent Line */}
-            <div style={{marginTop: "20px"}} className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[1px] bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+            <div style={{marginTop: "20px"}} className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-linear-to-r from-transparent via-gold/30 to-transparent" />
 
             <div className="w-full px-8 md:px-16 lg:px-24 py-20 lg:py-28 mx-auto" style={{ maxWidth: '1920px',marginLeft: "100px", marginTop: "20px" }}>
                 <div 
@@ -150,7 +153,7 @@ export default function Footer() {
                         
                         <div className="flex flex-col gap-6">
                             {showrooms.map((address, i) => (
-                                <div key={i} className="flex gap-3 items-start max-w-[280px]">
+                                <div key={i} className="flex gap-3 items-start max-w-70">
                                     <FaMapMarkerAlt className="text-gold mt-1 shrink-0" size={14} />
                                     <p className="text-gray-400 text-sm leading-relaxed">
                                         {address}
@@ -161,6 +164,16 @@ export default function Footer() {
 
                         <div className="flex flex-col gap-4 pt-4">
                             <a
+                                href={buildWhatsAppUrl(ORDER_WHATSAPP_MESSAGE)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ padding: "12px 20px" }}
+                                className="group flex items-center gap-3 text-white border border-[#25D366]/25 px-6 py-3 rounded-full hover:border-[#25D366] hover:bg-[#25D366]/5 transition-all duration-300 w-fit"
+                            >
+                                <FaWhatsapp size={18} className="text-[#25D366]" />
+                                <span className="text-sm font-medium tracking-wide">Order on WhatsApp</span>
+                            </a>
+                            {/* <a
                                 href="https://wa.me/+923175177780"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -168,7 +181,7 @@ export default function Footer() {
                             >
                                 <FaWhatsapp size={18} className="text-[#25D366]" />
                                 <span className="text-sm font-medium tracking-wide">Connect on WhatsApp</span>
-                            </a>
+                            </a> */}
                             <a
                                 href="tel:+923175177780"
                                 className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-300 px-6 py-2 w-fit"
@@ -183,7 +196,7 @@ export default function Footer() {
 
             {/* Bottom Bar */}
             <div className="border-t border-white/5 bg-[#050505]">
-                <div className="w-full px-8 md:px-16 lg:px-24 py-8 flex flex-col md:flex-row items-center justify-between gap-4 max-w-[1600px] mx-auto text-center md:text-left">
+                <div className="w-full px-8 md:px-16 lg:px-24 py-8 flex flex-col md:flex-row items-center justify-between gap-4 max-w-400 mx-auto text-center md:text-left">
                     <p className="text-gray-500 text-[10px] md:text-xs tracking-[0.2em] font-light uppercase">
                         &copy; 2026 SAQIB WATCHES. ALL RIGHTS RESERVED.
                     </p>

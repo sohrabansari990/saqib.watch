@@ -5,7 +5,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Minus, Plus, Truck, ArrowLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,17 +13,22 @@ import { toast } from "sonner";
 import { collection, query, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { FaWhatsapp } from "react-icons/fa";
+import {
+    buildWhatsAppOrderMessage,
+    buildWhatsAppUrl,
+    getItemDisplayColor,
+    getItemDisplayImageUrl,
+    getItemVariantLabel,
+} from "@/lib/order";
 
 export default function CartPage() {
     const { cart, removeFromCart, updateQuantity, getCartTotal, mounted: contextMounted } = useCart();
-    const [mounted, setMounted] = useState(false);
     const [coupon, setCoupon] = useState("");
     const [discount, setDiscount] = useState(0);
     const [crossSells, setCrossSells] = useState([]);
 
     useEffect(() => {
-        setMounted(true);
         const fetchCrossSells = async () => {
             try {
                 const q = query(collection(db, "products"), limit(8));
@@ -42,10 +46,23 @@ export default function CartPage() {
     const subtotal = getCartTotal();
     const total = subtotal - discount;
 
+    const handleWhatsAppOrder = () => {
+        const message = buildWhatsAppOrderMessage({
+            title: "🛒 *CART ORDER — Saqib Watches*",
+            items: cart,
+            totalAmount: total,
+            intro: "I'd like to place these pieces via WhatsApp.",
+            outro: "Please confirm availability.",
+            includeCustomer: false,
+        });
+
+        window.open(buildWhatsAppUrl(message), "_blank");
+    };
+
     useEffect(() => {
-        if (!mounted || !contextMounted) return;
+        if (!contextMounted) return;
         localStorage.setItem("total", total);
-    }, [mounted, contextMounted, total]);
+    }, [contextMounted, total]);
 
     const handleApplyCoupon = (e) => {
         e.preventDefault();
@@ -102,7 +119,7 @@ export default function CartPage() {
                             <motion.div 
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="py-32 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-3xl bg-white/[0.02]"
+                                className="py-32 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-3xl bg-white/2"
                             >
                                 <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/5">
                                     <ShoppingBag size={32} className="text-gray-600" />
@@ -125,7 +142,7 @@ export default function CartPage() {
                                             exit={{ opacity: 0, x: 20, scale: 0.95 }}
                                             key={item.cartKey || item.id}
                                             style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "32px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", padding: "32px", borderRadius: "24px", marginBottom: "32px", position: "relative" }}
-                                            className="group hover:bg-white/[0.05] transition-all duration-500 backdrop-blur-sm"
+                                            className="group hover:bg-white/5 transition-all duration-500 backdrop-blur-sm"
                                         >
                                             {/* Image */}
                                             <Link 
@@ -133,15 +150,15 @@ export default function CartPage() {
                                                 style={{ width: "160px", aspectRatio: "3/4", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", position: "relative", flexShrink: 0 }}
                                                 className="group-hover:border-gold/30 transition-all duration-500"
                                             >
-                                                {item.imageUrl ? (
+                                                {getItemDisplayImageUrl(item) ? (
                                                     <Image 
-                                                        src={item.imageUrl} 
+                                                        src={getItemDisplayImageUrl(item)} 
                                                         alt={item.name} 
                                                         fill
                                                         className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full bg-[#151515] flex items-center justify-center text-gray-700">NO IMG</div>
+                                                    <div className="w-full h-full bg-[#151515] flex items-center justify-center text-gray-700" style={{ backgroundColor: getItemDisplayColor(item) || "#151515" }}>NO IMG</div>
                                                 )}
                                             </Link>
 
@@ -149,9 +166,9 @@ export default function CartPage() {
                                             <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "16px" }}>
                                                 <div style={{ display: "flex", flexDirection: "column" }}>
                                                     <h3 className="font-serif text-2xl font-light text-white mb-1 group-hover:text-gold transition-colors duration-300">{item.name}</h3>
-                                                    {item.selectedColor && (
+                                                    {getItemVariantLabel(item) && (
                                                         <span style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#6b7280", fontWeight: "bold" }}>
-                                                            Edition: {item.selectedColor}
+                                                            Edition: {getItemVariantLabel(item)}
                                                         </span>
                                                     )}
                                                 </div>
@@ -197,6 +214,15 @@ export default function CartPage() {
                                     <Link href="/gallery" className="text-gray-500 hover:text-white transition-colors text-[10px] uppercase tracking-widest font-bold underline underline-offset-8">
                                         Continue Curating
                                     </Link>
+
+                                    <button
+                                        onClick={handleWhatsAppOrder}
+                                        style={{ padding: "14px 28px" }}
+                                        className="inline-flex items-center justify-center gap-3 rounded-full border border-[#25D366]/30 px-8 py-4 text-xs font-bold uppercase tracking-[0.25em] text-[#25D366] transition-all duration-300 hover:bg-[#25D366] hover:text-black"
+                                    >
+                                        <FaWhatsapp size={16} />
+                                        Order on WhatsApp
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -254,11 +280,11 @@ export default function CartPage() {
                                     <button className="w-full bg-gold hover:bg-[#d4b55c] text-black h-20 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 hover:scale-[1.02] shadow-[0_20px_40px_rgba(201,169,76,0.2)] group relative overflow-hidden">
                                         <span className="relative z-10 text-xs uppercase tracking-[0.3em] font-black">Secure Checkout</span>
                                         <ChevronRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
-                                        <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                                        <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
                                     </button>
                                 </Link>
 
-                                <div className="mt-8 flex items-start gap-4 p-5 rounded-2xl bg-white/[0.02] border border-white/5">
+                                <div className="mt-8 flex items-start gap-4 p-5 rounded-2xl bg-white/2 border border-white/5">
                                     <div style={{margin: "10px"}} className="mt-5">
                                         <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center">
                                             <Truck size={14} className="text-gold" />
@@ -298,20 +324,20 @@ export default function CartPage() {
                                                 src={product.imageUrl} 
                                                 alt={product.name} 
                                                 fill
-                                                className="object-cover group-hover:scale-110 transition-transform duration-[1500ms] ease-out"
+                                                className="object-cover group-hover:scale-110 transition-transform duration-1500 ease-out"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-600">NO IMAGE</div>
                                         )}
                                         {/* Luxury overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         <div className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                                             <span style={{padding: "10px"}} className="text-[10px] uppercase tracking-[0.3em] font-bold text-white bg-gold/80 backdrop-blur px-6 py-3 rounded-full">View Piece</span>
                                         </div>
                                     </div>
                                     <div className="text-center">
                                         <h4 className="font-serif text-xl font-light text-white mb-2 group-hover:text-gold transition-colors">{product.name}</h4>
-                                        <p className="text-gold text-xs font-bold tracking-[0.1em]">{product.price?.toLocaleString()} PKR</p>
+                                        <p className="text-gold text-xs font-bold tracking-widest">{product.price?.toLocaleString()} PKR</p>
                                     </div>
                                 </Link>
                             ))}

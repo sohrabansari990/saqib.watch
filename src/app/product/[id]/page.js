@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductActions from "@/components/ProductActions";
+import CollectionLoader from "@/components/CollectionLoader";
 import { useFavorites } from "@/context/FavoritesContext";
 import { Heart, ShieldCheck, Truck, RotateCcw, Star } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -24,6 +25,7 @@ export default function ProductPage() {
   const router = useRouter();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [similarLoading, setSimilarLoading] = useState(false);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedThumbIndex, setSelectedThumbIndex] = useState(0);
   const [similarProducts, setSimilarProducts] = useState([]);
@@ -33,22 +35,28 @@ export default function ProductPage() {
   const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchProduct = async () => {
       if (!id) return;
       setLoading(true);
+      setSimilarLoading(false);
+      setSimilarProducts([]);
       try {
         const docRef = doc(db, "products", id);
         const docSnap = await getDoc(docRef);
 
+        if (!isActive) return;
+
         if (docSnap.exists()) {
           const data = { id: docSnap.id, ...docSnap.data() };
           setProduct(data);
-          if (data.variants && data.variants.length > 0) {
-            setSelectedColor(data.variants[0].color);
-          }
+          setSelectedColor(data.variants && data.variants.length > 0 ? data.variants[0].color : null);
+          setLoading(false);
 
           // Fetch Similar Products
           if (data.category) {
+            setSimilarLoading(true);
             try {
               const q = query(
                 collection(db, "products"),
@@ -60,10 +68,17 @@ export default function ProductPage() {
                 .map((d) => ({ id: d.id, ...d.data() }))
                 .filter((d) => d.id !== id)
                 .slice(0, 4);
+              if (!isActive) return;
               setSimilarProducts(simList);
             } catch (err) {
               console.error("Failed to fetch similar:", err);
+            } finally {
+              if (isActive) {
+                setSimilarLoading(false);
+              }
             }
+          } else {
+            setSimilarLoading(false);
           }
         } else {
           router.push("/gallery");
@@ -71,11 +86,17 @@ export default function ProductPage() {
       } catch (error) {
         console.error("Error fetching product:", error);
       } finally {
-        setLoading(false);
+        if (isActive) {
+          setLoading(false);
+          setSimilarLoading(false);
+        }
       }
     };
 
     fetchProduct();
+    return () => {
+      isActive = false;
+    };
   }, [id, router]);
 
   // Build flat list of ALL images across all variants (or general images)
@@ -104,11 +125,11 @@ export default function ProductPage() {
     return (
       <>
         <Header />
-        <main className="pt-24 min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-white/10 border-t-gold rounded-full animate-spin"></div>
-            <div className="text-gold uppercase tracking-[0.3em] text-xs font-bold animate-pulse">Loading Collection</div>
-          </div>
+        <main
+          className="pt-24 min-h-screen bg-[#0a0a0a] flex items-center justify-center"
+          style={{ padding: "6.5rem 2rem 4.5rem" }}
+        >
+          <CollectionLoader variant="product" />
         </main>
         <Footer />
       </>
@@ -849,19 +870,19 @@ export default function ProductPage() {
                     )}
                 </AnimatePresence>
                 <p className="text-gray-500 text-sm uppercase tracking-widest mt-6">Verified purchase reviews coming soon</p>
-                <div className="mt-12 w-full max-w-sm h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent opacity-50"></div>
+                <div className="mt-12 w-full max-w-sm h-px bg-linear-to-r from-transparent via-gold/50 to-transparent opacity-50"></div>
             </div>
         </section>
 
         {/* You May Also Like Section */}
-        {similarProducts.length > 0 && (
+        {(similarLoading || similarProducts.length > 0) && (
           <section 
             className="border-t flex justify-center border-white/5 px-6 md:px-12 2xl:px-20 relative"
             style={{ padding: "3vw 0vw" }}
           >
             <div className="max-w-7xl mx-auto flex flex-col items-center justify-center relative z-10">
                 <p 
-                    className="text-gold tracking-[0.4em] text-xs font-semibold uppercase mb-4 opacity-80 decoration-gold/50 underline-offset-[12px] underline decoration-px"
+                    className="text-gold tracking-[0.4em] text-xs font-semibold uppercase mb-4 opacity-80 decoration-gold/50 underline-offset-12 underline decoration-px"
                     style={{ textAlign: "center", width: "100%" }}
                 >
                   Similar Masterpieces
@@ -874,57 +895,63 @@ export default function ProductPage() {
                 </h2>
               {/* </div> */}
               
-              <div 
-                style={{ 
-                    display: "flex", 
-                    justifyContent: "center", 
-                    flexWrap: "wrap", 
-                    gap: "3rem", 
-                    width: "100%",
-                    marginTop: "2rem"
-                }}
-              >
-                {similarProducts.map((simProduct) => (
-                  <Link 
-                    href={`/product/${simProduct.id}`} 
-                    key={simProduct.id} 
-                    style={{ width: "280px", display: "flex", flexDirection: "column", alignItems: "center" }}
-                    className="group cursor-pointer"
-                  >
-                    <div 
-                        style={{ width: "100%", aspectRatio: "3/4", position: "relative", borderRadius: "1rem", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}
+              {similarLoading ? (
+                <div className="w-full mt-10">
+                  <CollectionLoader variant="similar" />
+                </div>
+              ) : (
+                <div 
+                  style={{ 
+                      display: "flex", 
+                      justifyContent: "center", 
+                      flexWrap: "wrap", 
+                      gap: "3rem", 
+                      width: "100%",
+                      marginTop: "2rem"
+                  }}
+                >
+                  {similarProducts.map((simProduct) => (
+                    <Link 
+                      href={`/product/${simProduct.id}`} 
+                      key={simProduct.id} 
+                      style={{ width: "280px", display: "flex", flexDirection: "column", alignItems: "center" }}
+                      className="group cursor-pointer"
                     >
-                      {simProduct.imageUrl ? (
-                        <Image
-                          src={simProduct.imageUrl}
-                          alt={simProduct.name}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-600 bg-dark">No Image</div>
-                      )}
-                      {/* Gradient overlay mimicking shadcn/21st.dev luxury overlays */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-                      
-                      {/* View Button Overlay inside Image Frame */}
-                      <div className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]">
-                         <span style={{padding: "10px"}} className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-black font-semibold text-xs tracking-widest uppercase px-8 py-3 rounded-full transition-colors shadow-xl">
-                            View Details
-                         </span>
+                      <div 
+                          style={{ width: "100%", aspectRatio: "3/4", position: "relative", borderRadius: "1rem", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}
+                      >
+                        {simProduct.imageUrl ? (
+                          <Image
+                            src={simProduct.imageUrl}
+                            alt={simProduct.name}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-gray-600 bg-dark">No Image</div>
+                        )}
+                        {/* Gradient overlay mimicking shadcn/21st.dev luxury overlays */}
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
+                        
+                        {/* View Button Overlay inside Image Frame */}
+                        <div className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]">
+                           <span style={{padding: "10px"}} className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-black font-semibold text-xs tracking-widest uppercase px-8 py-3 rounded-full transition-colors shadow-xl">
+                              View Details
+                           </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-center w-full">
-                      <h3 className="font-serif text-white text-lg mb-1 group-hover:text-gold transition-colors">{simProduct.name}</h3>
-                      <p className="text-gold text-sm tracking-wide">Rs. {simProduct.price?.toLocaleString()}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                      <div className="text-center w-full">
+                        <h3 className="font-serif text-white text-lg mb-1 group-hover:text-gold transition-colors">{simProduct.name}</h3>
+                        <p className="text-gold text-sm tracking-wide">Rs. {simProduct.price?.toLocaleString()}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
             {/* Ambient luxury glow bounds */}
             <div className="absolute inset-0 pointer-events-none flex justify-center opacity-30">
-                <div className="w-[80vw] h-full bg-[radial-gradient(ellipse_at_center,_rgba(201,169,76,0.15)_0%,_rgba(0,0,0,0)_70%)]" />
+                <div className="w-[80vw] h-full bg-[radial-gradient(ellipse_at_center,rgba(201,169,76,0.15)_0%,rgba(0,0,0,0)_70%)]" />
             </div>
           </section>
         )}

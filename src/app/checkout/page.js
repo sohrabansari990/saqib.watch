@@ -12,6 +12,7 @@ import emailjs from "@emailjs/browser";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaWhatsapp } from "react-icons/fa";
 import { 
     ArrowLeft, 
     ChevronRight, 
@@ -25,6 +26,14 @@ import {
     User,
     CheckCircle2
 } from "lucide-react";
+import {
+    buildWhatsAppOrderMessage,
+    buildWhatsAppUrl,
+    formatOrderItems,
+    getItemDisplayColor,
+    getItemDisplayImageUrl,
+    getItemVariantLabel,
+} from "@/lib/order";
 
 function RadioOption({ id, value, check, onChange, label, description, icon: Icon }) {
     const isChecked = check === value;
@@ -44,7 +53,7 @@ function RadioOption({ id, value, check, onChange, label, description, icon: Ico
                 position: "relative",
                 overflow: "hidden"
             }}
-            className="group hover:bg-white/[0.04] backdrop-blur-sm"
+            className="group hover:bg-white/4 backdrop-blur-sm"
         >
             {isChecked && (
                 <motion.div 
@@ -95,8 +104,8 @@ const cities = [
 
 export default function CheckoutPage() {
     const { cart, getCartTotal, clearCart, mounted: contextMounted } = useCart();
-    const [mounted, setMounted] = useState(false);
     const router = useRouter();
+    const [mounted, setMounted] = useState(false);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -133,8 +142,6 @@ export default function CheckoutPage() {
 
     // Dynamic "Online" fetching simulation/actual fetch
     useEffect(() => {
-        setMounted(true);
-        
         async function fetchOnlineCities() {
             try {
                 // Fetching from a comprehensive Pakistan cities repository on GitHub
@@ -163,6 +170,17 @@ export default function CheckoutPage() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted || !contextMounted) return;
+        if (cart.length === 0 && !isOrdered) {
+            router.push("/cart");
+        }
+    }, [cart.length, contextMounted, isOrdered, mounted, router]);
+
     // Simulate "Online Search" delay for UX
     useEffect(() => {
         if (citySearch) {
@@ -178,7 +196,6 @@ export default function CheckoutPage() {
 
     // Redirect if empty (but not if we just placed an order)
     if (cart.length === 0 && !isOrdered) {
-        if (mounted) router.push("/cart");
         return null;
     }
 
@@ -231,12 +248,8 @@ export default function CheckoutPage() {
                 paymentProofUrl = await uploadToCloudinary(screenshot);
             }
 
-            const itemsList = cart
-                .map((item) => {
-                    const color = item.selectedColor ? ` (${item.selectedColor})` : "";
-                    return `${item.name}${color} x${item.quantity} — Rs.${item.price * item.quantity}`;
-                })
-                .join(" | ");
+            const itemsList = formatOrderItems(cart);
+            const paymentLabel = paymentMethod === "cod" ? "Cash on Delivery" : "EasyPaisa / JazzCash";
 
             await emailjs.send(
                 "service_v3f938c",
@@ -247,7 +260,7 @@ export default function CheckoutPage() {
                     customer_address: formData.address,
                     customer_city: formData.city,
                     customer_province: formData.province,
-                    payment_method: paymentMethod === "cod" ? "Cash on Delivery" : "EasyPaisa / JazzCash",
+                    payment_method: paymentLabel,
                     order_items: itemsList,
                     order_total: `Rs. ${total.toLocaleString()}`,
                     payment_proof_url: paymentProofUrl,
@@ -270,6 +283,20 @@ export default function CheckoutPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleWhatsAppOrder = () => {
+        const message = buildWhatsAppOrderMessage({
+            title: "🛍️ *CHECKOUT ORDER — Saqib Watches*",
+            items: cart,
+            customer: formData,
+            totalAmount: total,
+            paymentMethod: paymentMethod === "cod" ? "Cash on Delivery" : "EasyPaisa / JazzCash",
+            intro: "I'd like to place this order via WhatsApp.",
+            outro: "Please confirm availability.",
+        });
+
+        window.open(buildWhatsAppUrl(message), "_blank");
     };
 
     return (
@@ -597,14 +624,19 @@ export default function CheckoutPage() {
                                         {cart.map((item) => (
                                             <div key={item.cartKey || item.id} style={{ display: "flex", gap: "20px", alignItems: "center" }}>
                                                 <div style={{ width: "72px", aspectRatio: "3/4", background: "rgba(255,255,255,0.03)", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
-                                                    {item.imageUrl ? (
-                                                        <img src={item.imageUrl} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                    {getItemDisplayImageUrl(item) ? (
+                                                        <img src={getItemDisplayImageUrl(item)} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                                     ) : (
-                                                        <div style={{ width: "100%", height: "100%", backgroundColor: item.color }} />
+                                                        <div style={{ width: "100%", height: "100%", backgroundColor: getItemDisplayColor(item) || item.color || "#151515" }} />
                                                     )}
                                                 </div>
                                                 <div style={{ flex: 1 }}>
                                                     <p style={{ fontSize: "14px", fontWeight: "500", color: "white", marginBottom: "4px" }} className="line-clamp-1">{item.name}</p>
+                                                    {getItemVariantLabel(item) && (
+                                                        <p style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#6b7280", fontWeight: "bold", marginBottom: "6px" }}>
+                                                            Edition: {getItemVariantLabel(item)}
+                                                        </p>
+                                                    )}
                                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                                                         <p style={{ fontSize: "11px", color: "#6b7280" }}>Qty: {item.quantity}</p>
                                                         <p style={{ fontSize: "13px", color: "#C9A84C", fontWeight: "600" }}>{item.price.toLocaleString()} PKR</p>
@@ -636,6 +668,35 @@ export default function CheckoutPage() {
                                             <span style={{ fontSize: "10px", color: "#6b7280", marginLeft: "8px", textTransform: "uppercase", letterSpacing: "0.1em" }}>PKR Currency</span>
                                         </div>
                                     </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleWhatsAppOrder}
+                                        style={{
+                                            width: "100%",
+                                            height: "64px",
+                                            padding: "0 28px",
+                                            background: "rgba(37, 211, 102, 0.08)",
+                                            color: "#25D366",
+                                            borderRadius: "18px",
+                                            fontSize: "13px",
+                                            fontWeight: "bold",
+                                            textTransform: "uppercase",
+                                            letterSpacing: "0.2em",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            gap: "12px",
+                                            transition: "all 0.3s",
+                                            border: "1px solid rgba(37, 211, 102, 0.25)",
+                                            cursor: "pointer",
+                                            marginBottom: "16px",
+                                        }}
+                                        className="hover:bg-[#25D366] hover:text-black"
+                                    >
+                                        <FaWhatsapp size={18} />
+                                        Order on WhatsApp
+                                    </button>
 
                                     <button
                                         onClick={handleSubmit}

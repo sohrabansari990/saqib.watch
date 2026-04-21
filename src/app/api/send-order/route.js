@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { buildWhatsAppOrderMessage } from "@/lib/order";
 
 export async function POST(request) {
   try {
@@ -13,28 +14,21 @@ export async function POST(request) {
       return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
     }
 
-    const itemsList = items
-      .map((item) => {
-        const colorText = item.color ? ` (${item.color})` : "";
-        return `• ${item.name}${colorText} x${item.quantity} — Rs. ${item.price * item.quantity}`;
-      })
-      .join("\n");
-
     const paymentLabel =
       paymentMethod === "cod" ? "💵 Cash on Delivery" : "📱 EasyPaisa / JazzCash";
 
-    const message = `🛒 *NEW ORDER — Saqib Watches*
-━━━━━━━━━━━━━━━━━━━━
-👤 *Customer:* ${customerName}
-📞 *WhatsApp:* ${customerWhatsApp}
-📍 *Address:* ${address}, ${city}
-━━━━━━━━━━━━━━━━━━━━
-🕰️ *Items Ordered:*
-${itemsList}
-━━━━━━━━━━━━━━━━━━━━
-💰 *Total:* Rs. ${totalAmount}
-💳 *Payment:* ${paymentLabel}
-━━━━━━━━━━━━━━━━━━━━`;
+    const message = buildWhatsAppOrderMessage({
+      title: "🛒 *NEW ORDER — Saqib Watches*",
+      items,
+      customer: {
+        name: customerName,
+        whatsapp: customerWhatsApp,
+        address,
+        city,
+      },
+      totalAmount,
+      paymentMethod: paymentLabel,
+    });
 
     const response = await fetch("https://api.fonnte.com/send", {
       method: "POST",
