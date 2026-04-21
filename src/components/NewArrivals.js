@@ -5,21 +5,35 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
+import { cacheProducts, getCachedCatalog, getNewestProducts } from "@/lib/productCache";
 
 function WatchCard({ watch, index }) {
     const [imageLoaded, setImageLoaded] = useState(false);
+    const router = useRouter();
     const hasDiscount =
         watch.originalPrice &&
         watch.price &&
         Number(watch.originalPrice) > Number(watch.price);
 
+    const productHref = `/product/${watch.id}`;
+    const prefetchProduct = () => {
+        router.prefetch(productHref);
+    };
+
     return (
-        <Link href={`/product/${watch.id}`} className="group cursor-pointer block h-full">
+        <Link
+            href={productHref}
+            prefetch
+            onMouseEnter={prefetchProduct}
+            onTouchStart={prefetchProduct}
+            className="group cursor-pointer block h-full"
+        >
             <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-3/4 mb-4 border border-white/5">
                 {/* SALE badge */}
                 {hasDiscount && (
@@ -108,24 +122,40 @@ export default function NewArrivals() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const cachedCatalog = getCachedCatalog();
+        if (!cachedCatalog?.products?.length) {
+            return;
+        }
+
+        setProducts(getNewestProducts(cachedCatalog.products, 12));
+        setLoading(false);
+    }, []);
+
+    useEffect(() => {
         let isMounted = true;
         const load = async () => {
             if (!db) {
                 setLoading(false);
                 return;
             }
-            setLoading(true);
+            if (!getCachedCatalog()?.products?.length) {
+                setLoading(true);
+            }
             try {
                 let q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(12));
                 try {
                     const snap = await getDocs(q);
                     if (!isMounted) return;
-                    setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+                    const nextProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    setProducts(nextProducts);
+                    cacheProducts(nextProducts);
                 } catch (e) {
                     // Fallback if createdAt missing
                     const snap = await getDocs(query(collection(db, "products"), orderBy("name"), limit(12)));
                     if (!isMounted) return;
-                    setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+                    const nextProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    setProducts(nextProducts);
+                    cacheProducts(nextProducts);
                 }
             } catch (err) {
                 console.error("New arrivals load failed", err);

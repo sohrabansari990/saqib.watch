@@ -32,12 +32,10 @@ body {
   overflow-x: hidden;
 }
 
-/* GPU-accelerated animations — prevent layout thrashing */
-.group,
-[class*="transition-transform"],
-[class*="hover:scale"],
-[class*="hover:translate"],
-[class*="animate-"] {
+/* Keep compositing focused on the elements that animate continuously */
+.animate-marquee,
+.swiper-wrapper,
+.swiper-slide {
   will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -81,6 +79,7 @@ section:not(:first-of-type) {
   border-radius: 50%;
   backdrop-filter: blur(4px);
 }
+
 .product-carousel .swiper-button-next::after,
 .product-carousel .swiper-button-prev::after {
   font-size: 16px;
@@ -115,11 +114,12 @@ section:not(:first-of-type) {
   background: var(--color-gold-light);
 }
 
-/* Marquee Animation for Announcement Bar */
+/* Marquee animation for announcement bar */
 @keyframes marquee {
   0% {
     transform: translateX(100vw);
   }
+
   100% {
     transform: translateX(-100%);
   }
@@ -129,7 +129,6 @@ section:not(:first-of-type) {
   animation: marquee 20s linear infinite;
   white-space: nowrap;
   display: inline-block;
-  will-change: transform;
 }
 
 .animate-marquee:hover {

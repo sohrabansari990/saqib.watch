@@ -4,15 +4,17 @@ import { motion } from "framer-motion";
 import VideoModal from "@/components/VideoModal";
 import gsap from "gsap";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FaArrowRight, FaPlay } from "react-icons/fa";
 
-const INTRO_VIDEO_URL = "/saqib_into.MOV";
+const INTRO_VIDEO_URL = "/saqib_into.mp4";
 
 export default function HeroSection() {
     const heroRef = useRef(null);
     const hourHandRef = useRef(null);
     const minuteHandRef = useRef(null);
     const clockCircleRef = useRef(null);
+    const router = useRouter();
     const [offset, setOffset] = useState(0);
     const [videoOpen, setVideoOpen] = useState(false);
 
@@ -25,6 +27,10 @@ export default function HeroSection() {
         window.addEventListener("scroll", onScroll);
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
+
+    useEffect(() => {
+        router.prefetch("/gallery");
+    }, [router]);
 
     // GSAP clock animations
     useEffect(() => {

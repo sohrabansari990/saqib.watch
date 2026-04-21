@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, Suspense, useMemo } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -14,8 +14,7 @@ import { useFavorites } from "@/context/FavoritesContext";
 import { useCart } from "@/context/CartContext";
 import { Heart, X, Check, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const DEFAULT_CATEGORIES = ["all", "men", "women", "couples"];
+import { cacheCatalog, getCachedCatalog, getCategoriesFromProducts, sortProductsByNewest } from "@/lib/productCache";
 
 function GalleryContent() {
     const [products, setProducts] = useState([]);
@@ -26,39 +25,33 @@ function GalleryContent() {
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+    const [categories, setCategories] = useState(["all", "men", "women", "couples"]);
     const searchParams = useSearchParams();
     const router = useRouter();
     const hasSyncedQuery = useRef(false);
     const { toggleFavorite, isFavorite } = useFavorites();
     const { addToCart } = useCart();
+    const prefetchProduct = (productId) => {
+        router.prefetch(`/product/${productId}`);
+    };
 
-    // Fetch dynamic categories from all products
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const snapshot = await getDocs(collection(db, "products"));
-                const cats = new Set();
-                snapshot.docs.forEach((d) => {
-                    const cat = d.data().category;
-                    if (cat) cats.add(cat.toLowerCase());
-                });
-                const dynamicCats = ["all", ...([...cats].sort())];
-                setCategories(dynamicCats);
-            } catch (err) {
-                console.error("Error fetching categories:", err);
-            }
-        };
-        fetchCategories();
-    }, []);
-
-    // Sync initial filter from URL query
     useEffect(() => {
         const qp = searchParams.get("category");
         if (qp) {
             setFilter(qp);
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        const cachedCatalog = getCachedCatalog();
+        if (!cachedCatalog?.products?.length) {
+            return;
+        }
+
+        setProducts(cachedCatalog.products);
+        setCategories(getCategoriesFromProducts(cachedCatalog.products));
+        setLoading(false);
+    }, []);
 
     // Keep URL in sync with current filter (skip first sync until initial read)
     useEffect(() => {
@@ -72,42 +65,58 @@ function GalleryContent() {
     }, [filter, router]);
 
     useEffect(() => {
+        let isActive = true;
+
         const fetchProducts = async () => {
-            setLoading(true);
+            if (!getCachedCatalog()?.products?.length) {
+                setLoading(true);
+            }
+
             try {
-                let q = collection(db, "products");
-                if (filter !== "all") {
-                    q = query(collection(db, "products"), where("category", "==", filter));
+                const querySnapshot = await getDocs(collection(db, "products"));
+                if (!isActive) {
+                    return;
                 }
 
-                const querySnapshot = await getDocs(q);
-                const productsList = querySnapshot.docs.map(doc => ({
+                const productsList = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
                 }));
+
                 setProducts(productsList);
+                setCategories(getCategoriesFromProducts(productsList));
+                cacheCatalog(productsList);
             } catch (error) {
                 console.error("Error fetching products:", error);
             } finally {
-                setLoading(false);
+                if (isActive) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchProducts();
-    }, [filter]);
+
+        return () => {
+            isActive = false;
+        };
+    }, []);
 
     // Apply sorting in memo
     const displayedProducts = useMemo(() => {
-        let sorted = [...products];
+        let sorted = filter === "all"
+            ? [...products]
+            : products.filter((product) => product.category === filter);
+
         if (sortBy === "price_asc") {
             sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
         } else if (sortBy === "price_desc") {
             sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
         } else if (sortBy === "newest") {
-            sorted.reverse(); // Simplified newest logic tracking default insert order inversed
+            sorted = sortProductsByNewest(sorted);
         }
         return sorted;
-    }, [products, sortBy]);
+    }, [filter, products, sortBy]);
 
     return (
         <main className="pt-24 min-h-screen bg-dark" style={{ padding: "8.5vw 2vw 3vw 2vw" }}>
@@ -213,14 +222,19 @@ function GalleryContent() {
                     <CollectionLoader variant="gallery" />
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {products.length === 0 ? (
+                        {displayedProducts.length === 0 ? (
                             <div className="col-span-full text-center text-gray-500 py-20">
                                 No products found in this category.
                             </div>
                         ) : (
                             displayedProducts.map((watch) => (
                                 <div key={watch.id} className="group cursor-pointer block relative">
-                                    <Link href={`/product/${watch.id}`}>
+                                    <Link
+                                        href={`/product/${watch.id}`}
+                                        prefetch
+                                        onMouseEnter={() => prefetchProduct(watch.id)}
+                                        onTouchStart={() => prefetchProduct(watch.id)}
+                                    >
                                         <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-3/4 mb-4 border border-white/5">
                                             {watch.imageUrl ? (
                                                 <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
@@ -283,7 +297,12 @@ function GalleryContent() {
                                         <Heart size={18} fill={isFavorite(watch.id) ? "currentColor" : "none"} />
                                     </button>
 
-                                    <Link href={`/product/${watch.id}`}>
+                                    <Link
+                                        href={`/product/${watch.id}`}
+                                        prefetch
+                                        onMouseEnter={() => prefetchProduct(watch.id)}
+                                        onTouchStart={() => prefetchProduct(watch.id)}
+                                    >
                                         <h3 className="font-serif text-lg text-center text-white group-hover:text-gold transition-colors duration-300">
                                             {watch.name}
                                         </h3>

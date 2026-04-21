@@ -1,4 +1,6 @@
 import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { Toaster } from "sonner";
@@ -106,8 +108,6 @@ export default function RootLayout({ children }) {
         {/* DNS prefetch for image CDNs */}
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
         <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="anonymous" />
-        {/* Preload intro video for instant playback */}
-        <link rel="preload" href="/saqib_into.MOV" as="video" type="video/quicktime" />
         {/* JSON-LD Structured Data for Google Rich Results */}
         <script
           type="application/ld+json"
@@ -173,6 +173,8 @@ export default function RootLayout({ children }) {
             <Toaster position="top-center" richColors theme="dark" />
           </CartProvider>
         </AuthProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

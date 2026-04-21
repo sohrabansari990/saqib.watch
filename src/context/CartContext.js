@@ -5,20 +5,29 @@ import { toast } from "sonner";
 
 const CartContext = createContext();
 
+function readStoredCart() {
+    if (typeof window === "undefined") {
+        return [];
+    }
+
+    const savedCart = localStorage.getItem("sveston_cart");
+    if (!savedCart) {
+        return [];
+    }
+
+    try {
+        return JSON.parse(savedCart);
+    } catch (e) {
+        console.error("Failed to parse cart", e);
+        return [];
+    }
+}
+
 export function CartProvider({ children }) {
-    const [cart, setCart] = useState([]);
+    const [cart, setCart] = useState(readStoredCart);
     const [mounted, setMounted] = useState(false);
 
-    // Load cart from localStorage on mount
     useEffect(() => {
-        const savedCart = localStorage.getItem("sveston_cart");
-        if (savedCart) {
-            try {
-                setCart(JSON.parse(savedCart));
-            } catch (e) {
-                console.error("Failed to parse cart", e);
-            }
-        }
         setMounted(true);
     }, []);
 

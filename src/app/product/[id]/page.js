@@ -19,6 +19,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Image from "next/image";
+import { cacheProducts, getCachedCatalog, getCachedProduct, getSimilarProducts } from "@/lib/productCache";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -39,9 +40,30 @@ export default function ProductPage() {
 
     const fetchProduct = async () => {
       if (!id) return;
-      setLoading(true);
+      const cachedCatalog = getCachedCatalog();
+      const cachedProduct = getCachedProduct(id);
+
+      if (cachedProduct) {
+        setProduct(cachedProduct);
+        setSelectedColor(cachedProduct.variants && cachedProduct.variants.length > 0 ? cachedProduct.variants[0].color : null);
+        setLoading(false);
+
+        if (cachedCatalog?.products?.length) {
+          setSimilarProducts(getSimilarProducts(cachedCatalog.products, cachedProduct, 4));
+        }
+      } else {
+        setProduct(null);
+        setSelectedColor(null);
+        setLoading(true);
+        setSimilarProducts([]);
+      }
+
       setSimilarLoading(false);
-      setSimilarProducts([]);
+
+      if (cachedProduct && cachedCatalog?.products?.length && !cachedCatalog.isStale) {
+        return;
+      }
+
       try {
         const docRef = doc(db, "products", id);
         const docSnap = await getDoc(docRef);
@@ -52,10 +74,12 @@ export default function ProductPage() {
           const data = { id: docSnap.id, ...docSnap.data() };
           setProduct(data);
           setSelectedColor(data.variants && data.variants.length > 0 ? data.variants[0].color : null);
+          cacheProducts([data]);
           setLoading(false);
 
-          // Fetch Similar Products
-          if (data.category) {
+          if (cachedCatalog?.products?.length) {
+            setSimilarProducts(getSimilarProducts(cachedCatalog.products, data, 4));
+          } else if (data.category) {
             setSimilarLoading(true);
             try {
               const q = query(
@@ -70,6 +94,7 @@ export default function ProductPage() {
                 .slice(0, 4);
               if (!isActive) return;
               setSimilarProducts(simList);
+              cacheProducts(simList);
             } catch (err) {
               console.error("Failed to fetch similar:", err);
             } finally {

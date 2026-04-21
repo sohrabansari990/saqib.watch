@@ -5,33 +5,47 @@ import { toast } from "sonner";
 
 const FavoritesContext = createContext();
 
+function readStoredFavorites() {
+    if (typeof window === "undefined") {
+        return [];
+    }
+
+    const NEW_KEY = "saqib_favorites";
+    const OLD_KEY = "lahza_favorites";
+
+    try {
+        const savedNew = localStorage.getItem(NEW_KEY);
+        if (savedNew) {
+            return JSON.parse(savedNew);
+        }
+
+        const savedOld = localStorage.getItem(OLD_KEY);
+        return savedOld ? JSON.parse(savedOld) : [];
+    } catch (e) {
+        console.error("Failed to load favorites from localStorage", e);
+        return [];
+    }
+}
+
 export function FavoritesProvider({ children }) {
-    const [favorites, setFavorites] = useState([]);
+    const [favorites, setFavorites] = useState(readStoredFavorites);
     const [mounted, setMounted] = useState(false);
 
-    // LocalStorage keys (migrate from old key if present)
     useEffect(() => {
         const NEW_KEY = "saqib_favorites";
         const OLD_KEY = "lahza_favorites";
 
         try {
-            const savedNew = localStorage.getItem(NEW_KEY);
-            if (savedNew) {
-                setFavorites(JSON.parse(savedNew));
-            } else {
-                const savedOld = localStorage.getItem(OLD_KEY);
-                if (savedOld) {
-                    const parsed = JSON.parse(savedOld);
-                    setFavorites(parsed);
-                    // Migrate to new key and remove old
-                    localStorage.setItem(NEW_KEY, JSON.stringify(parsed));
-                    localStorage.removeItem(OLD_KEY);
-                }
+            if (!localStorage.getItem(NEW_KEY) && localStorage.getItem(OLD_KEY)) {
+                localStorage.setItem(NEW_KEY, JSON.stringify(favorites));
             }
+            localStorage.removeItem(OLD_KEY);
         } catch (e) {
-            console.error("Failed to load favorites from localStorage", e);
+            console.error("Failed to migrate favorites storage", e);
         }
+    }, [favorites]);
 
+    useEffect(() => {
         setMounted(true);
     }, []);
 

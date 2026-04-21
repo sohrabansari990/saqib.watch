@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const categories = [
     {
@@ -40,6 +41,11 @@ const categories = [
 function CategoryCard({ category, index }) {
     const cardRef = useRef(null);
     const isInView = useInView(cardRef, { once: true, margin: "-50px" });
+    const router = useRouter();
+    const href = `/gallery?category=${category.id}`;
+    const prefetchCategory = () => {
+        router.prefetch(href);
+    };
 
     return (
         <motion.div
@@ -49,7 +55,13 @@ function CategoryCard({ category, index }) {
             transition={{ duration: 0.8, delay: index * 0.2 }}
             className="group relative overflow-hidden rounded-2xl cursor-pointer border border-white/5 hover:border-gold/60 transition-all duration-500 ease-in-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-gold/10"
         >
-            <Link href={`/gallery?category=${category.id}`} className="block h-full">
+            <Link
+                href={href}
+                prefetch
+                onMouseEnter={prefetchCategory}
+                onTouchStart={prefetchCategory}
+                className="block h-full"
+            >
                 <div
                     className={`relative bg-gradient-to-b ${category.gradient} flex flex-col justify-end p-8 md:p-10 transition-all duration-500 ease-in-out`}
                     style={{ minHeight: "500px" }}
