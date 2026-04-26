@@ -31,28 +31,23 @@ export const metadata = {
   description:
     "Shop Saqib Watches — Pakistan's trusted online luxury watch store. 500+ premium watches for men, women & couples. Handpicked by champion Saqib Khan. Free delivery across Pakistan. COD available.",
   keywords: [
-    "Saqib Watches",
-    "Saqib Khan watches",
-    "luxury watches Pakistan",
-    "buy watches online Pakistan",
-    "original watches Pakistan",
-    "men watches online",
-    "women watches Pakistan",
-    "couple watches set",
-    "affordable luxury watches",
-    "wrist watches Pakistan",
-    "online watch store Pakistan",
-    "Peshawar watches",
-    "branded watches Pakistan",
-    "Tissot Pakistan",
-    "Cartier Pakistan",
-    "watch collection Pakistan",
-    "best watches in Pakistan",
-    "watches for gift Pakistan",
-    "COD watches Pakistan",
-    "premium watches online",
+    "Saqib Watches", "Saqib Khan watches", "Saqib Khan Peshawar",
+    "saqib champ watches", "saqib bodybuilder watches", 
+    "saqib champion watch", "saqib physique champion",
+    "saqib khan champ watch", "luxury watches Pakistan",
+    "buy watches online Pakistan", "original watches Pakistan",
+    "men watches online Pakistan", "women watches Pakistan",
+    "couple watches Pakistan", "affordable luxury watches",
+    "wrist watches Pakistan", "online watch store Pakistan",
+    "Peshawar watches", "Khyber Bazar watches",
+    "branded watches Pakistan", "Tissot Pakistan",
+    "Cartier Pakistan", "watch collection Pakistan",
+    "best watches Pakistan", "watches gift Pakistan",
+    "COD watches Pakistan", "cash on delivery watches",
+    "free delivery watches Pakistan", "saqibkhan.champ",
+    "saqibkhan0489 watches"
   ],
-  authors: [{ name: "Saqib Watches", url: "https://saqib-watches.vercel.app" }],
+  authors: [{ name: "Saqib Watches", url: "https://saqib.watch" }],
   creator: "Saqib Watches",
   publisher: "Saqib Watches",
   robots: {
@@ -64,8 +59,7 @@ export const metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   alternates: {
-    canonical: "https://saqib-watches.vercel.app",
-    // When domain is ready: canonical: "https://saqib.watch",
+    canonical: "https://saqib.watch",
   },
   openGraph: {
     type: "website",
@@ -74,7 +68,7 @@ export const metadata = {
     title: "Saqib Watches — Premium Luxury Watches in Pakistan",
     description:
       "500+ handpicked luxury watches for men, women & couples. Curated by Pakistan's Physique Champion. Free delivery. COD available.",
-    url: "https://saqib-watches.vercel.app",
+    url: "https://saqib.watch",
     images: [
       {
         url: "/og-image.jpg",
@@ -91,8 +85,7 @@ export const metadata = {
       "500+ handpicked luxury watches. Curated by champion Saqib Khan. Free delivery across Pakistan.",
     images: ["/og-image.jpg"],
   },
-  // TODO: Change to https://saqib.watch when domain is ready
-  metadataBase: new URL("https://saqib-watches.vercel.app"),
+  metadataBase: new URL("https://saqib.watch"),
   verification: {
     google: "40VoPoHnY0Ojwsi",
   },
@@ -117,12 +110,12 @@ export default function RootLayout({ children }) {
               "@graph": [
                 {
                   "@type": "Organization",
-                  "@id": "https://saqib-watches.vercel.app/#organization",
+                  "@id": "https://saqib.watch/#organization",
                   name: "Saqib Watches",
-                  url: "https://saqib-watches.vercel.app",
+                  url: "https://saqib.watch",
                   logo: {
                     "@type": "ImageObject",
-                    url: "https://saqib-watches.vercel.app/main_logo-removebg.png",
+                    url: "https://saqib.watch/main_logo-removebg.png",
                   },
                   description:
                     "Pakistan's trusted online luxury watch store. 500+ premium watches for men, women & couples.",
@@ -147,18 +140,80 @@ export default function RootLayout({ children }) {
                 },
                 {
                   "@type": "WebSite",
-                  "@id": "https://saqib-watches.vercel.app/#website",
-                  url: "https://saqib-watches.vercel.app",
+                  "@id": "https://saqib.watch/#website",
+                  url: "https://saqib.watch",
                   name: "Saqib Watches",
                   publisher: {
-                    "@id": "https://saqib-watches.vercel.app/#organization",
+                    "@id": "https://saqib.watch/#organization",
                   },
                   potentialAction: {
                     "@type": "SearchAction",
-                    target: "https://saqib-watches.vercel.app/gallery?q={search_term_string}",
+                    target: "https://saqib.watch/gallery?q={search_term_string}",
                     "query-input": "required name=search_term_string",
                   },
                 },
+                {
+                  "@type": "Person",
+                  "@id": "https://saqib.watch/#saqibkhan",
+                  name: "Saqib Khan",
+                  alternateName: ["Saqib Champ", "saqibkhan.champ", "Saqib Khan Champion"],
+                  description: "Pakistani National Physique Champion, Personal Trainer, and Founder of Saqib Watches",
+                  jobTitle: ["Physique Champion", "Personal Trainer", "Entrepreneur"],
+                  address: {
+                    "@type": "PostalAddress",
+                    addressLocality: "Peshawar",
+                    addressCountry: "PK"
+                  },
+                  sameAs: [
+                    "https://www.instagram.com/saqibkhan.champ/",
+                    "https://www.tiktok.com/@saqibkhan0489",
+                    "https://www.facebook.com/saqib.khan.723464/"
+                  ],
+                  url: "https://saqib.watch/about",
+                  worksFor: {
+                    "@id": "https://saqib.watch/#organization"
+                  }
+                },
+                {
+                  "@type": "LocalBusiness",
+                  "@id": "https://saqib.watch/#localbusiness",
+                  name: "Saqib Watches",
+                  description: "Premium luxury watches store in Peshawar, Pakistan. Curated by National Physique Champion Saqib Khan.",
+                  url: "https://saqib.watch",
+                  telephone: "+92-334-5062546",
+                  priceRange: "PKR 3000 - PKR 20000",
+                  currenciesAccepted: "PKR",
+                  paymentAccepted: "Cash, EasyPaisa, JazzCash",
+                  openingHoursSpecification: [
+                    {
+                      "@type": "OpeningHoursSpecification",
+                      dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+                      opens: "10:00",
+                      closes: "21:00"
+                    },
+                    {
+                      "@type": "OpeningHoursSpecification",
+                      dayOfWeek: "Sunday",
+                      opens: "12:00",
+                      closes: "18:00"
+                    }
+                  ],
+                  address: {
+                    "@type": "PostalAddress",
+                    streetAddress: "01, Saddar Bazar",
+                    addressLocality: "Peshawar",
+                    addressRegion: "Saddar Rd, Peshawar Cantonment, Peshawar, Pakistan",
+                    addressCountry: "PK"
+                  },
+                  geo: {
+                    "@type": "GeoCoordinates",
+                    latitude: 34.0151,
+                    longitude: 71.5785
+                  },
+                  founder: {
+                    "@id": "https://saqib.watch/#saqibkhan"
+                  }
+                }
               ],
             }),
           }}
