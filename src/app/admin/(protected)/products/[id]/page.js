@@ -47,8 +47,10 @@ export default function EditProductPage({ params }) {
         model: "",
         category: "",
         price: "",
+        discount: "",
         description: "",
         mode: "new",
+        soldOut: false,
         imageUrl: "",
     });
 
@@ -76,8 +78,10 @@ export default function EditProductPage({ params }) {
                         model: data.model || "",
                         category: data.category || "",
                         price: data.price?.toString() || "",
+                        discount: data.discount?.toString() || "",
                         description: data.description || "",
                         mode: data.mode || "new",
+                        soldOut: data.soldOut || false,
                         imageUrl: data.imageUrl || "",
                     });
 
@@ -277,8 +281,10 @@ export default function EditProductPage({ params }) {
                 model: formData.model || "",
                 category,
                 price: parseFloat(formData.price),
+                discount: formData.discount ? parseFloat(formData.discount) : 0,
                 description: formData.description,
                 mode: formData.mode,
+                soldOut: formData.soldOut,
                 imageUrl,
                 images,
                 variants: variantsData.length > 0 ? variantsData : [],
@@ -326,6 +332,10 @@ export default function EditProductPage({ params }) {
                                 <Input id="price" type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
                             </div>
                             <div className="space-y-2">
+                                <Label htmlFor="discount">Discount (%)</Label>
+                                <Input id="discount" type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} placeholder="e.g. 20" min="0" max="100" />
+                            </div>
+                            <div className="space-y-2">
                                 <Label htmlFor="category">Category *</Label>
                                 {!showCustomCategory ? (
                                     <div className="space-y-2">
@@ -357,6 +367,18 @@ export default function EditProductPage({ params }) {
                                     </select>
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
                                 </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="soldOut" className="flex items-center gap-2 cursor-pointer h-full pt-6">
+                                    <input
+                                        type="checkbox"
+                                        id="soldOut"
+                                        checked={formData.soldOut}
+                                        onChange={(e) => setFormData({ ...formData, soldOut: e.target.checked })}
+                                        className="w-4 h-4 text-gold border-white/10 rounded focus:ring-gold bg-dark-card"
+                                    />
+                                    Mark as Sold Out
+                                </Label>
                             </div>
                             <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="description">Description</Label>

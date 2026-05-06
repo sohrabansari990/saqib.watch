@@ -35,12 +35,21 @@ function WatchCard({ watch, index }) {
             className="group cursor-pointer block h-full"
         >
             <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-3/4 mb-4 border border-white/5">
-                {/* SALE badge */}
-                {hasDiscount && (
-                    <div className="absolute top-3 left-3 z-20">
-                        <span className="inline-block bg-red-600 text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-sm">
-                            SALE
+                <div style={{ position: "absolute", top: "16px", left: "0px", zIndex: 20, display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {watch.mode && watch.mode !== "new" && (
+                        <span style={{ backgroundColor: "#c9a96e", color: "black", fontSize: "10px", fontWeight: "bold", padding: "4px 8px 4px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+                            {watch.mode}
                         </span>
+                    )}
+                    {!watch.soldOut && watch.discount > 0 && (
+                        <span style={{ backgroundColor: "#DC2626", color: "white", fontSize: "10px", fontWeight: "bold", padding: "4px 8px 4px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+                            -{watch.discount}% OFF
+                        </span>
+                    )}
+                </div>
+                {watch.soldOut && (
+                    <div className="absolute top-2 right-2 z-20 pointer-events-none w-[100px] sm:w-[120px]">
+                        <Image src="/sold-out-removebg-preview.png" alt="Sold Out" width={120} height={120} className="w-full h-auto drop-shadow-lg" />
                     </div>
                 )}
 
@@ -101,16 +110,7 @@ function WatchCard({ watch, index }) {
             <h3 className="font-serif text-lg text-center text-white group-hover:text-gold transition-colors duration-300">
                 {watch.name}
             </h3>
-            <div className="text-center mt-1">
-                {hasDiscount && (
-                    <span className="text-gray-muted text-xs line-through mr-2">
-                        Rs. {Number(watch.originalPrice).toLocaleString()}
-                    </span>
-                )}
-                <span className="text-gold text-sm">
-                    {typeof watch.price === "number" ? `Rs. ${watch.price.toLocaleString()}` : watch.price}
-                </span>
-            </div>
+
         </Link>
     );
 }
@@ -146,14 +146,14 @@ export default function NewArrivals() {
                 try {
                     const snap = await getDocs(q);
                     if (!isMounted) return;
-                    const nextProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    const nextProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter(p => !p.soldOut);
                     setProducts(nextProducts);
                     cacheProducts(nextProducts);
                 } catch (e) {
                     // Fallback if createdAt missing
                     const snap = await getDocs(query(collection(db, "products"), orderBy("name"), limit(12)));
                     if (!isMounted) return;
-                    const nextProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    const nextProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter(p => !p.soldOut);
                     setProducts(nextProducts);
                     cacheProducts(nextProducts);
                 }

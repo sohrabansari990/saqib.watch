@@ -93,6 +93,8 @@ export const metadata = {
 
 import { AuthProvider } from "@/context/AuthContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
+import { BannerProvider } from "@/context/BannerContext";
+import SaleBanner from "@/components/SaleBanner";
 
 export default function RootLayout({ children }) {
   return (
@@ -220,14 +222,17 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="bg-dark text-foreground antialiased font-sans" suppressHydrationWarning suppressContentEditableWarning>
-        <AuthProvider>
-          <CartProvider>
-            <FavoritesProvider>
-              {children}
-            </FavoritesProvider>
-            <Toaster position="top-center" richColors theme="dark" />
-          </CartProvider>
-        </AuthProvider>
+        <BannerProvider>
+          <AuthProvider>
+            <CartProvider>
+              <FavoritesProvider>
+                <SaleBanner />
+                {children}
+              </FavoritesProvider>
+              <Toaster position="top-center" richColors theme="dark" />
+            </CartProvider>
+          </AuthProvider>
+        </BannerProvider>
         <Analytics />
         <SpeedInsights />
       </body>

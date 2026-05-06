@@ -268,24 +268,48 @@ export default function ProductPage() {
                 />
               </button>
 
-              {product.mode && product.mode !== "new" && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "12px",
-                    left: "12px",
-                    zIndex: 20,
-                    background: "#c9a96e",
-                    color: "#000",
-                    fontSize: "11px",
-                    fontWeight: "bold",
-                    padding: "4px 12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  {product.mode}
-                </span>
+              <div style={{ position: "absolute", top: "16px", left: "0px", zIndex: 20, display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {product.mode && product.mode !== "new" && (
+                    <span
+                      style={{
+                        backgroundColor: "#c9a96e",
+                        color: "black",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                        padding: "4px 12px 4px 16px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        alignSelf: "flex-start",
+                        borderRadius: "0 4px 4px 0",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                      }}
+                    >
+                      {product.mode}
+                    </span>
+                  )}
+                  {!product.soldOut && product.discount > 0 && (
+                      <span
+                        style={{
+                          backgroundColor: "#DC2626",
+                          color: "white",
+                          fontSize: "11px",
+                          fontWeight: "bold",
+                          padding: "4px 12px 4px 16px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.1em",
+                          alignSelf: "flex-start",
+                          borderRadius: "0 4px 4px 0",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                        }}
+                      >
+                        -{product.discount}% OFF
+                      </span>
+                  )}
+              </div>
+              {product.soldOut && (
+                  <div className="absolute top-2 right-2 z-20 pointer-events-none w-[100px] sm:w-[120px]">
+                      <img src="/sold-out-removebg-preview.png" alt="Sold Out" className="w-full h-auto drop-shadow-lg" />
+                  </div>
               )}
 
               {mainImage ? (
@@ -296,7 +320,7 @@ export default function ProductPage() {
                     overflow: "hidden",
                     border: "1px solid rgba(255,255,255,0.05)",
                     // background: "#1a1a1a",
-                    aspectRatio: "5 / 5",
+                    aspectRatio: "4 / 5",
                   }}
                 >
                   <Image
@@ -364,15 +388,30 @@ export default function ProductPage() {
                         </svg>
                   </button>
               </div>
-              <p
-                style={{
-                  fontSize: "24px",
-                  color: "#c9a96e",
-                  marginBottom: "20px",
-                }}
-              >
-                Rs. {product.price?.toLocaleString()}
-              </p>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "12px", marginBottom: "20px" }}>
+                  <p
+                    style={{
+                      fontSize: "24px",
+                      color: "#c9a96e",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Rs. {product.price?.toLocaleString()}
+                  </p>
+                  {product.discount > 0 && (
+                      <p
+                        style={{
+                          fontSize: "18px",
+                          color: "#6b7280",
+                          textDecoration: "line-through",
+                          marginBottom: "3px",
+                          opacity: 0.8
+                        }}
+                      >
+                        Rs. {Math.round(product.price / (1 - product.discount / 100)).toLocaleString()}
+                      </p>
+                  )}
+              </div>
 
               {hasVariants && (
                 <div style={{ marginBottom: "20px" }}>
@@ -553,24 +592,48 @@ export default function ProductPage() {
                 />
               </button>
 
-              {product.mode && product.mode !== "new" && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "12px",
-                    left: "12px",
-                    zIndex: 20,
-                    background: "#c9a96e",
-                    color: "#000",
-                    fontSize: "11px",
-                    fontWeight: "bold",
-                    padding: "4px 12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  {product.mode}
-                </span>
+              <div style={{ position: "absolute", top: "16px", left: "0px", zIndex: 20, display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {product.mode && product.mode !== "new" && (
+                    <span
+                      style={{
+                        backgroundColor: "#c9a96e",
+                        color: "black",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                        padding: "4px 12px 4px 16px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        alignSelf: "flex-start",
+                        borderRadius: "0 4px 4px 0",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                      }}
+                    >
+                      {product.mode}
+                    </span>
+                  )}
+                  {!product.soldOut && product.discount > 0 && (
+                      <span
+                        style={{
+                          backgroundColor: "#DC2626",
+                          color: "white",
+                          fontSize: "11px",
+                          fontWeight: "bold",
+                          padding: "4px 12px 4px 16px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.1em",
+                          alignSelf: "flex-start",
+                          borderRadius: "0 4px 4px 0",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                        }}
+                      >
+                        -{product.discount}% OFF
+                      </span>
+                  )}
+              </div>
+              {product.soldOut && (
+                  <div className="absolute top-2 right-2 z-20 pointer-events-none w-[100px] sm:w-[120px]">
+                      <img src="/sold-out-removebg-preview.png" alt="Sold Out" className="w-full h-auto drop-shadow-lg" />
+                  </div>
               )}
 
               {allImages.length > 0 ? (
@@ -681,15 +744,30 @@ export default function ProductPage() {
                         </svg>
                   </button>
               </div>
-              <p
-                style={{
-                  fontSize: "22px",
-                  color: "#c9a96e",
-                  marginBottom: "16px",
-                }}
-              >
-                Rs. {product.price?.toLocaleString()}
-              </p>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: "10px", marginBottom: "16px" }}>
+                  <p
+                    style={{
+                      fontSize: "22px",
+                      color: "#c9a96e",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Rs. {product.price?.toLocaleString()}
+                  </p>
+                  {product.discount > 0 && (
+                      <p
+                        style={{
+                          fontSize: "16px",
+                          color: "#6b7280",
+                          textDecoration: "line-through",
+                          marginBottom: "3px",
+                          opacity: 0.8
+                        }}
+                      >
+                        Rs. {Math.round(product.price / (1 - product.discount / 100)).toLocaleString()}
+                      </p>
+                  )}
+              </div>
 
               {hasVariants && (
                 <div style={{ marginBottom: "16px" }}>
@@ -943,7 +1021,7 @@ export default function ProductPage() {
                       className="group cursor-pointer"
                     >
                       <div 
-                          style={{ width: "100%", aspectRatio: "3/4", position: "relative", borderRadius: "1rem", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}
+                          style={{ width: "100%", aspectRatio: "4/5", position: "relative", borderRadius: "1rem", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}
                       >
                         {simProduct.imageUrl ? (
                           <Image
@@ -955,10 +1033,29 @@ export default function ProductPage() {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs text-gray-600 bg-dark">No Image</div>
                         )}
-                        {/* Gradient overlay mimicking shadcn/21st.dev luxury overlays */}
+                        {/* Gradient overlay */}
                         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out" />
-                        
-                        {/* View Button Overlay inside Image Frame */}
+
+                        {/* Badges */}
+                        <div style={{ position: "absolute", top: "12px", left: "0px", zIndex: 20, display: "flex", flexDirection: "column", gap: "6px" }}>
+                          {simProduct.mode && simProduct.mode !== "new" && (
+                            <span style={{ backgroundColor: "#c9a96e", color: "black", fontSize: "10px", fontWeight: "bold", padding: "3px 10px 3px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+                              {simProduct.mode}
+                            </span>
+                          )}
+                          {!simProduct.soldOut && simProduct.discount > 0 && (
+                            <span style={{ backgroundColor: "#DC2626", color: "white", fontSize: "10px", fontWeight: "bold", padding: "3px 10px 3px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+                              -{simProduct.discount}% OFF
+                            </span>
+                          )}
+                        </div>
+                        {simProduct.soldOut && (
+                          <div className="absolute top-2 right-2 z-20 pointer-events-none w-[80px]">
+                            <img src="/sold-out-removebg-preview.png" alt="Sold Out" className="w-full h-auto drop-shadow-lg" />
+                          </div>
+                        )}
+
+                        {/* View Button Overlay */}
                         <div className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]">
                            <span style={{padding: "10px"}} className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-black font-semibold text-xs tracking-widest uppercase px-8 py-3 rounded-full transition-colors shadow-xl">
                               View Details
@@ -985,3 +1082,4 @@ export default function ProductPage() {
     </>
   );
 }
+

@@ -119,7 +119,7 @@ function GalleryContent() {
     }, [filter, products, sortBy]);
 
     return (
-        <main className="pt-24 min-h-screen bg-dark" style={{ padding: "8.5vw 2vw 3vw 2vw" }}>
+        <main className="min-h-screen bg-dark" style={{ paddingTop: "150px", paddingLeft: "16px", paddingRight: "16px", paddingBottom: "3vw" }}>
             <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
                 <div className="text-center mb-12">
                     <p className="text-gold tracking-[0.4em] text-xs uppercase mb-3">
@@ -235,7 +235,7 @@ function GalleryContent() {
                                         onMouseEnter={() => prefetchProduct(watch.id)}
                                         onTouchStart={() => prefetchProduct(watch.id)}
                                     >
-                                        <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-3/4 mb-4 border border-white/5">
+                                        <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[4/5] mb-4 border border-white/5">
                                             {watch.imageUrl ? (
                                                 <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
                                                     <Image
@@ -256,11 +256,22 @@ function GalleryContent() {
 
                                             {/* Overlay */}
                                             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-
-                                            {watch.mode && watch.mode !== 'new' && (
-                                                <span className="absolute top-4 left-4 bg-gold text-black text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
-                                                    {watch.mode}
-                                                </span>
+                                            <div style={{ position: "absolute", top: "16px", left: "0px", display: "flex", flexDirection: "column", gap: "8px", zIndex: 10 }}>
+                                                {watch.mode && watch.mode !== 'new' && (
+                                                    <span style={{ backgroundColor: "#c9a96e", color: "black", fontSize: "10px", fontWeight: "bold", padding: "4px 8px 4px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+                                                        {watch.mode}
+                                                    </span>
+                                                )}
+                                                {!watch.soldOut && watch.discount > 0 && (
+                                                    <span style={{ backgroundColor: "#DC2626", color: "white", fontSize: "10px", fontWeight: "bold", padding: "4px 8px 4px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+                                                        -{watch.discount}% OFF
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {watch.soldOut && (
+                                                <div className="absolute top-2 right-2 z-20 pointer-events-none w-[100px] sm:w-[120px]">
+                                                    <img src="/sold-out-removebg-preview.png" alt="Sold Out" className="w-full h-auto drop-shadow-lg" />
+                                                </div>
                                             )}
 
                                             {/* Quick View Button Hover overlay */}
@@ -306,9 +317,12 @@ function GalleryContent() {
                                         <h3 className="font-serif text-lg text-center text-white group-hover:text-gold transition-colors duration-300">
                                             {watch.name}
                                         </h3>
-                                        <p className="text-center text-gold text-sm mt-1">
-                                            Rs. {watch.price?.toLocaleString()}
-                                        </p>
+                                        <div className="text-center mt-1 flex justify-center items-center gap-2">
+                                            <span className="text-gold text-sm font-medium">Rs. {watch.price?.toLocaleString()}</span>
+                                            {watch.discount > 0 && (
+                                                <span className="text-gray-500 text-xs line-through opacity-70">Rs. {Math.round(watch.price / (1 - watch.discount / 100)).toLocaleString()}</span>
+                                            )}
+                                        </div>
                                     </Link>
                                 </div>
                             ))
@@ -361,7 +375,12 @@ function GalleryContent() {
                         {/* Modal Content */}
                         <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-[#0a0a0a]">
                             <h2 className="font-serif text-3xl md:text-4xl text-white mb-2">{quickViewProduct.name}</h2>
-                            <p className="text-xl md:text-2xl text-gold mb-8">Rs. {quickViewProduct.price?.toLocaleString()}</p>
+                            <div className="mb-8 flex items-end gap-3">
+                                <p className="text-xl md:text-2xl text-gold font-semibold">Rs. {quickViewProduct.price?.toLocaleString()}</p>
+                                {quickViewProduct.discount > 0 && (
+                                    <p className="text-lg text-gray-500 line-through mb-[2px] opacity-70">Rs. {Math.round(quickViewProduct.price / (1 - quickViewProduct.discount / 100)).toLocaleString()}</p>
+                                )}
+                            </div>
                             
                             {quickViewProduct.variants && quickViewProduct.variants.length > 0 && (
                                 <div className="mb-10">
@@ -425,7 +444,7 @@ export default function GalleryPage() {
         <>
             <Header />
             <Suspense fallback={
-                <main className="pt-24 min-h-screen bg-dark" style={{ padding: "8.5vw 2vw 3vw 2vw" }}>
+                <main className="pt-[120px] md:pt-[8.5vw] px-4 md:px-[2vw] pb-[3vw] min-h-screen bg-dark">
                     <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
                         <CollectionLoader variant="gallery" />
                     </div>

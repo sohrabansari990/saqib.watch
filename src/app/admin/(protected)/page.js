@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, Tag } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminDashboard() { // Fixed Component Name
@@ -71,6 +71,11 @@ export default function AdminDashboard() { // Fixed Component Name
                         <p className="text-gray-400 text-sm">Welcome, {user?.email}</p>
                     </div>
                     <div className="flex gap-3">
+                        <Link href="/admin/sale">
+                            <Button variant="outline" className="border-gold/40 text-gold hover:bg-gold/10 cursor-pointer" style={{padding: "1vw 2vw"}}>
+                                <Tag size={18} className="mr-2" /> Sale Banner
+                            </Button>
+                        </Link>
                         <Link href="/admin/products/new">
                             <Button className="bg-gold text-black hover:bg-gold-light shadow-lg shadow-gold/20 cursor-pointer" style={{padding: "1vw 2vw"}}>
                                 <Plus size={18} className="mr-2" /> Add Product
