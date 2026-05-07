@@ -66,7 +66,7 @@ export default function SaleBanner() {
     if (!visible || !sale?.active || pathname?.startsWith("/admin")) return null;
 
     const pad = (n) => String(n).padStart(2, "0");
-    const galleryUrl = sale.category ? `/gallery?category=${encodeURIComponent(sale.category)}` : "/gallery";
+    const galleryUrl = sale.name ? `/gallery?category=${encodeURIComponent(sale.name.toLowerCase())}` : "/gallery";
 
     // Responsive size tokens
     const nameSize    = isMobile ? "9px"  : "11px";

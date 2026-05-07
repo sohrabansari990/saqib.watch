@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, Suspense, useMemo } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -26,6 +26,7 @@ function GalleryContent() {
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState(["all", "men", "women", "couples"]);
+    const [activeSale, setActiveSale] = useState(null);
     const searchParams = useSearchParams();
     const router = useRouter();
     const hasSyncedQuery = useRef(false);
@@ -67,16 +68,23 @@ function GalleryContent() {
     useEffect(() => {
         let isActive = true;
 
-        const fetchProducts = async () => {
+        const fetchData = async () => {
             if (!getCachedCatalog()?.products?.length) {
                 setLoading(true);
             }
 
             try {
-                const querySnapshot = await getDocs(collection(db, "products"));
-                if (!isActive) {
-                    return;
+                // Fetch Sale Settings
+                const saleSnap = await getDoc(doc(db, "settings", "sale"));
+                let saleData = null;
+                if (saleSnap.exists() && saleSnap.data().active) {
+                    saleData = saleSnap.data();
+                    setActiveSale(saleData);
                 }
+
+                // Fetch Products
+                const querySnapshot = await getDocs(collection(db, "products"));
+                if (!isActive) return;
 
                 const productsList = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
@@ -84,29 +92,53 @@ function GalleryContent() {
                 }));
 
                 setProducts(productsList);
-                setCategories(getCategoriesFromProducts(productsList));
+                
+                const baseCats = getCategoriesFromProducts(productsList);
+                if (saleData?.name) {
+                    // Add sale name as a primary category tab if active
+                    const saleCat = saleData.name.toLowerCase();
+                    if (!baseCats.includes(saleCat)) {
+                        setCategories(["all", saleCat, ...baseCats.filter(c => c !== "all")]);
+                    } else {
+                        setCategories(baseCats);
+                    }
+                } else {
+                    setCategories(baseCats);
+                }
+                
                 cacheCatalog(productsList);
             } catch (error) {
-                console.error("Error fetching products:", error);
+                console.error("Error fetching data:", error);
             } finally {
-                if (isActive) {
-                    setLoading(false);
-                }
+                if (isActive) setLoading(false);
             }
         };
 
-        fetchProducts();
-
-        return () => {
-            isActive = false;
-        };
+        fetchData();
+        return () => { isActive = false; };
     }, []);
 
     // Apply sorting in memo
     const displayedProducts = useMemo(() => {
-        let sorted = filter === "all"
-            ? [...products]
-            : products.filter((product) => product.category === filter);
+        const saleName = activeSale?.name?.toLowerCase();
+        
+        let filtered = products;
+        if (filter !== "all") {
+            if (saleName && filter === saleName) {
+                // Special filter for active sale:
+                // 1. Items with mode or category matching sale name
+                // 2. Items with discount >= 20% (system default)
+                filtered = products.filter((p) => {
+                    const matchesName = (p.mode?.toLowerCase() === saleName) || (p.category?.toLowerCase() === saleName);
+                    const isHighDiscount = (p.discount >= 20);
+                    return matchesName || isHighDiscount;
+                });
+            } else {
+                filtered = products.filter((product) => product.category === filter);
+            }
+        }
+
+        let sorted = [...filtered];
 
         if (sortBy === "price_asc") {
             sorted.sort((a, b) => (a.price || 0) - (b.price || 0));

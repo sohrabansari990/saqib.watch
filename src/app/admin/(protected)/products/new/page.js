@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Upload, X, ArrowLeft, Plus, Palette, Sparkles } from "lucide-react";
+import { Upload, X, ArrowLeft, Plus, Palette, Sparkles, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 const COLOR_PRESETS = [
@@ -35,6 +35,7 @@ export default function AddProductPage() {
     const [existingCategories, setExistingCategories] = useState([]);
     const [customCategory, setCustomCategory] = useState("");
     const [showCustomCategory, setShowCustomCategory] = useState(false);
+    const [activeSaleName, setActiveSaleName] = useState("");
 
     // Responsive track
     useEffect(() => {
@@ -62,7 +63,7 @@ export default function AddProductPage() {
     });
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchData = async () => {
             const snapshot = await getDocs(collection(db, "products"));
             const cats = new Set();
             snapshot.docs.forEach((doc) => {
@@ -70,8 +71,14 @@ export default function AddProductPage() {
                 if (cat) cats.add(cat);
             });
             setExistingCategories([...cats].sort());
+
+            // Fetch active sale name
+            const saleSnap = await getDoc(doc(db, "settings", "sale"));
+            if (saleSnap.exists() && saleSnap.data().active) {
+                setActiveSaleName(saleSnap.data().name);
+            }
         };
-        fetchCategories();
+        fetchData();
     }, []);
 
     const allCategories = [...new Set([...existingCategories, "men", "women", "couples"])].sort();
@@ -282,6 +289,7 @@ export default function AddProductPage() {
                                             <option value="new">NEW</option>
                                             <option value="sale">SALE</option>
                                             <option value="featured">FEATURED</option>
+                                            {activeSaleName && <option value={activeSaleName.toLowerCase()}>{activeSaleName.toUpperCase()}</option>}
                                         </select>
                                         <Input type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} placeholder="D. %" style={{ borderRadius: "10px" }} />
                                     </div>

@@ -38,6 +38,7 @@ export default function EditProductPage({ params }) {
     const [existingCategories, setExistingCategories] = useState([]);
     const [customCategory, setCustomCategory] = useState("");
     const [showCustomCategory, setShowCustomCategory] = useState(false);
+    const [activeSaleName, setActiveSaleName] = useState("");
 
     useEffect(() => {
         const check = () => setIsMobile(window.innerWidth < 1024);
@@ -75,6 +76,13 @@ export default function EditProductPage({ params }) {
                 setExistingCategories([...cats].sort());
 
                 const docSnap = await getDoc(doc(db, "products", id));
+                
+                // Fetch active sale name
+                const saleSnap = await getDoc(doc(db, "settings", "sale"));
+                if (saleSnap.exists() && saleSnap.data().active) {
+                    setActiveSaleName(saleSnap.data().name);
+                }
+
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     setFormData({
@@ -316,6 +324,7 @@ export default function EditProductPage({ params }) {
                                             <option value="new">NEW</option>
                                             <option value="sale">SALE</option>
                                             <option value="featured">FEATURED</option>
+                                            {activeSaleName && <option value={activeSaleName.toLowerCase()}>{activeSaleName.toUpperCase()}</option>}
                                         </select>
                                         <Input type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} placeholder="D. %" style={{ borderRadius: "10px" }} />
                                     </div>
