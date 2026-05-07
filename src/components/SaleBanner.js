@@ -4,12 +4,14 @@ import { useEffect, useState, useRef } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useBanner } from "@/context/BannerContext";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 const BANNER_H_DESKTOP = 40;
 const BANNER_H_MOBILE  = 32;
 
 export default function SaleBanner() {
+    const pathname = usePathname();
     const { setBannerHeight } = useBanner();
     const [visible, setVisible] = useState(true);
     const [sale, setSale] = useState(null);
@@ -61,7 +63,7 @@ export default function SaleBanner() {
         return () => clearInterval(jiggleRef.current);
     }, []);
 
-    if (!visible || !sale?.active) return null;
+    if (!visible || !sale?.active || pathname?.startsWith("/admin")) return null;
 
     const pad = (n) => String(n).padStart(2, "0");
     const galleryUrl = sale.category ? `/gallery?category=${encodeURIComponent(sale.category)}` : "/gallery";

@@ -10,7 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { collection, query, limit, getDocs } from "firebase/firestore";
+import { collection, query, limit, getDocs, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaWhatsapp } from "react-icons/fa";
@@ -64,15 +64,42 @@ export default function CartPage() {
         localStorage.setItem("total", total);
     }, [contextMounted, total]);
 
-    const handleApplyCoupon = (e) => {
+    const handleApplyCoupon = async (e) => {
         e.preventDefault();
-        if (coupon.trim().toUpperCase() === "SAVE10" || coupon.trim().toUpperCase() === "RAMADAN") {
-            const disc = subtotal * 0.10;
-            setDiscount(disc);
-            toast.success("Coupon applied: 10% off");
-        } else {
-            toast.error("Invalid coupon code");
-            setDiscount(0);
+        if (!coupon.trim()) return;
+
+        try {
+            const q = query(
+                collection(db, "coupons"), 
+                where("code", "==", coupon.trim().toUpperCase()),
+                where("isActive", "==", true)
+            );
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const couponData = querySnapshot.docs[0].data();
+                
+                if (subtotal < couponData.minAmount) {
+                    toast.error(`Min order for this coupon is Rs. ${couponData.minAmount.toLocaleString()}`);
+                    return;
+                }
+
+                let disc = 0;
+                if (couponData.type === "percentage") {
+                    disc = (subtotal * couponData.value) / 100;
+                } else {
+                    disc = couponData.value;
+                }
+
+                setDiscount(disc);
+                toast.success(`Coupon applied: ${couponData.type === 'percentage' ? couponData.value + '% off' : 'Rs. ' + couponData.value.toLocaleString() + ' off'}`);
+            } else {
+                toast.error("Invalid or expired coupon code");
+                setDiscount(0);
+            }
+        } catch (error) {
+            console.error("Error applying coupon:", error);
+            toast.error("Something went wrong applying the coupon");
         }
     };
 
@@ -249,18 +276,19 @@ export default function CartPage() {
                                     </div>
                                 )}
                                 
-                                <div className="flex items-center gap-2 py-4 border-y border-white/5">
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px 0", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                                     <Input
-                                        placeholder="VOUCHER CODE"
+                                        placeholder="COUPON CODE"
                                         value={coupon}
-                                        onChange={(e) => setCoupon(e.target.value)}
-                                        className="bg-black/50 border-white/5 h-14 rounded-xl text-center tracking-[0.2em] font-medium text-xs focus:ring-gold/30 uppercase"
+                                        onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+                                        style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.05)", height: "56px", borderRadius: "12px", textAlign: "center", letterSpacing: "0.2em", fontWeight: "500", fontSize: "12px", textTransform: "uppercase" }}
+                                        className="focus:ring-gold/30"
                                     />
                                     <Button 
-                                    style={{padding: "10px"}}
                                         variant="outline" 
                                         onClick={handleApplyCoupon}
-                                        className="h-14 px-8 border-gold/30 text-gold hover:bg-gold hover:text-black transition-all duration-500 font-bold rounded-xl"
+                                        style={{ height: "56px", padding: "0 24px", border: "1px solid rgba(201,169,76,0.3)", color: "#C9A84C", fontWeight: "bold", borderRadius: "12px", background: "transparent", cursor: "pointer" }}
+                                        className="hover:bg-gold hover:text-black transition-all duration-500"
                                     >
                                         Apply
                                     </Button>

@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import emailjs from "@emailjs/browser";
+import { collection, query, getDocs, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,7 +26,8 @@ import {
     MapPin,
     Phone,
     User,
-    CheckCircle2
+    CheckCircle2,
+    Ticket
 } from "lucide-react";
 import {
     buildWhatsAppOrderMessage,
@@ -120,6 +123,8 @@ export default function CheckoutPage() {
     const [imagePreview, setImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isOrdered, setIsOrdered] = useState(false);
+    const [couponCode, setCouponCode] = useState("");
+    const [couponDiscount, setCouponDiscount] = useState(0);
 
     // City Dropdown State
     const [showCityDropdown, setShowCityDropdown] = useState(false);
@@ -223,9 +228,50 @@ export default function CheckoutPage() {
 
     const amount = getCartTotal();
     const storedTotal = typeof window !== 'undefined' ? localStorage.getItem("total") : null;
-    const finalTotal = storedTotal ? parseFloat(storedTotal) : amount;
-    const discount = Math.max(0, amount - finalTotal);
-    const total = amount - discount;
+    const initialDiscount = storedTotal ? Math.max(0, amount - parseFloat(storedTotal)) : 0;
+    
+    // Total calculation: subtotal - (cart discount OR checkout coupon discount)
+    const activeDiscount = Math.max(initialDiscount, couponDiscount);
+    const total = amount - activeDiscount;
+
+    const handleApplyCoupon = async (e) => {
+        if (e) e.preventDefault();
+        if (!couponCode.trim()) return;
+
+        try {
+            const q = query(
+                collection(db, "coupons"), 
+                where("code", "==", couponCode.trim().toUpperCase()),
+                where("isActive", "==", true)
+            );
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const couponData = querySnapshot.docs[0].data();
+                
+                if (amount < couponData.minAmount) {
+                    toast.error(`Min order for this coupon is Rs. ${couponData.minAmount.toLocaleString()}`);
+                    return;
+                }
+
+                let disc = 0;
+                if (couponData.type === "percentage") {
+                    disc = (amount * couponData.value) / 100;
+                } else {
+                    disc = couponData.value;
+                }
+
+                setCouponDiscount(disc);
+                toast.success(`Coupon applied: ${couponData.type === 'percentage' ? couponData.value + '% off' : 'Rs. ' + couponData.value.toLocaleString() + ' off'}`);
+            } else {
+                toast.error("Invalid or expired coupon code");
+                setCouponDiscount(0);
+            }
+        } catch (error) {
+            console.error("Error applying coupon:", error);
+            toast.error("Something went wrong applying the coupon");
+        }
+    };
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
@@ -249,7 +295,7 @@ export default function CheckoutPage() {
             }
 
             const itemsList = formatOrderItems(cart);
-            const paymentLabel = paymentMethod === "cod" ? "Cash on Delivery" : "EasyPaisa / JazzCash";
+            const paymentLabel = paymentMethod === "cod" ? "Cash on Delivery" : "Easypaisa";
 
             await emailjs.send(
                 "service_v3f938c",
@@ -279,7 +325,7 @@ export default function CheckoutPage() {
             setTimeout(() => clearCart(), 100);
         } catch (error) {
             console.error("Order submission error:", error);
-            toast.error("Something went wrong. Please WhatsApp us directly at +92 334 5062546");
+            toast.error("Something went wrong. Please WhatsApp us directly at +92 309 5225815");
         } finally {
             setLoading(false);
         }
@@ -291,7 +337,7 @@ export default function CheckoutPage() {
             items: cart,
             customer: formData,
             totalAmount: total,
-            paymentMethod: paymentMethod === "cod" ? "Cash on Delivery" : "EasyPaisa / JazzCash",
+            paymentMethod: paymentMethod === "cod" ? "Cash on Delivery" : "Easypaisa",
             intro: "I'd like to place this order via WhatsApp.",
             outro: "Please confirm availability.",
         });
@@ -526,12 +572,24 @@ export default function CheckoutPage() {
                                         <RadioOption
                                             id="online"
                                             value="online"
-                                            label="Digital Transfer (EasyPaisa / JazzCash)"
+                                            label="Digital Transfer (Easypaisa)"
                                             description="Direct secure transfer. Recommended for faster processing and delivery."
                                             icon={Smartphone}
                                             check={paymentMethod}
                                             onChange={setPaymentMethod}
                                         />
+                                        {paymentMethod === "online" && (
+                                            <div style={{ display: "flex", justifyContent: "center", marginTop: "-8px" }} className="animate-in fade-in zoom-in duration-300">
+                                                <div style={{ position: "relative", width: "100%", maxWidth: "280px", height: "110px", borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(201,169,76,0.2)", boxShadow: "0 10px 30px rgba(201,169,76,0.05)" }}>
+                                                    <Image 
+                                                        src="/easypaisa.jpg" 
+                                                        alt="EasyPaisa" 
+                                                        fill 
+                                                        style={{ objectFit: "contain", backgroundColor: "#fff" }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <AnimatePresence>
@@ -545,7 +603,7 @@ export default function CheckoutPage() {
                                                 <div style={{ marginTop: "32px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,169,76,0.2)", borderRadius: "24px", padding: "32px" }}>
                                                     <div style={{ textAlign: "center", marginBottom: "32px" }}>
                                                         <p style={{ color: "#6b7280", letterSpacing: "0.2em", fontSize: "10px", textTransform: "uppercase", marginBottom: "8px" }}>Send Precise Amount To</p>
-                                                        <h3 style={{ fontSize: "2rem", fontWeight: "bold", color: "white", letterSpacing: "0.1em" }}>0334 5062546</h3>
+                                                        <h3 style={{ fontSize: "2rem", fontWeight: "bold", color: "white", letterSpacing: "0.1em" }}>0309 5225815</h3>
                                                         <p style={{ color: "#C9A84C", fontWeight: "600", fontSize: "14px" }}>Erfan Khan</p>
                                                     </div>
 
@@ -653,11 +711,32 @@ export default function CheckoutPage() {
                                         </div>
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                             <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Luxury Discount</span>
-                                            <span style={{ fontSize: "14px", color: "#10b981" }}>- {discount.toLocaleString()} PKR</span>
+                                            <span style={{ fontSize: "14px", color: "#10b981" }}>- {activeDiscount.toLocaleString()} PKR</span>
                                         </div>
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                             <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Global Shipping</span>
                                             <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#C9A84C", fontWeight: "bold" }}>Complimentary</span>
+                                        </div>
+
+                                        {/* Coupon Input */}
+                                        <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "16px 0", borderTop: "1px solid rgba(255,255,255,0.05)", marginTop: "8px" }}>
+                                            <div style={{ position: "relative", flex: 1 }}>
+                                                <Ticket size={14} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "#6b7280" }} />
+                                                <input
+                                                    placeholder="PROMO CODE"
+                                                    value={couponCode}
+                                                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                                    style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.05)", height: "48px", borderRadius: "12px", paddingLeft: "40px", paddingRight: "16px", fontSize: "10px", letterSpacing: "0.2em", fontWeight: "bold", color: "white", outline: "none", transition: "all 0.3s" }}
+                                                    className="focus:border-gold"
+                                                />
+                                            </div>
+                                            <button 
+                                                onClick={handleApplyCoupon}
+                                                style={{ height: "48px", padding: "0 24px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", fontWeight: "bold", letterSpacing: "0.1em", borderRadius: "12px", textTransform: "uppercase", fontSize: "10px", cursor: "pointer", transition: "all 0.3s" }}
+                                                className="hover:bg-gold hover:text-black"
+                                            >
+                                                Apply
+                                            </button>
                                         </div>
                                     </div>
 

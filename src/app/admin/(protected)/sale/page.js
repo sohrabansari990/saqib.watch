@@ -5,7 +5,9 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 import Link from "next/link";
-import { ArrowLeft, Save, Tag } from "lucide-react";
+import { ArrowLeft, Save, Tag, Sparkles, Clock, Globe } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 const PRESET_OFFERS = [
     { name: "Eid Sale", emoji: "🌙" },
@@ -23,6 +25,7 @@ const CATEGORIES = ["Men", "Women", "Unisex", "Luxury", "Sport", "Classic"];
 export default function AdminSalePage() {
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
     const [form, setForm] = useState({
         active: false,
         name: "Summer Sale",
@@ -31,6 +34,13 @@ export default function AdminSalePage() {
         category: "Men",
         customCategory: "",
     });
+
+    useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth < 1024);
+        check();
+        window.addEventListener("resize", check);
+        return () => window.removeEventListener("resize", check);
+    }, []);
 
     useEffect(() => {
         const load = async () => {
@@ -47,19 +57,15 @@ export default function AdminSalePage() {
                         customCategory: CATEGORIES.includes(data.category) ? "" : (data.category ?? ""),
                     });
                 }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
+            } catch (e) { console.error(e); } finally { setLoading(false); }
         };
         load();
     }, []);
 
     const handleSave = async () => {
-        if (!form.name.trim()) return toast.error("Please enter an offer name.");
-        if (!form.discount || form.discount < 1 || form.discount > 99) return toast.error("Discount must be between 1–99%.");
-        if (!form.endDate) return toast.error("Please set an end date for the offer.");
+        if (!form.name.trim()) return toast.error("Enter offer name.");
+        if (!form.discount || form.discount < 1 || form.discount > 99) return toast.error("Discount 1–99%.");
+        if (!form.endDate) return toast.error("Set end date.");
 
         setSaving(true);
         try {
@@ -70,283 +76,159 @@ export default function AdminSalePage() {
                 endDate: form.endDate,
                 category: form.customCategory.trim() || form.category,
             });
-            toast.success("Sale banner updated!");
-        } catch (e) {
-            console.error(e);
-            toast.error("Failed to save settings.");
-        } finally {
-            setSaving(false);
-        }
+            toast.success("Broadcast updated!");
+        } catch (e) { toast.error("Failed to save."); } finally { setSaving(false); }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#0b0b0f] flex items-center justify-center text-white">
-                Loading...
-            </div>
-        );
-    }
+    if (loading) return <div className="min-h-screen text-white flex items-center justify-center">Loading Settings...</div>;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#0b0b0f] via-[#0f0f14] to-[#0f0a06] text-white">
-            <div className="max-w-2xl mx-auto px-6 py-12">
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-10">
-                    <Link href="/admin" className="text-gray-400 hover:text-gold transition-colors">
-                        <ArrowLeft size={20} />
+        <div className="min-h-screen text-white" style={{ background: "linear-gradient(135deg, #0b0b0f 0%, #0f0f14 50%, #0f0a06 100%)" }}>
+            <div style={{ maxWidth: "1000px", margin: "0 auto", padding: isMobile ? "40px 20px" : "60px 40px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "40px" }}>
+                    <Link href="/admin">
+                        <Button variant="ghost" style={{ padding: "0", color: "#6b7280", borderRadius: "50%", width: "40px", height: "40px", border: "1px solid rgba(255,255,255,0.05)" }} className="hover:bg-white/5 hover:text-white">
+                            <ArrowLeft size={20} />
+                        </Button>
                     </Link>
                     <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-gold/80 mb-1">Admin</p>
-                        <h1 className="text-3xl font-serif">Sale Banner Settings</h1>
+                        <p style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(201,168,76,0.8)", marginBottom: "4px", fontWeight: "bold" }}>Marketing</p>
+                        <h1 style={{ fontSize: isMobile ? "28px" : "40px", fontFamily: "serif", fontWeight: "300" }}>Broadcast Banner</h1>
                     </div>
                 </div>
 
-                <div className="space-y-8 bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl shadow-black/40">
-                    {/* Active Toggle */}
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="font-semibold text-white">Enable Sale Banner</p>
-                            <p className="text-xs text-gray-400 mt-1">Show the announcement banner on the storefront</p>
-                        </div>
-                        <button
-                            onClick={() => setForm(f => ({ ...f, active: !f.active }))}
-                            style={{
-                                width: "52px",
-                                height: "28px",
-                                borderRadius: "14px",
-                                background: form.active ? "#c9a96e" : "#374151",
-                                position: "relative",
-                                transition: "background 0.3s",
-                                border: "none",
-                                cursor: "pointer",
-                                flexShrink: 0,
-                            }}
-                        >
-                            <span style={{
-                                position: "absolute",
-                                top: "3px",
-                                left: form.active ? "27px" : "3px",
-                                width: "22px",
-                                height: "22px",
-                                borderRadius: "50%",
-                                background: "#fff",
-                                transition: "left 0.3s",
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-                            }} />
-                        </button>
-                    </div>
+                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "32px", alignItems: "start" }}>
+                    <div style={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: "32px" }}>
+                        <Card style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: isMobile ? "24px" : "40px", borderRadius: "24px" }}>
+                            <div style={{ marginBottom: "32px" }}>
+                                <label style={{ fontSize: "10px", textTransform: "uppercase", color: "#6b7280", marginBottom: "16px", display: "block" }}>Select Campaign Type</label>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                                    {PRESET_OFFERS.map((o) => (
+                                        <button
+                                            key={o.name}
+                                            onClick={() => setForm(f => ({ ...f, name: o.name === "Custom" ? f.name : o.name }))}
+                                            style={{
+                                                padding: "8px 16px",
+                                                borderRadius: "12px",
+                                                border: form.name === o.name ? "1px solid #C9A84C" : "1px solid rgba(255,255,255,0.1)",
+                                                background: form.name === o.name ? "rgba(201,168,110,0.1)" : "rgba(255,255,255,0.02)",
+                                                color: form.name === o.name ? "#C9A84C" : "#9ca3af",
+                                                fontSize: "12px",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            {o.emoji} {o.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-                    <hr style={{ borderColor: "rgba(255,255,255,0.08)" }} />
+                            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                                <div>
+                                    <label style={{ fontSize: "10px", textTransform: "uppercase", color: "#6b7280", marginBottom: "12px", display: "block" }}>Display Name</label>
+                                    <input
+                                        type="text"
+                                        value={form.name}
+                                        onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                                        style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", height: "50px", padding: "0 16px", color: "white", outline: "none" }}
+                                    />
+                                </div>
 
-                    {/* Preset Offers */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-3">Offer Type</label>
-                        <div className="flex flex-wrap gap-2">
-                            {PRESET_OFFERS.map((o) => (
-                                <button
-                                    key={o.name}
-                                    onClick={() => setForm(f => ({ ...f, name: o.name === "Custom" ? f.name : o.name }))}
-                                    style={{
-                                        padding: "6px 14px",
-                                        borderRadius: "20px",
-                                        border: form.name === o.name
-                                            ? "1px solid #c9a96e"
-                                            : "1px solid rgba(255,255,255,0.15)",
-                                        background: form.name === o.name ? "rgba(201,169,110,0.2)" : "transparent",
-                                        color: form.name === o.name ? "#c9a96e" : "#9ca3af",
-                                        fontSize: "13px",
-                                        cursor: "pointer",
-                                        transition: "all 0.2s",
-                                    }}
-                                >
-                                    {o.emoji} {o.name}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "24px" }}>
+                                    <div>
+                                        <label style={{ fontSize: "10px", textTransform: "uppercase", color: "#6b7280", marginBottom: "12px", display: "block" }}>Discount (%)</label>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", height: "50px", padding: "0 16px" }}>
+                                            <input
+                                                type="range"
+                                                min={1}
+                                                max={99}
+                                                value={form.discount}
+                                                onChange={e => setForm(f => ({ ...f, discount: Number(e.target.value) }))}
+                                                style={{ flex: 1, accentColor: "#C9A84C" }}
+                                            />
+                                            <span style={{ fontWeight: "bold", color: "#C9A84C", fontSize: "13px" }}>{form.discount}%</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: "10px", textTransform: "uppercase", color: "#6b7280", marginBottom: "12px", display: "block" }}>Ends At</label>
+                                        <input
+                                            type="datetime-local"
+                                            value={form.endDate}
+                                            onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
+                                            style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", height: "50px", padding: "0 16px", color: "white", colorScheme: "dark" }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
 
-                    {/* Offer Name */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Offer Name</label>
-                        <input
-                            type="text"
-                            value={form.name}
-                            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                            placeholder="e.g. Eid Sale"
-                            style={{
-                                width: "100%",
-                                background: "rgba(255,255,255,0.05)",
-                                border: "1px solid rgba(255,255,255,0.15)",
+                        {/* Preview */}
+                        <div style={{ padding: "24px", borderRadius: "20px", border: "1px dashed rgba(201,168,76,0.3)", background: "rgba(201,168,76,0.02)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                                <Sparkles size={14} style={{ color: "#C9A84C" }} />
+                                <span style={{ fontSize: "9px", textTransform: "uppercase", color: "#C9A84C", fontWeight: "bold" }}>Live Preview</span>
+                            </div>
+                            <div style={{
                                 borderRadius: "10px",
-                                padding: "10px 14px",
-                                color: "#fff",
-                                fontSize: "14px",
-                                outline: "none",
-                            }}
-                        />
-                    </div>
-
-                    {/* Discount */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Discount Percentage — <span className="text-gold font-bold">{form.discount}%</span>
-                        </label>
-                        <div className="flex items-center gap-4">
-                            <input
-                                type="range"
-                                min={1}
-                                max={99}
-                                value={form.discount}
-                                onChange={e => setForm(f => ({ ...f, discount: Number(e.target.value) }))}
-                                style={{ flex: 1, accentColor: "#c9a96e" }}
-                            />
-                            <input
-                                type="number"
-                                min={1}
-                                max={99}
-                                value={form.discount}
-                                onChange={e => setForm(f => ({ ...f, discount: Number(e.target.value) }))}
-                                style={{
-                                    width: "70px",
-                                    background: "rgba(255,255,255,0.05)",
-                                    border: "1px solid rgba(255,255,255,0.15)",
-                                    borderRadius: "8px",
-                                    padding: "8px 10px",
-                                    color: "#c9a96e",
-                                    fontWeight: "bold",
-                                    fontSize: "14px",
-                                    outline: "none",
-                                    textAlign: "center",
-                                }}
-                            />
-                            <span className="text-gray-400 text-sm">%</span>
+                                overflow: "hidden",
+                                height: isMobile ? "auto" : "40px",
+                                minHeight: "40px",
+                                padding: isMobile ? "12px" : "0",
+                                background: "linear-gradient(90deg, #000 0%, #C9A84C 35%, #C9A84C 65%, #000 100%)",
+                                display: "flex",
+                                flexDirection: isMobile ? "column" : "row",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "12px",
+                            }}>
+                                <span style={{ color: "black", fontWeight: "900", fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.2em" }}>{form.name}</span>
+                                <div style={{ background: "rgba(0,0,0,0.2)", padding: "4px 8px", borderRadius: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
+                                    <Clock size={10} color="white" />
+                                    <span style={{ color: "white", fontSize: "8px", fontWeight: "bold" }}>02D : 14H : 55M</span>
+                                </div>
+                                <span style={{ background: "#ef4444", color: "white", fontSize: "8px", fontWeight: "900", padding: "3px 10px", borderRadius: "12px" }}>UPTO {form.discount}% OFF</span>
+                            </div>
                         </div>
                     </div>
 
-                    {/* End Date */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Sale End Date & Time</label>
-                        <input
-                            type="datetime-local"
-                            value={form.endDate}
-                            onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
-                            style={{
-                                width: "100%",
-                                background: "rgba(255,255,255,0.05)",
-                                border: "1px solid rgba(255,255,255,0.15)",
-                                borderRadius: "10px",
-                                padding: "10px 14px",
-                                color: "#fff",
-                                fontSize: "14px",
-                                outline: "none",
-                                colorScheme: "dark",
-                            }}
-                        />
-                        <p className="text-xs text-gray-500 mt-1">The countdown timer stops and banner hides when this time is reached.</p>
-                    </div>
+                    <div style={{ width: isMobile ? "100%" : "300px", display: "flex", flexDirection: "column", gap: "32px", position: isMobile ? "static" : "sticky", top: "40px" }}>
+                        <Card style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: "24px", borderRadius: "20px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px", background: "rgba(0,0,0,0.2)", borderRadius: "12px" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <Globe size={16} style={{ color: form.active ? "#22c55e" : "#6b7280" }} />
+                                        <span style={{ fontSize: "11px", fontWeight: "bold" }}>PUBLIC</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setForm(f => ({ ...f, active: !f.active }))}
+                                        style={{ width: "40px", height: "20px", borderRadius: "10px", background: form.active ? "#C9A84C" : "#374151", position: "relative", border: "none", cursor: "pointer" }}
+                                    >
+                                        <div style={{ position: "absolute", top: "2px", left: form.active ? "22px" : "2px", width: "16px", height: "16px", borderRadius: "50%", background: "white", transition: "all 0.2s" }} />
+                                    </button>
+                                </div>
 
-                    {/* Gallery Category */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Link to Gallery Category <span className="text-gray-500">(for "Shop Now" redirect)</span>
-                        </label>
-                        <div className="flex flex-wrap gap-2 mb-3">
-                            {CATEGORIES.map((cat) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setForm(f => ({ ...f, category: cat, customCategory: "" }))}
-                                    style={{
-                                        padding: "6px 14px",
-                                        borderRadius: "20px",
-                                        border: form.category === cat && !form.customCategory
-                                            ? "1px solid #c9a96e"
-                                            : "1px solid rgba(255,255,255,0.15)",
-                                        background: form.category === cat && !form.customCategory
-                                            ? "rgba(201,169,110,0.2)"
-                                            : "transparent",
-                                        color: form.category === cat && !form.customCategory ? "#c9a96e" : "#9ca3af",
-                                        fontSize: "13px",
-                                        cursor: "pointer",
-                                        transition: "all 0.2s",
-                                    }}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
-                        <input
-                            type="text"
-                            value={form.customCategory}
-                            onChange={e => setForm(f => ({ ...f, customCategory: e.target.value }))}
-                            placeholder="Or type a custom category..."
-                            style={{
-                                width: "100%",
-                                background: "rgba(255,255,255,0.05)",
-                                border: "1px solid rgba(255,255,255,0.15)",
-                                borderRadius: "10px",
-                                padding: "10px 14px",
-                                color: "#fff",
-                                fontSize: "14px",
-                                outline: "none",
-                            }}
-                        />
-                    </div>
+                                <div>
+                                    <label style={{ fontSize: "9px", textTransform: "uppercase", color: "#6b7280", marginBottom: "10px", display: "block" }}>Target Path</label>
+                                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+                                        {CATEGORIES.map(c => (
+                                            <button key={c} onClick={() => setForm(f => ({ ...f, category: c, customCategory: "" }))} style={{ fontSize: "9px", padding: "4px 10px", borderRadius: "6px", border: form.category === c && !form.customCategory ? "1px solid #C9A84C" : "1px solid rgba(255,255,255,0.1)", background: form.category === c && !form.customCategory ? "rgba(201,168,76,0.1)" : "transparent", color: form.category === c && !form.customCategory ? "white" : "#6b7280", cursor: "pointer" }}>{c}</button>
+                                        ))}
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={form.customCategory}
+                                        onChange={e => setForm(f => ({ ...f, customCategory: e.target.value }))}
+                                        placeholder="Or Custom..."
+                                        style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", height: "40px", padding: "0 12px", fontSize: "12px", color: "white" }}
+                                    />
+                                </div>
 
-                    {/* Preview */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Preview</label>
-                        <div style={{
-                            borderRadius: "10px",
-                            overflow: "hidden",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            height: "40px",
-                            background: "linear-gradient(90deg, #1a1000 0%, #c9a96e 30%, #c9a96e 70%, #1a1000 100%)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "12px",
-                            position: "relative",
-                            padding: "0 40px",
-                        }}>
-                            <span style={{ color: "#000", fontWeight: "bold", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
-                                {form.name || "Sale Name"}
-                            </span>
-                            <span style={{ background: "rgba(0,0,0,0.3)", color: "#fff", fontSize: "10px", fontWeight: "bold", borderRadius: "4px", padding: "2px 6px" }}>
-                                00D 00H 00M 00S
-                            </span>
-                            <span style={{ background: "#DC2626", color: "#fff", fontWeight: "bold", fontSize: "11px", borderRadius: "20px", padding: "2px 12px" }}>
-                                Upto {form.discount || 0}% Off
-                            </span>
-                            <span style={{ color: "#000", fontWeight: "bold", fontSize: "11px", textDecoration: "underline" }}>Shop Now →</span>
-                        </div>
+                                <Button onClick={handleSave} disabled={saving} style={{ height: "56px", background: "#C9A84C", color: "black", borderRadius: "14px", fontWeight: "900", letterSpacing: "0.1em", fontSize: "11px", gap: "8px" }}>
+                                    <Save size={16} /> {saving ? "UPDATING..." : "COMMIT"}
+                                </Button>
+                            </div>
+                        </Card>
                     </div>
-
-                    {/* Save */}
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        style={{
-                            width: "100%",
-                            background: saving ? "#8a7040" : "#c9a96e",
-                            color: "#000",
-                            fontWeight: "bold",
-                            fontSize: "14px",
-                            padding: "14px",
-                            borderRadius: "12px",
-                            border: "none",
-                            cursor: saving ? "not-allowed" : "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px",
-                            transition: "background 0.2s",
-                            letterSpacing: "0.1em",
-                            textTransform: "uppercase",
-                        }}
-                    >
-                        <Save size={16} />
-                        {saving ? "Saving..." : "Save Sale Settings"}
-                    </button>
                 </div>
             </div>
         </div>

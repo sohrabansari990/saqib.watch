@@ -30,24 +30,23 @@ const collectionLinks = [
 const socialLinks = [
     {
         icon: FaInstagram,
-        href: "https://www.instagram.com/saqibkhan.champ/?hl=en",
+        href: "https://www.instagram.com/saqibwatch?igsh=NXM0NWVpd2N0OHl1",
         label: "Instagram",
     },
     {
         icon: FaTiktok,
-        href: "https://www.tiktok.com/@saqibkhan0489",
+        href: "https://www.tiktok.com/@saqib.watch?_r=1&_t=ZS-96868TefWGG",
         label: "TikTok",
     },
     {
         icon: FaFacebookF,
-        href: "https://www.facebook.com/saqib.khan.723464/",
+        href: "https://www.facebook.com/share/1B7VFmtoXp/",
         label: "Facebook",
     },
 ];
 
 const showrooms = [
-    "01, Khyber Bazar, Peshawar, Pakistan",
-    "03, Zaryab Colony near Faqir Abad, Peshawar, Pakistan",
+    "saddar cantt,Peshawar, Pakistan",
 ];
 
 export default function Footer() {
@@ -183,11 +182,11 @@ export default function Footer() {
                                 <span className="text-sm font-medium tracking-wide">Connect on WhatsApp</span>
                             </a> */}
                             <a
-                                href="tel:+923175177780"
+                                href="tel:+92 309 5225815"
                                 className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-300 px-6 py-2 w-fit"
                             >
                                 <FaPhone size={14} className="text-gold" />
-                                <span className="text-sm font-light tracking-widest">+92 317 5177780</span>
+                                <span className="text-sm font-light tracking-widest">+92 309 5225815</span>
                             </a>
                         </div>
                     </div>

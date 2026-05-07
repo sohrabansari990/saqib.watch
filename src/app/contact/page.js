@@ -57,7 +57,7 @@ export default function ContactPage() {
                                             Call Us
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            +92 334 5062546
+                                            +92 309 5225815
                                         </p>
                                     </div>
                                 </div>
@@ -71,7 +71,7 @@ export default function ContactPage() {
                                             WhatsApp
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            +92 334 5062546
+                                            +92 309 5225815
                                         </p>
                                     </div>
                                 </div>
@@ -111,7 +111,7 @@ export default function ContactPage() {
                                 <h3 className="text-gold uppercase tracking-widest text-sm font-semibold mb-4">FIND OUR STORE</h3>
                                 <div className="border border-[#333] rounded-lg overflow-hidden w-full relative h-75">
                                     <iframe 
-                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.4!2d71.5785!3d34.0151!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38d917b31a79e8b5%3A0x9f0a8ef17ec285c0!2sKhyber%20Bazaar%2C%20Peshawar!5e0!3m2!1sen!2s!4v1"
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3307.8807286456886!2d71.53120489332433!3d33.99559720898666!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38d9175ede34d627%3A0xabeef035e7cacb5c!2sPeshawar%20Saddar%20Cantt%20Car%20Parking!5e0!3m2!1sen!2s!4v1778167439127!5m2!1sen!2s"
                                     width="100%" 
                                     height="100%" 
                                     className="absolute inset-0"
@@ -121,7 +121,7 @@ export default function ContactPage() {
                                     ></iframe>
                                 </div>
                                 <a 
-                                    href="https://maps.google.com/?q=Khyber+Bazar+Peshawar+Pakistan" 
+                                    href="https://maps.google.com/?q=saddar+cantt+Peshawar+Pakistan" 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="mt-6 w-full inline-block text-center border-2 border-gold text-gold py-4 uppercase tracking-[0.2em] font-bold text-sm hover:bg-gold hover:text-black transition-colors"

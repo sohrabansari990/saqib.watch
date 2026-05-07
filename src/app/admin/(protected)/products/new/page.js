@@ -2,43 +2,53 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { collection, addDoc, getDocs, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Upload, X, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Upload, X, ArrowLeft, Plus, Palette, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 const COLOR_PRESETS = [
-    { name: "Red", hex: "#DC2626" },
-    { name: "Black", hex: "#000000" },
-    { name: "Green", hex: "#16A34A" },
-    { name: "White", hex: "#FFFFFF" },
-    { name: "Silver", hex: "#C0C0C0" },
     { name: "Gold", hex: "#D4AF37" },
-    { name: "Blue", hex: "#2563EB" },
+    { name: "Silver", hex: "#C0C0C0" },
+    { name: "Gold + Silver", hex: "linear-gradient(45deg, #D4AF37 50%, #C0C0C0 50%)" },
+    { name: "Black", hex: "#000000" },
+    { name: "Black + Silver", hex: "linear-gradient(45deg, #000000 50%, #C0C0C0 50%)" },
+    { name: "Black + Gold", hex: "linear-gradient(45deg, #000000 50%, #D4AF37 50%)" },
     { name: "Rose Gold", hex: "#B76E79" },
-    { name: "Brown", hex: "#8B4513" },
-    { name: "Black with Silver", hex: "#2F4F4F" },
-    { name: "Black with Gold", hex: "#3D3D00" },
+    { name: "Blue", hex: "#2563EB" },
+    { name: "Green", hex: "#16A34A" },
+    { name: "Red", hex: "#DC2626" },
+    { name: "White", hex: "#FFFFFF" },
     { name: "Navy", hex: "#001F3F" },
 ];
 
 export default function AddProductPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const [existingCategories, setExistingCategories] = useState([]);
     const [customCategory, setCustomCategory] = useState("");
     const [showCustomCategory, setShowCustomCategory] = useState(false);
 
-    // Variants: array of { color, hex, imageFiles: File[], imagePreviews: string[] }
+    // Responsive track
+    useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth < 1024);
+        check();
+        window.addEventListener("resize", check);
+        return () => window.removeEventListener("resize", check);
+    }, []);
+
     const [variants, setVariants] = useState([]);
-    // General images (used when NO variants are added)
     const [generalImages, setGeneralImages] = useState([]);
+
+    const [showCustomColorForm, setShowCustomColorForm] = useState(false);
+    const [customColor, setCustomColor] = useState({ name: "", hex: "#000000" });
 
     const [formData, setFormData] = useState({
         name: "",
@@ -51,96 +61,21 @@ export default function AddProductPage() {
         soldOut: false,
     });
 
-    // Fetch existing categories from Firestore
     useEffect(() => {
         const fetchCategories = async () => {
-            try {
-                const snapshot = await getDocs(collection(db, "products"));
-                const cats = new Set();
-                snapshot.docs.forEach((d) => {
-                    const cat = d.data().category;
-                    if (cat) cats.add(cat);
-                });
-                setExistingCategories([...cats].sort());
-            } catch (err) {
-                console.error("Failed to load categories:", err);
-            }
+            const snapshot = await getDocs(collection(db, "products"));
+            const cats = new Set();
+            snapshot.docs.forEach((doc) => {
+                const cat = doc.data().category;
+                if (cat) cats.add(cat);
+            });
+            setExistingCategories([...cats].sort());
         };
         fetchCategories();
     }, []);
 
     const allCategories = [...new Set([...existingCategories, "men", "women", "couples"])].sort();
 
-    // --- General image handlers ---
-    const handleGeneralImageAdd = (e) => {
-        const files = Array.from(e.target.files);
-        files.forEach((file) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setGeneralImages((prev) => [...prev, { file, preview: reader.result }]);
-            };
-            reader.readAsDataURL(file);
-        });
-        e.target.value = "";
-    };
-
-    const removeGeneralImage = (index) => {
-        setGeneralImages((prev) => prev.filter((_, i) => i !== index));
-    };
-
-    // --- Variant handlers ---
-    const addVariant = (colorPreset) => {
-        if (variants.find((v) => v.color === colorPreset.name)) {
-            toast.error(`${colorPreset.name} variant already added`);
-            return;
-        }
-        setVariants((prev) => [
-            ...prev,
-            { color: colorPreset.name, hex: colorPreset.hex, imageFiles: [], imagePreviews: [] },
-        ]);
-    };
-
-    const removeVariant = (index) => {
-        setVariants((prev) => prev.filter((_, i) => i !== index));
-    };
-
-    const handleVariantImageAdd = (variantIndex, e) => {
-        const files = Array.from(e.target.files);
-        files.forEach((file) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setVariants((prev) =>
-                    prev.map((v, i) =>
-                        i === variantIndex
-                            ? {
-                                  ...v,
-                                  imageFiles: [...v.imageFiles, file],
-                                  imagePreviews: [...v.imagePreviews, reader.result],
-                              }
-                            : v
-                    )
-                );
-            };
-            reader.readAsDataURL(file);
-        });
-        e.target.value = "";
-    };
-
-    const removeVariantImage = (variantIndex, imgIndex) => {
-        setVariants((prev) =>
-            prev.map((v, i) =>
-                i === variantIndex
-                    ? {
-                          ...v,
-                          imageFiles: v.imageFiles.filter((_, j) => j !== imgIndex),
-                          imagePreviews: v.imagePreviews.filter((_, j) => j !== imgIndex),
-                      }
-                    : v
-            )
-        );
-    };
-
-    // --- Supabase upload helper ---
     const uploadToSupabase = async (file) => {
         const fileExt = file.name.split(".").pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -150,271 +85,234 @@ export default function AddProductPage() {
         return publicUrl;
     };
 
-    // --- Submit ---
+    const handleGeneralImageAdd = (e) => {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onloadend = () => setGeneralImages(prev => [...prev, { file, preview: reader.result }]);
+            reader.readAsDataURL(file);
+        });
+        e.target.value = "";
+    };
+
+    const removeGeneralImage = (index) => setGeneralImages(prev => prev.filter((_, i) => i !== index));
+
+    const addVariant = (preset) => {
+        if (variants.find(v => v.color === preset.name)) return toast.error("Already added");
+        setVariants(prev => [...prev, { color: preset.name, hex: preset.hex, files: [], previews: [] }]);
+        setShowCustomColorForm(false);
+    };
+
+    const handleAddCustomColor = () => {
+        if (!customColor.name) return toast.error("Enter color name");
+        addVariant(customColor);
+        setCustomColor({ name: "", hex: "#000000" });
+    };
+
+    const removeVariant = (index) => setVariants(prev => prev.filter((_, i) => i !== index));
+
+    const handleVariantImageAdd = (vIdx, e) => {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onloadend = () => setVariants(prev => prev.map((v, i) => i === vIdx ? { ...v, files: [...v.files, file], previews: [...v.previews, reader.result] } : v));
+            reader.readAsDataURL(file);
+        });
+        e.target.value = "";
+    };
+
+    const removeVariantImage = (vIdx, iIdx) => {
+        setVariants(prev => prev.map((v, i) => i === vIdx ? { ...v, files: v.files.filter((_, j) => j !== iIdx), previews: v.previews.filter((_, j) => j !== iIdx) } : v));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const hasVariants = variants.length > 0;
-        const hasGeneralImages = generalImages.length > 0;
-
-        if (!hasVariants && !hasGeneralImages) {
-            toast.error("Please upload at least one product image");
-            return;
-        }
-
-        if (hasVariants) {
-            const emptyVariant = variants.find((v) => v.imageFiles.length === 0);
-            if (emptyVariant) {
-                toast.error(`Please add at least one image for the ${emptyVariant.color} variant`);
-                return;
-            }
-        }
-
         const category = showCustomCategory ? customCategory.trim().toLowerCase() : formData.category;
-        if (!category) {
-            toast.error("Please select or enter a category");
-            return;
-        }
+        if (!category) return toast.error("Select category");
 
         setLoading(true);
-
         try {
             let imageUrl = "";
             let images = [];
             let variantsData = [];
 
-            if (hasVariants) {
+            if (variants.length > 0) {
                 for (const variant of variants) {
                     const urls = [];
-                    for (const file of variant.imageFiles) {
-                        const url = await uploadToSupabase(file);
-                        urls.push(url);
-                    }
+                    for (const file of variant.files) urls.push(await uploadToSupabase(file));
                     variantsData.push({ color: variant.color, hex: variant.hex, images: urls });
                 }
                 imageUrl = variantsData[0].images[0];
-                images = variantsData.flatMap((v) => v.images);
+                images = variantsData.flatMap(v => v.images);
             } else {
-                for (const img of generalImages) {
-                    const url = await uploadToSupabase(img.file);
-                    images.push(url);
-                }
-                imageUrl = images[0];
+                for (const img of generalImages) images.push(await uploadToSupabase(img.file));
+                imageUrl = images[0] || "";
             }
 
             await addDoc(collection(db, "products"), {
-                name: formData.name,
-                model: formData.model || "",
+                ...formData,
                 category,
                 price: parseFloat(formData.price),
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
-                description: formData.description,
-                mode: formData.mode,
-                soldOut: formData.soldOut,
                 imageUrl,
                 images,
-                variants: variantsData.length > 0 ? variantsData : [],
+                variants: variantsData,
                 createdAt: serverTimestamp(),
             });
 
-            toast.success("Product created successfully");
+            toast.success("Piece added to vault");
             router.push("/admin");
         } catch (error) {
-            console.error("Error adding product:", error);
-            toast.error("Failed to add product");
+            console.error(error);
+            toast.error("Failed to save");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen w-full flex justify-center items-start bg-gradient-to-br from-[#0b0b0f] via-[#0f0f14] to-[#0f0a06] text-white">
-            <div className="max-w-5xl md:max-w-[70%] w-full mx-auto px-6 py-14" style={{ padding: "2vw 1vw" }}>
-                <div className="mb-8 flex items-center gap-4">
+        <div className="min-h-screen text-white" style={{ background: "linear-gradient(135deg, #0b0b0f 0%, #0f0f14 50%, #0f0a06 100%)" }}>
+            <div style={{ maxWidth: "1200px", margin: "0 auto", padding: isMobile ? "40px 20px" : "60px 40px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "40px" }}>
                     <Link href="/admin">
-                        <Button variant="ghost" className="text-gray-400 hover:text-white">
+                        <Button variant="ghost" style={{ padding: "0", color: "#6b7280", borderRadius: "50%", width: "40px", height: "40px", border: "1px solid rgba(255,255,255,0.05)" }} className="hover:bg-white/5 hover:text-white">
                             <ArrowLeft size={20} />
                         </Button>
                     </Link>
                     <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-gold/80 mb-2">Create</p>
-                        <h1 className="text-3xl font-serif">Add New Product</h1>
+                        <p style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(201,168,76,0.8)", marginBottom: "4px", fontWeight: "bold" }}>Addition</p>
+                        <h1 style={{ fontSize: isMobile ? "28px" : "40px", fontFamily: "serif", fontWeight: "300" }}>Curate New Piece</h1>
                     </div>
                 </div>
 
-                <Card className="bg-[#121214] border border-white/10 shadow-2xl shadow-black/50 rounded-2xl" style={{ padding: "2vw 1vw" }}>
-                    <CardHeader className="space-y-2">
-                        <CardTitle className="text-2xl">Product Details</CardTitle>
-                        <CardDescription>Upload imagery and metadata for the catalog.</CardDescription>
-                    </CardHeader>
-                    <CardContent style={{ padding: "2vw 1vw" }}>
-                        <form onSubmit={handleSubmit} className="space-y-8">
-                            {/* --- Basic Info --- */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Product Name *</Label>
-                                    <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Rollie Date Just Watch" required style={{ padding: "1vw" }} />
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "32px", alignItems: "start" }}>
+                    <div style={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: "32px" }}>
+                        <Card style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: isMobile ? "24px" : "40px", borderRadius: "24px" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "24px" }}>
+                                <div style={{ gridColumn: isMobile ? "auto" : "1 / -1" }}>
+                                    <Label style={{ fontSize: "10px", textTransform: "uppercase", color: "#9ca3af", marginBottom: "12px", display: "block" }}>Masterpiece Name</Label>
+                                    <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", height: "50px", borderRadius: "12px" }} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="model">Model Number</Label>
-                                    <Input id="model" value={formData.model} onChange={(e) => setFormData({ ...formData, model: e.target.value })} placeholder="e.g. RLX-3499" style={{ padding: "1vw" }} />
-                                    <p className="text-xs text-gray-500">Displayed on the product page.</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="price">Price (PKR) *</Label>
-                                    <Input id="price" type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} placeholder="e.g. 5000" required style={{ padding: "1vw" }} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="discount">Discount (%)</Label>
-                                    <Input id="discount" type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} placeholder="e.g. 20" min="0" max="100" style={{ padding: "1vw" }} />
-                                    <p className="text-xs text-gray-500">Leave empty if no discount.</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="category">Category *</Label>
-                                    {!showCustomCategory ? (
-                                        <div className="space-y-2">
-                                            <div className="relative">
-                                                <select id="category" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="flex h-10 w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold appearance-none cursor-pointer capitalize" style={{ padding: "0vw 1vw" }}>
-                                                    <option value="" disabled>Select Category</option>
-                                                    {allCategories.map((cat) => (
-                                                        <option key={cat} value={cat} className="capitalize">{cat}</option>
-                                                    ))}
-                                                </select>
-                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
-                                            </div>
-                                            <button type="button" onClick={() => setShowCustomCategory(true)} className="text-xs text-gold hover:text-gold-light transition-colors">
-                                                + Add new category
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-2">
-                                            <Input value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} placeholder="Type new category name" style={{ padding: "1vw" }} />
-                                            <button type="button" onClick={() => { setShowCustomCategory(false); setCustomCategory(""); }} className="text-xs text-gray-400 hover:text-white transition-colors">
-                                                ← Back to existing categories
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="mode">Badge / Mode</Label>
-                                    <div className="relative">
-                                        <select id="mode" value={formData.mode} onChange={(e) => setFormData({ ...formData, mode: e.target.value })} className="flex h-10 w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold appearance-none cursor-pointer" style={{ padding: "0vw 1vw" }}>
-                                            <option value="new">New</option>
-                                            <option value="sale">Sale</option>
-                                            <option value="featured">Featured</option>
-                                        </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">▼</div>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="soldOut" className="flex items-center gap-2 cursor-pointer h-full pt-6">
-                                        <input
-                                            type="checkbox"
-                                            id="soldOut"
-                                            checked={formData.soldOut}
-                                            onChange={(e) => setFormData({ ...formData, soldOut: e.target.checked })}
-                                            className="w-4 h-4 text-gold border-white/10 rounded focus:ring-gold bg-dark-card"
-                                        />
-                                        Mark as Sold Out
-                                    </Label>
-                                </div>
-                                <div className="space-y-2 md:col-span-2">
-                                    <Label htmlFor="description">Description (Optional)</Label>
-                                    <textarea id="description" className="flex min-h-[100px] w-full rounded-md border border-white/10 bg-dark-card px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Product details..." style={{ padding: "1vw" }} />
-                                </div>
-                            </div>
-
-                            {/* --- Color Variants Section --- */}
-                            <div className="space-y-4 border-t border-white/10 pt-8">
                                 <div>
-                                    <h3 className="text-lg font-serif text-white mb-1">Color Variants</h3>
-                                    <p className="text-xs text-gray-500">Add color variants with separate images for each. If you don&apos;t need color variants, skip this and add general images below.</p>
+                                    <Label style={{ fontSize: "10px", textTransform: "uppercase", color: "#9ca3af", marginBottom: "12px", display: "block" }}>Reference</Label>
+                                    <Input value={formData.model} onChange={(e) => setFormData({ ...formData, model: e.target.value })} placeholder="Ref #" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", height: "50px", borderRadius: "12px" }} />
                                 </div>
-
-                                <div className="space-y-2">
-                                    <Label>Select Colors to Add</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {COLOR_PRESETS.map((preset) => {
-                                            const isAdded = variants.some((v) => v.color === preset.name);
-                                            return (
-                                                <button key={preset.name} type="button" onClick={() => !isAdded && addVariant(preset)} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs transition-all ${isAdded ? "border-gold/50 bg-gold/10 text-gold cursor-default" : "border-white/10 text-gray-300 hover:border-gold hover:text-gold cursor-pointer"}`}>
-                                                    <span className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0" style={{ backgroundColor: preset.hex }} />
-                                                    {preset.name}
-                                                    {isAdded && <span className="text-gold">✓</span>}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
+                                <div>
+                                    <Label style={{ fontSize: "10px", textTransform: "uppercase", color: "#9ca3af", marginBottom: "12px", display: "block" }}>Price (PKR)</Label>
+                                    <Input type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", height: "50px", borderRadius: "12px" }} />
                                 </div>
+                                <div style={{ gridColumn: isMobile ? "auto" : "1 / -1" }}>
+                                    <Label style={{ fontSize: "10px", textTransform: "uppercase", color: "#9ca3af", marginBottom: "12px", display: "block" }}>Description</Label>
+                                    <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} style={{ width: "100%", minHeight: "120px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", padding: "16px", color: "white", outline: "none", resize: "none" }} />
+                                </div>
+                            </div>
+                        </Card>
 
-                                {variants.length > 0 && (
-                                    <div className="space-y-4">
-                                        {variants.map((variant, vIdx) => (
-                                            <div key={variant.color} className="border border-white/10 rounded-lg p-4 space-y-3 bg-white/[0.02]">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: variant.hex }} />
-                                                        <span className="text-sm font-medium text-white">{variant.color}</span>
-                                                        <span className="text-xs text-gray-500">({variant.imagePreviews.length} images)</span>
-                                                    </div>
-                                                    <button type="button" onClick={() => removeVariant(vIdx)} className="text-red-400 hover:text-red-300 transition-colors cursor-pointer">
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                                <div className="flex flex-wrap gap-3">
-                                                    {variant.imagePreviews.map((preview, iIdx) => (
-                                                        <div key={iIdx} className="relative w-20 h-20 rounded-md overflow-hidden border border-white/10 group">
-                                                            <img src={preview} alt="" className="w-full h-full object-cover" />
-                                                            <button type="button" onClick={() => removeVariantImage(vIdx, iIdx)} className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                                                                <X size={16} className="text-red-400" />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                    <label className="w-20 h-20 rounded-md border-2 border-dashed border-white/10 hover:border-gold/50 flex items-center justify-center cursor-pointer transition-colors">
-                                                        <Plus size={20} className="text-gray-500" />
-                                                        <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => handleVariantImageAdd(vIdx, e)} />
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                        <Card style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: isMobile ? "24px" : "40px", borderRadius: "24px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                                <h3 style={{ fontSize: "18px", fontFamily: "serif", fontWeight: "300" }}>Edition Allocation</h3>
+                                <Button type="button" onClick={() => setShowCustomColorForm(!showCustomColorForm)} variant="ghost" style={{ fontSize: "9px", color: "#C9A84C", gap: "6px" }} className="hover:bg-gold/10">
+                                    <Palette size={12} /> Custom
+                                </Button>
                             </div>
 
-                            {/* --- General Images (when no variants) --- */}
-                            {variants.length === 0 && (
-                                <div className="space-y-4 border-t border-white/10 pt-8">
-                                    <div>
-                                        <h3 className="text-lg font-serif text-white mb-1">Product Images *</h3>
-                                        <p className="text-xs text-gray-500">Upload one or more images. First image will be the main thumbnail.</p>
-                                    </div>
-                                    <div className="flex flex-wrap gap-3">
-                                        {generalImages.map((img, idx) => (
-                                            <div key={idx} className={`relative w-28 h-28 rounded-lg overflow-hidden border group ${idx === 0 ? "border-gold/50 ring-2 ring-gold/20" : "border-white/10"}`}>
-                                                <img src={img.preview} alt="" className="w-full h-full object-cover" />
-                                                {idx === 0 && <span className="absolute top-1 left-1 bg-gold text-black text-[9px] font-bold px-1.5 py-0.5 rounded">MAIN</span>}
-                                                <button type="button" onClick={() => removeGeneralImage(idx)} className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                                                    <X size={18} className="text-red-400" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                        <label className="w-28 h-28 rounded-lg border-2 border-dashed border-white/10 hover:border-gold/50 flex flex-col items-center justify-center cursor-pointer transition-colors gap-1">
-                                            <Upload size={24} className="text-gray-500" />
-                                            <span className="text-[10px] text-gray-500">Add Image</span>
-                                            <input type="file" className="hidden" accept="image/*" multiple onChange={handleGeneralImageAdd} />
-                                        </label>
-                                    </div>
+                            {showCustomColorForm && (
+                                <div style={{ background: "rgba(0,0,0,0.2)", padding: "20px", borderRadius: "16px", marginBottom: "24px", display: "flex", gap: "12px", alignItems: "end" }}>
+                                    <div style={{ flex: 1 }}><Input value={customColor.name} onChange={(e) => setCustomColor({...customColor, name: e.target.value})} placeholder="Color Name" style={{ height: "40px" }} /></div>
+                                    <div><input type="color" value={customColor.hex} onChange={(e) => setCustomColor({...customColor, hex: e.target.value})} style={{ width: "40px", height: "40px", background: "none", border: "none", cursor: "pointer" }} /></div>
+                                    <Button type="button" onClick={handleAddCustomColor} style={{ background: "#C9A84C", color: "black", height: "40px" }}>Add</Button>
                                 </div>
                             )}
 
-                            <div className="pt-4 flex justify-center">
-                                <Button type="submit" size="lg" className="bg-gold cursor-pointer text-black hover:bg-gold-light font-bold shadow-lg shadow-gold/20" disabled={loading} style={{ padding: "1vw 2vw", marginTop: "2vw" }}>
-                                    {loading ? "Creating..." : "Create Product"}
-                                </Button>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "32px" }}>
+                                {COLOR_PRESETS.map((p) => (
+                                    <button key={p.name} type="button" onClick={() => addVariant(p)} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 12px", borderRadius: "99px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", fontSize: "11px", color: "#d1d5db" }} className="hover:border-gold">
+                                        <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: p.hex, border: "1px solid rgba(255,255,255,0.2)" }} /> {p.name}
+                                    </button>
+                                ))}
                             </div>
-                        </form>
-                    </CardContent>
-                </Card>
+
+                            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                {variants.map((v, vIdx) => (
+                                    <div key={v.color} style={{ background: "rgba(0,0,0,0.3)", padding: "20px", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                                <div style={{ width: "18px", height: "18px", borderRadius: "50%", background: v.hex, border: "1px solid rgba(255,255,255,0.2)" }} />
+                                                <span style={{ fontWeight: "bold", fontSize: "13px" }}>{v.color}</span>
+                                            </div>
+                                            <button type="button" onClick={() => removeVariant(vIdx)} style={{ color: "#ef4444", opacity: 0.6 }} className="hover:opacity-100"><Trash2 size={16} /></button>
+                                        </div>
+                                        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                                            {v.previews.map((p, pIdx) => (
+                                                <div key={pIdx} style={{ width: "70px", height: "70px", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
+                                                    <img src={p} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
+                                                    <button type="button" onClick={() => removeVariantImage(vIdx, pIdx)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0 }} className="hover:opacity-100"><X size={14} /></button>
+                                                </div>
+                                            ))}
+                                            <label style={{ width: "70px", height: "70px", borderRadius: "10px", border: "2px dashed rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} className="hover:border-gold/50">
+                                                <Plus size={20} style={{ color: "#6b7280" }} />
+                                                <input type="file" className="hidden" multiple accept="image/*" onChange={(e) => handleVariantImageAdd(vIdx, e)} />
+                                            </label>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+                    </div>
+
+                    <div style={{ width: isMobile ? "100%" : "350px", display: "flex", flexDirection: "column", gap: "32px", position: isMobile ? "static" : "sticky", top: "40px" }}>
+                        <Card style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: "24px", borderRadius: "24px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                                <div>
+                                    <Label style={{ fontSize: "9px", textTransform: "uppercase", color: "#6b7280", marginBottom: "10px", display: "block" }}>Collection</Label>
+                                    {!showCustomCategory ? (
+                                        <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "12px", color: "white", outline: "none" }}>
+                                            <option value="">Select Category</option>
+                                            {allCategories.map(c => <option key={c} value={c} style={{ background: "#1a1a1a" }}>{c.toUpperCase()}</option>)}
+                                        </select>
+                                    ) : (
+                                        <Input value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} placeholder="New Category" />
+                                    )}
+                                    <button type="button" onClick={() => setShowCustomCategory(!showCustomCategory)} style={{ fontSize: "9px", color: "#C9A84C", marginTop: "8px" }}>{showCustomCategory ? "← Cancel" : "+ Add Custom"}</button>
+                                </div>
+                                <div>
+                                    <Label style={{ fontSize: "9px", textTransform: "uppercase", color: "#6b7280", marginBottom: "10px", display: "block" }}>Configuration</Label>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                                        <select value={formData.mode} onChange={(e) => setFormData({ ...formData, mode: e.target.value })} style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "12px", color: "white" }}>
+                                            <option value="new">NEW</option>
+                                            <option value="sale">SALE</option>
+                                            <option value="featured">FEATURED</option>
+                                        </select>
+                                        <Input type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} placeholder="D. %" style={{ borderRadius: "10px" }} />
+                                    </div>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px", background: "rgba(0,0,0,0.2)", borderRadius: "12px" }}>
+                                    <input type="checkbox" checked={formData.soldOut} onChange={(e) => setFormData({...formData, soldOut: e.target.checked})} id="soldOut" />
+                                    <Label htmlFor="soldOut" style={{ fontSize: "11px", fontWeight: "bold" }}>MARK SOLD OUT</Label>
+                                </div>
+                            </div>
+                        </Card>
+
+                        {variants.length === 0 && (
+                            <Card style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: "24px", borderRadius: "24px" }}>
+                                <h3 style={{ fontSize: "15px", marginBottom: "16px" }}>Visual Assets</h3>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                                    {generalImages.map((img, idx) => (
+                                        <div key={idx} style={{ width: "70px", height: "70px", borderRadius: "10px", overflow: "hidden", border: idx === 0 ? "2px solid #C9A84C" : "1px solid rgba(255,255,255,0.1)", position: "relative" }}>
+                                            <img src={img.preview} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
+                                            <button type="button" onClick={() => removeGeneralImage(idx)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0 }} className="hover:opacity-100"><X size={14} /></button>
+                                        </div>
+                                    ))}
+                                    <label style={{ width: "70px", height: "70px", borderRadius: "10px", border: "2px dashed rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Upload size={20} style={{ color: "#6b7280" }} /><input type="file" className="hidden" multiple accept="image/*" onChange={handleGeneralImageAdd} /></label>
+                                </div>
+                            </Card>
+                        )}
+
+                        <Button type="submit" disabled={loading} style={{ width: "100%", height: "64px", background: "#C9A84C", color: "black", borderRadius: "16px", fontWeight: "900", letterSpacing: "0.2em", fontSize: "11px" }}>
+                            {loading ? "INITIALIZING VAULT..." : "COMMIT TO CATALOG"}
+                        </Button>
+                    </div>
+                </form>
             </div>
         </div>
     );

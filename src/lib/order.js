@@ -1,4 +1,4 @@
-const ORDER_WHATSAPP_NUMBER = "923345062546";
+const ORDER_WHATSAPP_NUMBER = "923095225815";
 
 function normalizeText(value) {
     return String(value ?? "").trim().toLowerCase();
