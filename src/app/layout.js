@@ -129,7 +129,7 @@ export default function RootLayout({ children }) {
                   },
                   contactPoint: {
                     "@type": "ContactPoint",
-                    telephone: "+92-317-5177780",
+                    telephone: "+92-334-5062546",
                     contactType: "sales",
                     areaServed: "PK",
                     availableLanguage: ["en", "ur"],

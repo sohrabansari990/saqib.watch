@@ -173,7 +173,7 @@ export default function Footer() {
                                 <span className="text-sm font-medium tracking-wide">Order on WhatsApp</span>
                             </a>
                             {/* <a
-                                href="https://wa.me/+923175177780"
+                                href="https://wa.me/923345062546"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="group flex items-center gap-3 text-white border border-white/10 px-6 py-3 rounded-full hover:border-[#25D366] hover:bg-[#25D366]/5 transition-all duration-300 w-fit"
@@ -182,11 +182,11 @@ export default function Footer() {
                                 <span className="text-sm font-medium tracking-wide">Connect on WhatsApp</span>
                             </a> */}
                             <a
-                                href="tel:+92 309 5225815"
+                                href="tel:+923345062546"
                                 className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-300 px-6 py-2 w-fit"
                             >
                                 <FaPhone size={14} className="text-gold" />
-                                <span className="text-sm font-light tracking-widest">+92 309 5225815</span>
+                                <span className="text-sm font-light tracking-widest">+92 334 5062546</span>
                             </a>
                         </div>
                     </div>
