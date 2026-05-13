@@ -1,20 +1,51 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
-const PRELOADER_ANIMATION =
-  "https://lottie.host/4ebb8e27-9608-4fdd-ac0b-b3a77136b1ac/tZAOaJ6pgy.lottie";
+const PRELOADER_DURATION_MS = 2200;
+const PRELOADER_EXIT_DELAY_MS = 180;
+const RING_SIZE = 250;
+const STROKE_WIDTH = 8;
+const RADIUS = (RING_SIZE - STROKE_WIDTH) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export default function HomePreloader() {
+  const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setVisible(false), 2500);
-    return () => window.clearTimeout(timer);
+    let frameId = 0;
+    let finished = false;
+    const startTime = performance.now();
+
+    const tick = (now) => {
+      const elapsed = now - startTime;
+      const rawProgress = Math.min(elapsed / PRELOADER_DURATION_MS, 1);
+      const easedProgress = 1 - Math.pow(1 - rawProgress, 2.25);
+      const nextValue = Math.min(Math.round(easedProgress * 100), 100);
+
+      setProgress(nextValue);
+
+      if (rawProgress < 1) {
+        frameId = window.requestAnimationFrame(tick);
+        return;
+      }
+
+      if (!finished) {
+        finished = true;
+        setExiting(true);
+        window.setTimeout(() => setVisible(false), PRELOADER_EXIT_DELAY_MS);
+      }
+    };
+
+    frameId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frameId);
   }, []);
 
   if (!visible) return null;
+
+  const dashOffset = CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE;
 
   return (
     <div
@@ -27,34 +58,18 @@ export default function HomePreloader() {
         justifyContent: "center",
         overflow: "hidden",
         background:
-          "radial-gradient(circle at top, rgba(201,169,110,0.16), transparent 30%), #050505",
+          "radial-gradient(circle at center, rgba(201,169,110,0.14), transparent 24%), radial-gradient(circle at top, rgba(201,169,110,0.08), transparent 30%), #050505",
         color: "#f8f5ef",
+        opacity: exiting ? 0 : 1,
+        transition: `opacity ${PRELOADER_EXIT_DELAY_MS}ms ease`,
       }}
     >
-      <video
-        src="/clock time.webm"
-        autoPlay
-        muted
-        loop
-        playsInline
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          opacity: 0.16,
-          mixBlendMode: "screen",
-          filter: "sepia(1) saturate(1.25) hue-rotate(350deg) brightness(0.82)",
-        }}
-      />
-
       <div
         style={{
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(180deg, rgba(5,5,5,0.48), rgba(5,5,5,0.9))",
+            "linear-gradient(180deg, rgba(5,5,5,0.2), rgba(5,5,5,0.84))",
           pointerEvents: "none",
         }}
       />
@@ -69,31 +84,92 @@ export default function HomePreloader() {
       >
         <div
           style={{
-            width: "min(68vw, 280px)",
-            height: "min(68vw, 280px)",
+            width: `${RING_SIZE}px`,
+            height: `${RING_SIZE}px`,
+            maxWidth: "68vw",
+            maxHeight: "68vw",
             margin: "0 auto 18px",
-            borderRadius: "999px",
-            border: "1px solid rgba(201,169,110,0.34)",
-            background:
-              "radial-gradient(circle at center, rgba(201,169,110,0.1), rgba(5,5,5,0.72) 70%)",
-            boxShadow:
-              "0 0 0 1px rgba(201,169,110,0.12), 0 26px 80px rgba(0,0,0,0.55)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
+            position: "relative",
+            display: "grid",
+            placeItems: "center",
           }}
         >
-          <div
+          <svg
+            viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
             style={{
-              width: "90%",
-              height: "90%",
-              filter:
-                "brightness(0) saturate(100%) invert(77%) sepia(29%) saturate(673%) hue-rotate(356deg) brightness(94%) contrast(90%)",
-              opacity: 0.98,
+              width: "100%",
+              height: "100%",
+              overflow: "visible",
+              transform: "rotate(-90deg)",
+              filter: "drop-shadow(0 0 28px rgba(201,169,110,0.18))",
             }}
           >
-            <DotLottieReact src={PRELOADER_ANIMATION} loop autoplay />
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RADIUS}
+              fill="transparent"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={STROKE_WIDTH}
+            />
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RADIUS}
+              fill="transparent"
+              stroke="#c9a96e"
+              strokeWidth={STROKE_WIDTH}
+              strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={dashOffset}
+            />
+          </svg>
+
+          <div
+            style={{
+              position: "absolute",
+              inset: "11%",
+              borderRadius: "999px",
+              border: "1px solid rgba(201,169,110,0.24)",
+              background:
+                "radial-gradient(circle at center, rgba(201,169,110,0.08), rgba(10,10,10,0.9) 68%)",
+              boxShadow:
+                "inset 0 0 40px rgba(201,169,110,0.08), 0 18px 60px rgba(0,0,0,0.45)",
+            }}
+          />
+
+          <div
+            style={{
+              position: "absolute",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+            }}
+          >
+            <span
+              style={{
+                color: "#c9a96e",
+                fontSize: "clamp(34px, 7vw, 52px)",
+                lineHeight: 1,
+                fontWeight: 700,
+                fontFamily: "var(--font-cormorant-garamond), Georgia, serif",
+              }}
+            >
+              {progress}
+            </span>
+            <span
+              style={{
+                color: "rgba(248,245,239,0.78)",
+                fontSize: "12px",
+                fontWeight: 800,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+              }}
+            >
+              Percent
+            </span>
           </div>
         </div>
 
@@ -111,26 +187,14 @@ export default function HomePreloader() {
         <p
           style={{
             marginTop: "8px",
-            color: "rgba(248,245,239,0.58)",
+            color: "rgba(248,245,239,0.62)",
             fontSize: "12px",
-            letterSpacing: "0.18em",
+            letterSpacing: "0.16em",
             textTransform: "uppercase",
           }}
         >
-          Curating your collection
+          Loading, almost there
         </p>
-        <div
-          style={{
-            margin: "18px auto 0",
-            width: "190px",
-            height: "3px",
-            borderRadius: "999px",
-            overflow: "hidden",
-            background: "rgba(255,255,255,0.1)",
-          }}
-        >
-          <div className="home-preloader-bar" />
-        </div>
       </div>
     </div>
   );

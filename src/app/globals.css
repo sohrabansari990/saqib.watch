@@ -139,24 +139,6 @@ section:not(:first-of-type) {
   pointer-events: auto;
 }
 
-@keyframes home-preloader-progress {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(0%);
-  }
-}
-
-.home-preloader-bar {
-  width: 100%;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #c9a96e, #f8f5ef);
-  animation: home-preloader-progress 2.25s ease forwards;
-}
-
 @media (min-width: 768px) {
   .gallery-view-controls {
     display: flex !important;
