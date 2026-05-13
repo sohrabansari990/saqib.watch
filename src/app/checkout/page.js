@@ -332,6 +332,11 @@ export default function CheckoutPage() {
     };
 
     const handleWhatsAppOrder = () => {
+        if (!formData.name || !formData.whatsapp || !formData.address || !formData.city) {
+            toast.error("Please fill in the required shipping fields first.");
+            return;
+        }
+
         const message = buildWhatsAppOrderMessage({
             title: "🛍️ *CHECKOUT ORDER — Saqib Watches*",
             items: cart,
@@ -339,7 +344,7 @@ export default function CheckoutPage() {
             totalAmount: total,
             paymentMethod: paymentMethod === "cod" ? "Cash on Delivery" : "Easypaisa",
             intro: "I'd like to place this order via WhatsApp.",
-            outro: "Please confirm availability.",
+            outro: "Please confirm availability and delivery details.",
         });
 
         window.open(buildWhatsAppUrl(message), "_blank");
@@ -753,28 +758,25 @@ export default function CheckoutPage() {
                                         onClick={handleWhatsAppOrder}
                                         style={{
                                             width: "100%",
-                                            height: "64px",
-                                            padding: "0 28px",
-                                            background: "rgba(37, 211, 102, 0.08)",
-                                            color: "#25D366",
+                                            height: "62px",
+                                            marginBottom: "14px",
                                             borderRadius: "18px",
-                                            fontSize: "13px",
-                                            fontWeight: "bold",
-                                            textTransform: "uppercase",
-                                            letterSpacing: "0.2em",
+                                            border: "1px solid rgba(37,211,102,0.35)",
+                                            background: "rgba(37,211,102,0.08)",
+                                            color: "#25D366",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             gap: "12px",
-                                            transition: "all 0.3s",
-                                            border: "1px solid rgba(37, 211, 102, 0.25)",
+                                            fontSize: "12px",
+                                            fontWeight: 900,
+                                            letterSpacing: "0.18em",
+                                            textTransform: "uppercase",
                                             cursor: "pointer",
-                                            marginBottom: "16px",
                                         }}
-                                        className="hover:bg-[#25D366] hover:text-black"
                                     >
                                         <FaWhatsapp size={18} />
-                                        Order on WhatsApp
+                                        Place Order via WhatsApp
                                     </button>
 
                                     <button

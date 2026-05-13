@@ -5,14 +5,10 @@ import {
     FaFacebookF,
     FaInstagram,
     FaTiktok,
-    FaWhatsapp,
     FaPhone,
     FaMapMarkerAlt,
     FaArrowRight,
 } from "react-icons/fa";
-import { buildWhatsAppUrl } from "@/lib/order";
-
-const ORDER_WHATSAPP_MESSAGE = "Hi! I'd like to place an order from Saqib Watches. Please share the best available options with me.";
 
 const quickLinks = [
     { label: "Home", href: "/" },
@@ -162,25 +158,6 @@ export default function Footer() {
                         </div>
 
                         <div className="flex flex-col gap-4 pt-4">
-                            <a
-                                href={buildWhatsAppUrl(ORDER_WHATSAPP_MESSAGE)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ padding: "12px 20px" }}
-                                className="group flex items-center gap-3 text-white border border-[#25D366]/25 px-6 py-3 rounded-full hover:border-[#25D366] hover:bg-[#25D366]/5 transition-all duration-300 w-fit"
-                            >
-                                <FaWhatsapp size={18} className="text-[#25D366]" />
-                                <span className="text-sm font-medium tracking-wide">Order on WhatsApp</span>
-                            </a>
-                            {/* <a
-                                href="https://wa.me/923345062546"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group flex items-center gap-3 text-white border border-white/10 px-6 py-3 rounded-full hover:border-[#25D366] hover:bg-[#25D366]/5 transition-all duration-300 w-fit"
-                            >
-                                <FaWhatsapp size={18} className="text-[#25D366]" />
-                                <span className="text-sm font-medium tracking-wide">Connect on WhatsApp</span>
-                            </a> */}
                             <a
                                 href="tel:+923345062546"
                                 className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-300 px-6 py-2 w-fit"

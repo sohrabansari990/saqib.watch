@@ -3,18 +3,17 @@
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
-import { FaWhatsapp } from "react-icons/fa";
-import { buildProductWhatsAppMessage, buildWhatsAppUrl } from "@/lib/order";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, Zap } from "lucide-react";
+import { ShieldCheck, ShoppingBag, Zap } from "lucide-react";
 
-export default function ProductActions({ product, selectedColor }) {
+export default function ProductActions({ product, selectedColor, selectedVariantAvailable = true }) {
     const { addToCart, clearCart } = useCart();
     const [loading, setLoading] = useState(false);
     const [buyNowLoading, setBuyNowLoading] = useState(false);
     const router = useRouter();
 
-    const isSoldOut = product.soldOut === true;
+    const isProductSoldOut = product.soldOut === true;
+    const isSoldOut = isProductSoldOut || selectedVariantAvailable === false;
 
     const handleAddToCart = () => {
         if (isSoldOut) return;
@@ -36,11 +35,6 @@ export default function ProductActions({ product, selectedColor }) {
         }, 300);
     };
 
-    const handleWhatsAppOrder = () => {
-        const message = buildProductWhatsAppMessage(product, selectedColor);
-        window.open(buildWhatsAppUrl(message), "_blank");
-    };
-
     return (
         <div className="flex flex-col gap-4 mt-8">
             <div className="flex flex-col sm:flex-row gap-3">
@@ -53,7 +47,7 @@ export default function ProductActions({ product, selectedColor }) {
                     style={{ paddingTop: '1.5rem', paddingBottom: '1.5rem' }}
                 >
                     <ShoppingBag size={16} className="mr-2" />
-                    {isSoldOut ? "Sold Out" : loading ? "Adding..." : "Add to Cart"}
+                    {isProductSoldOut ? "Sold Out" : selectedVariantAvailable === false ? "Color Unavailable" : loading ? "Adding..." : "Add to Cart"}
                 </Button>
                 <Button
                     size="lg"
@@ -66,14 +60,10 @@ export default function ProductActions({ product, selectedColor }) {
                     {isSoldOut ? "Unavailable" : buyNowLoading ? "Redirecting..." : "Buy It Now"}
                 </Button>
             </div>
-            <Button
-                size="lg"
-                className="w-full px-8 py-6 text-xs tracking-[0.2em] uppercase font-bold bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366] text-[#25D366] hover:text-black transition-all cursor-pointer"
-                onClick={handleWhatsAppOrder}
-            >
-                <FaWhatsapp size={18} className="mr-2" />
-                Order on WhatsApp
-            </Button>
+            <div className="flex items-center justify-center gap-2 text-[11px] text-gray-400">
+                <ShieldCheck size={13} className="text-gold" />
+                Confirm color and delivery at checkout.
+            </div>
         </div>
     );
 }

@@ -12,7 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import ProductActions from "@/components/ProductActions";
 import CollectionLoader from "@/components/CollectionLoader";
 import { useFavorites } from "@/context/FavoritesContext";
-import { Heart, ShieldCheck, Truck, RotateCcw, Star } from "lucide-react";
+import { BadgeCheck, Clock3, Heart, PackageCheck, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -20,6 +21,40 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Image from "next/image";
 import { cacheProducts, getCachedCatalog, getCachedProduct, getSimilarProducts } from "@/lib/productCache";
+import { getImageFrameAspectRatio } from "@/lib/imageFrame";
+
+function isVariantAvailable(variant) {
+  return variant?.available !== false && Array.isArray(variant?.images) && variant.images.length > 0;
+}
+
+function getInitialSelectedColor(product) {
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  return variants.find(isVariantAvailable)?.color || variants[0]?.color || null;
+}
+
+function ProductImageWithSkeleton({ src, alt, sizes = "100vw", priority = false, className = "", style, onLoad }) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <>
+      {!loaded && <div className="skeleton-surface absolute inset-0 z-10" />}
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+        className={cn(className, "transition-opacity duration-300", loaded ? "opacity-100" : "opacity-0")}
+        style={style}
+        onLoad={(event) => {
+          setLoaded(true);
+          onLoad?.(event);
+        }}
+        onError={() => setLoaded(true)}
+      />
+    </>
+  );
+}
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -33,6 +68,7 @@ export default function ProductPage() {
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [swiper, setSwiper] = useState(null);
+  const [imageDimensions, setImageDimensions] = useState({});
   const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
@@ -45,7 +81,7 @@ export default function ProductPage() {
 
       if (cachedProduct) {
         setProduct(cachedProduct);
-        setSelectedColor(cachedProduct.variants && cachedProduct.variants.length > 0 ? cachedProduct.variants[0].color : null);
+        setSelectedColor(getInitialSelectedColor(cachedProduct));
         setLoading(false);
 
         if (cachedCatalog?.products?.length) {
@@ -73,7 +109,7 @@ export default function ProductPage() {
         if (docSnap.exists()) {
           const data = { id: docSnap.id, ...docSnap.data() };
           setProduct(data);
-          setSelectedColor(data.variants && data.variants.length > 0 ? data.variants[0].color : null);
+          setSelectedColor(getInitialSelectedColor(data));
           cacheProducts([data]);
           setLoading(false);
 
@@ -130,7 +166,10 @@ export default function ProductPage() {
     const hasVariants = product.variants && product.variants.length > 0;
     if (hasVariants) {
       const imgs = [];
-      product.variants.forEach((variant) => {
+      const availableVariants = product.variants.filter(isVariantAvailable);
+      const visibleVariants = availableVariants.length > 0 ? availableVariants : product.variants;
+
+      visibleVariants.forEach((variant) => {
         (variant.images || []).forEach((url) => {
           imgs.push({ url, color: variant.color });
         });
@@ -165,6 +204,26 @@ export default function ProductPage() {
 
   const hasVariants = product.variants && product.variants.length > 0;
   const mainImage = allImages[selectedThumbIndex] || allImages[0];
+  const selectedVariant = hasVariants ? product.variants.find((variant) => variant.color === selectedColor) : null;
+  const selectedVariantAvailable = !hasVariants || isVariantAvailable(selectedVariant);
+  const getFrameAspect = (sourceProduct, imageUrl, fallback = "portrait") =>
+    getImageFrameAspectRatio(sourceProduct?.imageAspect, imageDimensions[imageUrl], fallback);
+  const handleImageLoad = (imageUrl, event) => {
+    if (!imageUrl) return;
+    const { naturalWidth, naturalHeight } = event.currentTarget;
+    if (!naturalWidth || !naturalHeight) return;
+
+    setImageDimensions((current) => {
+      const previous = current[imageUrl];
+      if (previous?.width === naturalWidth && previous?.height === naturalHeight) {
+        return current;
+      }
+      return {
+        ...current,
+        [imageUrl]: { width: naturalWidth, height: naturalHeight },
+      };
+    });
+  };
 
   // Click a thumbnail: show that image & update selected color
   const handleThumbClick = (idx) => {
@@ -175,6 +234,9 @@ export default function ProductPage() {
 
   // Click a color swatch: jump to first image of that color
   const handleColorChange = (color) => {
+    const variant = product.variants?.find((item) => item.color === color);
+    if (variant && !isVariantAvailable(variant)) return;
+
     setSelectedColor(color);
     const firstIdx = allImages.findIndex((img) => img.color === color);
     if (firstIdx !== -1) {
@@ -183,20 +245,162 @@ export default function ProductPage() {
     }
   };
 
+  const handleShareOnWhatsApp = () => {
+    const url = window.location.href;
+    window.open(`https://wa.me/?text=Check out this watch: ${url}`, "_blank");
+  };
+
+  const renderColorOptions = (keyPrefix = "color") => {
+    if (!hasVariants) return null;
+
+    return (
+      <div style={{ marginBottom: "22px" }}>
+        <span
+          style={{
+            color: "#9ca3af",
+            fontSize: "12px",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            display: "block",
+            marginBottom: "12px",
+          }}
+        >
+          Color:{" "}
+          <span style={{ color: "#fff", textTransform: "capitalize", fontWeight: 700 }}>
+            {selectedColor || "Select"}
+          </span>
+        </span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+          {product.variants.map((variant) => {
+            const isSelected = selectedColor === variant.color;
+            const isAvailable = isVariantAvailable(variant);
+
+            return (
+              <button
+                key={`${keyPrefix}-${variant.color}`}
+                type="button"
+                onClick={() => handleColorChange(variant.color)}
+                disabled={!isAvailable}
+                title={isAvailable ? variant.color : `${variant.color} unavailable`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  minHeight: "42px",
+                  padding: "0 13px 0 8px",
+                  borderRadius: "999px",
+                  border: isSelected ? "1px solid #c9a96e" : "1px solid rgba(255,255,255,0.12)",
+                  background: isSelected ? "rgba(201,169,110,0.16)" : "rgba(255,255,255,0.035)",
+                  color: isAvailable ? "#f9fafb" : "#6b7280",
+                  cursor: isAvailable ? "pointer" : "not-allowed",
+                  opacity: isAvailable ? 1 : 0.45,
+                  position: "relative",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <span
+                  style={{
+                    width: "26px",
+                    height: "26px",
+                    borderRadius: "50%",
+                    background: variant.hex,
+                    border: variant.color?.toLowerCase() === "white" ? "1px solid rgba(0,0,0,0.25)" : "1px solid rgba(255,255,255,0.25)",
+                    boxShadow: isSelected ? "0 0 0 3px rgba(201,169,110,0.32)" : "none",
+                  }}
+                />
+                <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "capitalize", letterSpacing: "0.04em" }}>
+                  {variant.color}
+                </span>
+                {!isAvailable && (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      left: "10px",
+                      right: "10px",
+                      top: "50%",
+                      height: "1px",
+                      background: "rgba(255,255,255,0.55)",
+                      transform: "rotate(-12deg)",
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const serviceItems = [
+    {
+      icon: PackageCheck,
+      title: "Inspect Before Payment",
+      text: "Check the parcel and confirm the watch before handing payment to the rider.",
+    },
+    {
+      icon: Truck,
+      title: "Fast Dispatch",
+      text: "Most confirmed orders move quickly, with city-by-city updates shared on WhatsApp.",
+    },
+    {
+      icon: BadgeCheck,
+      title: "Verified Support",
+      text: "We confirm color, model, and availability before dispatch so surprises stay out of the box.",
+    },
+    {
+      icon: Clock3,
+      title: "Delay Care",
+      text: "If a confirmed order misses the promised 3-day window, support will arrange a fair concession.",
+    },
+  ];
+
+  const renderServicePromise = () => (
+    <div
+      style={{
+        border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(255,255,255,0.025)",
+        borderRadius: "14px",
+        padding: "18px",
+        marginTop: "24px",
+        marginBottom: "4px",
+      }}
+    >
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
+        {serviceItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.title} style={{ display: "flex", gap: "12px", minWidth: "240px", flex: "1 1 240px" }}>
+              <div className="shrink-0 flex items-center justify-center rounded-full bg-gold/10 text-gold" style={{ width: "34px", height: "34px" }}>
+                <Icon size={16} />
+              </div>
+              <div>
+                <p style={{ color: "#fff", fontSize: "12px", fontWeight: 800, marginBottom: "4px" }}>{item.title}</p>
+                <p style={{ color: "#9ca3af", fontSize: "12px", lineHeight: 1.55 }}>{item.text}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <Header />
       <main className="min-h-screen bg-dark" style={{ paddingTop: "100px" }}>
-        <div style={{ padding: "20px 24px 40px 24px" }}>
+        <div style={{ padding: "20px 24px 40px 24px", maxWidth: "1560px", margin: "0 auto" }}>
           {/* ===== DESKTOP: 3-column (thumbs | main image | details) ===== */}
           <div
             className="hidden lg:flex"
-            style={{ gap: "24px", alignItems: "flex-start" }}
+            style={{ gap: "28px", alignItems: "flex-start", justifyContent: "center" }}
           >
             {/* Column 1 — Vertical Thumbnails (ALL images from ALL colors) */}
             <div
+              className="product-thumb-rail"
               style={{
-                width: "80px",
+                width: "76px",
                 flexShrink: 0,
                 display: "flex",
                 flexDirection: "column",
@@ -205,6 +409,7 @@ export default function ProductPage() {
                 top: "110px",
                 maxHeight: "calc(100vh - 140px)",
                 overflowY: "auto",
+                overflowX: "hidden",
               }}
             >
               {allImages.map((img, idx) => (
@@ -212,8 +417,8 @@ export default function ProductPage() {
                   key={`vthumb-${idx}`}
                   onClick={() => handleThumbClick(idx)}
                   style={{
-                    width: "80px",
-                    height: "80px",
+                    width: "76px",
+                    height: "76px",
                     flexShrink: 0,
                     position: "relative",
                     borderRadius: "6px",
@@ -230,7 +435,7 @@ export default function ProductPage() {
                     src={img.url}
                     alt={`Thumb ${idx + 1}`}
                     fill
-                    sizes="80px"
+                    sizes="76px"
                     className="object-cover"
                   />
                 </button>
@@ -238,7 +443,7 @@ export default function ProductPage() {
             </div>
 
             {/* Column 2 — Main Image (single selected image, no carousel) */}
-            <div style={{ flex: "1", maxWidth: "550px", position: "relative" }}>
+            <div style={{ flex: "0 1 620px", maxWidth: "620px", position: "relative" }}>
               {/* Favorite button */}
               <button
                 onClick={() => toggleFavorite(product)}
@@ -319,24 +524,24 @@ export default function ProductPage() {
                     borderRadius: "8px",
                     overflow: "hidden",
                     border: "1px solid rgba(255,255,255,0.05)",
-                    // background: "#1a1a1a",
-                    aspectRatio: "4 / 5",
+                    background: "#111",
+                    aspectRatio: getFrameAspect(product, mainImage.url),
                   }}
                 >
-                  <Image
+                  <ProductImageWithSkeleton
                     key={mainImage.url}
                     src={mainImage.url}
                     alt={product.name}
-                    fill
                     sizes="(min-width: 1024px) 40vw, 90vw"
                     priority
-                    style={{ objectFit: "contain" }}
+                    style={{ objectFit: "cover", objectPosition: "center" }}
+                    onLoad={(event) => handleImageLoad(mainImage.url, event)}
                   />
                 </div>
               ) : (
                 <div
                   style={{
-                    aspectRatio: "4/5",
+                    aspectRatio: getFrameAspect(product, null),
                     background: "#1a1a1a",
                     borderRadius: "8px",
                     display: "flex",
@@ -351,7 +556,7 @@ export default function ProductPage() {
             </div>
 
             {/* Column 3 — Product Details */}
-            <div style={{ flex: "1", minWidth: 0, paddingTop: "4px" }}>
+            <div style={{ flex: "0 1 620px", maxWidth: "620px", minWidth: 0, paddingTop: "10px" }}>
               <Link
                 href="/gallery"
                 className="text-gold hover:underline"
@@ -365,7 +570,7 @@ export default function ProductPage() {
               >
                 ← Back to Collection
               </Link>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-start justify-between gap-4 mb-4">
                   <h1
                     className="font-serif text-white"
                     style={{
@@ -375,17 +580,13 @@ export default function ProductPage() {
                   >
                     {product.name}
                   </h1>
-                  <button 
-                    onClick={() => {
-                        const url = window.location.href;
-                        window.open(`https://wa.me/?text=Check out this masterpiece: ${url}`, '_blank');
-                    }}
-                    className="text-gray-400 hover:text-[#25D366] transition-colors p-3 bg-[#111] border border-white/5 hover:border-[#25D366]/30 rounded-full flex items-center justify-center group shadow-lg"
+                  <button
+                    onClick={handleShareOnWhatsApp}
+                    className="shrink-0 text-[#25D366] hover:text-black transition-colors px-4 py-3 bg-[#25D366]/10 border border-[#25D366]/25 hover:bg-[#25D366] hover:border-[#25D366] rounded-full flex items-center justify-center gap-2 group shadow-lg"
                     title="Share on WhatsApp"
                   >
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-                        </svg>
+                    <FaWhatsapp className="h-4 w-4" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.16em]">Share</span>
                   </button>
               </div>
               <div style={{ display: "flex", alignItems: "flex-end", gap: "12px", marginBottom: "20px" }}>
@@ -413,58 +614,7 @@ export default function ProductPage() {
                   )}
               </div>
 
-              {hasVariants && (
-                <div style={{ marginBottom: "20px" }}>
-                  <span
-                    style={{
-                      color: "#9ca3af",
-                      fontSize: "12px",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
-                      display: "block",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    Color:{" "}
-                    <span
-                      style={{ color: "#fff", textTransform: "capitalize" }}
-                    >
-                      {selectedColor}
-                    </span>
-                  </span>
-                  <div
-                    style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}
-                  >
-                    {product.variants.map((variant) => (
-                      <button
-                        key={variant.color}
-                        onClick={() => handleColorChange(variant.color)}
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "50%",
-                          backgroundColor: variant.hex,
-                          border:
-                            selectedColor === variant.color
-                              ? "2px solid #c9a96e"
-                              : "2px solid rgba(255,255,255,0.2)",
-                          cursor: "pointer",
-                          transition: "all 0.2s",
-                          transform:
-                            selectedColor === variant.color
-                              ? "scale(1.1)"
-                              : "scale(1)",
-                          boxShadow:
-                            selectedColor === variant.color
-                              ? "0 0 0 3px rgba(201,169,110,0.3)"
-                              : "none",
-                        }}
-                        title={variant.color}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+              {renderColorOptions("desktop")}
 
               <div
                 style={{
@@ -527,7 +677,8 @@ export default function ProductPage() {
               </div>
 
               {/* Trust Badges & Delivery Estimate */}
-              <div style={{ paddingTop: "10px", paddingBottom: "10px" }} className="mt-10 mb-8 border-y border-white/10 py-6">
+              {renderServicePromise()}
+              <div style={{ display: "none", paddingTop: "10px", paddingBottom: "10px" }} className="mt-10 mb-8 border-y border-white/10 py-6">
                 <div className="grid grid-cols-1 gap-4 mb-2">
                   {/* Delivery Estimate */}
                   <div className="flex items-center gap-4 text-gray-300 text-sm">
@@ -553,7 +704,7 @@ export default function ProductPage() {
                 </div>
               </div>
 
-              <ProductActions product={product} selectedColor={selectedColor} />
+              <ProductActions product={product} selectedColor={selectedColor} selectedVariantAvailable={selectedVariantAvailable} />
             </div>
           </div>
 
@@ -642,18 +793,18 @@ export default function ProductPage() {
                     borderRadius: "8px",
                     overflow: "hidden",
                     border: "1px solid rgba(255,255,255,0.05)",
-                    background: "#1a1a1a",
+                    background: "#111",
                   }}
                 >
                   {allImages.length === 1 ? (
-                    <div style={{ position: "relative", aspectRatio: "4 / 5" }}>
-                      <Image
+                    <div style={{ position: "relative", aspectRatio: getFrameAspect(product, allImages[0].url) }}>
+                      <ProductImageWithSkeleton
                         src={allImages[0].url}
                         alt={product.name}
-                        fill
                         sizes="95vw"
                         priority
-                        style={{ objectFit: "contain" }}
+                        style={{ objectFit: "cover", objectPosition: "center" }}
+                        onLoad={(event) => handleImageLoad(allImages[0].url, event)}
                       />
                     </div>
                   ) : (
@@ -673,14 +824,14 @@ export default function ProductPage() {
                     >
                       {allImages.map((img, idx) => (
                         <SwiperSlide key={`m-${idx}`}>
-                          <div style={{ position: "relative", aspectRatio: "4 / 5" }}>
-                            <Image
+                          <div style={{ position: "relative", aspectRatio: getFrameAspect(product, img.url) }}>
+                            <ProductImageWithSkeleton
                               src={img.url}
                               alt={`${product.name} - ${idx + 1}`}
-                              fill
                               sizes="95vw"
                               priority={idx === 0}
-                              style={{ objectFit: "contain" }}
+                              style={{ objectFit: "cover", objectPosition: "center" }}
+                              onLoad={(event) => handleImageLoad(img.url, event)}
                             />
                           </div>
                         </SwiperSlide>
@@ -691,7 +842,7 @@ export default function ProductPage() {
               ) : (
                 <div
                   style={{
-                    aspectRatio: "4/5",
+                    aspectRatio: getFrameAspect(product, null),
                     background: "#1a1a1a",
                     borderRadius: "8px",
                     display: "flex",
@@ -732,16 +883,13 @@ export default function ProductPage() {
                   >
                     {product.name}
                   </h1>
-                  <button 
-                    onClick={() => {
-                        const url = window.location.href;
-                        window.open(`https://wa.me/?text=Check out this masterpiece: ${url}`, '_blank');
-                    }}
-                    className="text-gray-400 hover:text-[#25D366] transition-colors p-2.5 bg-[#111] border border-white/5 rounded-full flex items-center justify-center shrink-0"
+                  <button
+                    onClick={handleShareOnWhatsApp}
+                    className="text-[#25D366] hover:text-black transition-colors px-3 py-2.5 bg-[#25D366]/10 border border-[#25D366]/25 hover:bg-[#25D366] rounded-full flex items-center justify-center gap-2 shrink-0"
+                    title="Share on WhatsApp"
                   >
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-                        </svg>
+                    <FaWhatsapp className="h-4 w-4" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.14em]">Share</span>
                   </button>
               </div>
               <div style={{ display: "flex", alignItems: "flex-end", gap: "10px", marginBottom: "16px" }}>
@@ -769,58 +917,7 @@ export default function ProductPage() {
                   )}
               </div>
 
-              {hasVariants && (
-                <div style={{ marginBottom: "16px" }}>
-                  <span
-                    style={{
-                      color: "#9ca3af",
-                      fontSize: "12px",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
-                      display: "block",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    Color:{" "}
-                    <span
-                      style={{ color: "#fff", textTransform: "capitalize" }}
-                    >
-                      {selectedColor}
-                    </span>
-                  </span>
-                  <div
-                    style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}
-                  >
-                    {product.variants.map((variant) => (
-                      <button
-                        key={`m-${variant.color}`}
-                        onClick={() => handleColorChange(variant.color)}
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "50%",
-                          backgroundColor: variant.hex,
-                          border:
-                            selectedColor === variant.color
-                              ? "2px solid #c9a96e"
-                              : "2px solid rgba(255,255,255,0.2)",
-                          cursor: "pointer",
-                          transition: "all 0.2s",
-                          transform:
-                            selectedColor === variant.color
-                              ? "scale(1.1)"
-                              : "scale(1)",
-                          boxShadow:
-                            selectedColor === variant.color
-                              ? "0 0 0 3px rgba(201,169,110,0.3)"
-                              : "none",
-                        }}
-                        title={variant.color}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+              {renderColorOptions("mobile")}
 
               <div
                 style={{
@@ -883,7 +980,8 @@ export default function ProductPage() {
               </div>
 
               {/* Trust Badges & Delivery Estimate (Mobile) */}
-              <div className="mt-8 mb-6 border-y border-white/10 py-5">
+              {renderServicePromise()}
+              <div className="hidden mt-8 mb-6 border-y border-white/10 py-5">
                 <div className="flex flex-col gap-3 mb-2">
                   <div className="flex items-center gap-3 text-gray-300 text-xs">
                     <div className="w-6 h-6 rounded-full bg-gold/10 flex items-center justify-center shrink-0 text-gold">
@@ -906,7 +1004,7 @@ export default function ProductPage() {
                 </div>
               </div>
 
-              <ProductActions product={product} selectedColor={selectedColor} />
+              <ProductActions product={product} selectedColor={selectedColor} selectedVariantAvailable={selectedVariantAvailable} />
             </div>
           </div>
         </div>
@@ -1021,14 +1119,14 @@ export default function ProductPage() {
                       className="group cursor-pointer"
                     >
                       <div 
-                          style={{ width: "100%", aspectRatio: "4/5", position: "relative", borderRadius: "1rem", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}
+                          style={{ width: "100%", aspectRatio: getFrameAspect(simProduct, simProduct.imageUrl), position: "relative", borderRadius: "1rem", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)", background: "#111" }}
                       >
                         {simProduct.imageUrl ? (
-                          <Image
+                          <ProductImageWithSkeleton
                             src={simProduct.imageUrl}
                             alt={simProduct.name}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                            onLoad={(event) => handleImageLoad(simProduct.imageUrl, event)}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs text-gray-600 bg-dark">No Image</div>

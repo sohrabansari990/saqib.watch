@@ -42,17 +42,12 @@ function ShimmerBlock({ className }) {
 function LoaderHeader({ title, subtitle }) {
     return (
         <div className="flex flex-col items-center text-center gap-4">
-            <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 3.2, repeat: Infinity, ease: "linear" }}
-                className="relative flex h-20 w-20 items-center justify-center rounded-full border border-gold/20 bg-white/2 shadow-[0_0_40px_rgba(201,169,76,0.08)]"
-            >
-                <div className="absolute inset-2 rounded-full border border-white/10" />
-                <div className="absolute inset-4 rounded-full border border-gold/30 border-t-transparent border-r-transparent" />
-                <div className="h-3 w-3 rounded-full bg-gold shadow-[0_0_20px_rgba(201,169,76,0.45)]" />
-            </motion.div>
+            <div className="grid w-full max-w-xl gap-3">
+                <ShimmerBlock className="mx-auto h-3 w-28 rounded-full bg-gold/10" />
+                <ShimmerBlock className="mx-auto h-10 w-4/5 rounded-full md:h-14" />
+                <ShimmerBlock className="mx-auto h-3 w-2/3 rounded-full" />
+            </div>
             <div className="space-y-2">
-                <p className="text-[10px] uppercase tracking-[0.45em] text-gold/80">Please wait</p>
                 <h2 className="font-serif text-3xl md:text-5xl font-light text-white">{title}</h2>
                 <p className="text-sm md:text-base text-gray-500 tracking-[0.12em] uppercase">{subtitle}</p>
             </div>

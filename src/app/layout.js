@@ -95,6 +95,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { BannerProvider } from "@/context/BannerContext";
 import SaleBanner from "@/components/SaleBanner";
+import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
 export default function RootLayout({ children }) {
   return (
@@ -228,6 +229,7 @@ export default function RootLayout({ children }) {
               <FavoritesProvider>
                 <SaleBanner />
                 {children}
+                <FloatingWhatsApp />
               </FavoritesProvider>
               <Toaster position="top-center" richColors theme="dark" />
             </CartProvider>

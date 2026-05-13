@@ -13,10 +13,7 @@ import { toast } from "sonner";
 import { collection, query, limit, getDocs, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaWhatsapp } from "react-icons/fa";
 import {
-    buildWhatsAppOrderMessage,
-    buildWhatsAppUrl,
     getItemDisplayColor,
     getItemDisplayImageUrl,
     getItemVariantLabel,
@@ -45,19 +42,6 @@ export default function CartPage() {
 
     const subtotal = getCartTotal();
     const total = subtotal - discount;
-
-    const handleWhatsAppOrder = () => {
-        const message = buildWhatsAppOrderMessage({
-            title: "🛒 *CART ORDER — Saqib Watches*",
-            items: cart,
-            totalAmount: total,
-            intro: "I'd like to place these pieces via WhatsApp.",
-            outro: "Please confirm availability.",
-            includeCustomer: false,
-        });
-
-        window.open(buildWhatsAppUrl(message), "_blank");
-    };
 
     useEffect(() => {
         if (!contextMounted) return;
@@ -242,14 +226,6 @@ export default function CartPage() {
                                         Continue Curating
                                     </Link>
 
-                                    <button
-                                        onClick={handleWhatsAppOrder}
-                                        style={{ padding: "14px 28px" }}
-                                        className="inline-flex items-center justify-center gap-3 rounded-full border border-[#25D366]/30 px-8 py-4 text-xs font-bold uppercase tracking-[0.25em] text-[#25D366] transition-all duration-300 hover:bg-[#25D366] hover:text-black"
-                                    >
-                                        <FaWhatsapp size={16} />
-                                        Order on WhatsApp
-                                    </button>
                                 </div>
                             </div>
                         )}

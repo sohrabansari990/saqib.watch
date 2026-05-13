@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Upload, X, ArrowLeft, Plus, Palette, Sparkles, Trash2 } from "lucide-react";
+import { Upload, X, ArrowLeft, Plus, Palette, Sparkles, Trash2, Square, RectangleVertical } from "lucide-react";
 import Link from "next/link";
+import { IMAGE_FRAME_OPTIONS } from "@/lib/imageFrame";
 
 const COLOR_PRESETS = [
     { name: "Gold", hex: "#D4AF37" },
@@ -59,6 +60,7 @@ export default function AddProductPage() {
         discount: "",
         description: "",
         mode: "new",
+        imageAspect: "auto",
         soldOut: false,
     });
 
@@ -106,7 +108,7 @@ export default function AddProductPage() {
 
     const addVariant = (preset) => {
         if (variants.find(v => v.color === preset.name)) return toast.error("Already added");
-        setVariants(prev => [...prev, { color: preset.name, hex: preset.hex, files: [], previews: [] }]);
+        setVariants(prev => [...prev, { color: preset.name, hex: preset.hex, available: true, files: [], previews: [] }]);
         setShowCustomColorForm(false);
     };
 
@@ -117,6 +119,10 @@ export default function AddProductPage() {
     };
 
     const removeVariant = (index) => setVariants(prev => prev.filter((_, i) => i !== index));
+
+    const toggleVariantAvailability = (index) => {
+        setVariants(prev => prev.map((variant, i) => i === index ? { ...variant, available: variant.available === false } : variant));
+    };
 
     const handleVariantImageAdd = (vIdx, e) => {
         const files = Array.from(e.target.files);
@@ -147,7 +153,7 @@ export default function AddProductPage() {
                 for (const variant of variants) {
                     const urls = [];
                     for (const file of variant.files) urls.push(await uploadToSupabase(file));
-                    variantsData.push({ color: variant.color, hex: variant.hex, images: urls });
+                    variantsData.push({ color: variant.color, hex: variant.hex, images: urls, available: variant.available !== false });
                 }
                 imageUrl = variantsData[0].images[0];
                 images = variantsData.flatMap(v => v.images);
@@ -161,6 +167,7 @@ export default function AddProductPage() {
                 category,
                 price: parseFloat(formData.price),
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
+                imageAspect: formData.imageAspect || "auto",
                 imageUrl,
                 images,
                 variants: variantsData,
@@ -247,7 +254,13 @@ export default function AddProductPage() {
                                                 <div style={{ width: "18px", height: "18px", borderRadius: "50%", background: v.hex, border: "1px solid rgba(255,255,255,0.2)" }} />
                                                 <span style={{ fontWeight: "bold", fontSize: "13px" }}>{v.color}</span>
                                             </div>
-                                            <button type="button" onClick={() => removeVariant(vIdx)} style={{ color: "#ef4444", opacity: 0.6 }} className="hover:opacity-100"><Trash2 size={16} /></button>
+                                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                                <label style={{ display: "flex", alignItems: "center", gap: "6px", color: "#9ca3af", fontSize: "10px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                                                    <input type="checkbox" checked={v.available !== false} onChange={() => toggleVariantAvailability(vIdx)} />
+                                                    Available
+                                                </label>
+                                                <button type="button" onClick={() => removeVariant(vIdx)} style={{ color: "#ef4444", opacity: 0.6 }} className="hover:opacity-100"><Trash2 size={16} /></button>
+                                            </div>
                                         </div>
                                         <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
                                             {v.previews.map((p, pIdx) => (
@@ -292,6 +305,40 @@ export default function AddProductPage() {
                                             {activeSaleName && <option value={activeSaleName.toLowerCase()}>{activeSaleName.toUpperCase()}</option>}
                                         </select>
                                         <Input type="number" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} placeholder="D. %" style={{ borderRadius: "10px" }} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label style={{ fontSize: "9px", textTransform: "uppercase", color: "#6b7280", marginBottom: "10px", display: "block" }}>Image Frame</Label>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "8px" }}>
+                                        {IMAGE_FRAME_OPTIONS.map((option) => {
+                                            const Icon = option.value === "portrait" ? RectangleVertical : option.value === "square" ? Square : Sparkles;
+                                            const isSelected = formData.imageAspect === option.value;
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, imageAspect: option.value })}
+                                                    style={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        gap: "6px",
+                                                        minHeight: "42px",
+                                                        borderRadius: "10px",
+                                                        border: isSelected ? "1px solid #C9A84C" : "1px solid rgba(255,255,255,0.1)",
+                                                        background: isSelected ? "rgba(201,168,76,0.16)" : "rgba(0,0,0,0.25)",
+                                                        color: isSelected ? "#C9A84C" : "#d1d5db",
+                                                        fontSize: "10px",
+                                                        fontWeight: 800,
+                                                        textTransform: "uppercase",
+                                                        letterSpacing: "0.08em",
+                                                    }}
+                                                >
+                                                    <Icon size={13} />
+                                                    {option.label}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px", background: "rgba(0,0,0,0.2)", borderRadius: "12px" }}>

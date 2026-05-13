@@ -12,18 +12,87 @@ import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useCart } from "@/context/CartContext";
-import { Heart, X, Check, ChevronDown } from "lucide-react";
+import { Heart, X, Check, ChevronDown, SlidersHorizontal, Grid2X2, Grid3X3, LayoutGrid, ListFilter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cacheCatalog, getCachedCatalog, getCategoriesFromProducts, sortProductsByNewest } from "@/lib/productCache";
+
+function GalleryProductImage({ src, alt, sizes }) {
+    const [loaded, setLoaded] = useState(false);
+
+    return (
+        <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
+            {!loaded && <div className="skeleton-surface absolute inset-0 z-10" />}
+            <Image
+                src={src}
+                alt={alt}
+                fill
+                sizes={sizes}
+                className={cn("h-full w-full object-cover transition-opacity duration-300", loaded ? "opacity-100" : "opacity-0")}
+                loading="lazy"
+                quality={80}
+                onLoad={() => setLoaded(true)}
+                onError={() => setLoaded(true)}
+            />
+        </div>
+    );
+}
+
+function DensityIcon({ columns, list = false, active = false }) {
+    if (list) {
+        return (
+            <span style={{ display: "grid", gap: "3px", width: "18px" }}>
+                {Array.from({ length: 4 }).map((_, index) => (
+                    <span
+                        key={index}
+                        style={{
+                            height: "2px",
+                            borderRadius: "999px",
+                            background: active ? "#111" : "currentColor",
+                            opacity: active ? 1 : 0.75,
+                        }}
+                    />
+                ))}
+            </span>
+        );
+    }
+
+    return (
+        <span
+            style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${columns}, 4px)`,
+                gap: "2px",
+            }}
+        >
+            {Array.from({ length: columns * columns }).map((_, index) => (
+                <span
+                    key={index}
+                    style={{
+                        width: "4px",
+                        height: "4px",
+                        borderRadius: "1px",
+                        background: active ? "#111" : "currentColor",
+                        opacity: active ? 1 : 0.75,
+                    }}
+                />
+            ))}
+        </span>
+    );
+}
 
 function GalleryContent() {
     const [products, setProducts] = useState([]);
     const [filter, setFilter] = useState("all");
-    const [sortBy, setSortBy] = useState("default");
+    const [availabilityFilter, setAvailabilityFilter] = useState("all");
+    const [priceRange, setPriceRange] = useState([0, 0]);
+    const [sortBy, setSortBy] = useState("best_selling");
+    const [gridColumns, setGridColumns] = useState(4);
+    const [viewMode, setViewMode] = useState("grid");
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [selectedQuickViewColor, setSelectedQuickViewColor] = useState(null);
     const [isImageLoading, setIsImageLoading] = useState(false);
     const [isSortOpen, setIsSortOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState(["all", "men", "women", "couples"]);
     const [activeSale, setActiveSale] = useState(null);
@@ -35,6 +104,40 @@ function GalleryContent() {
     const prefetchProduct = (productId) => {
         router.prefetch(`/product/${productId}`);
     };
+    const sortOptions = [
+        { id: "featured", label: "Featured" },
+        { id: "relevant", label: "Most relevant" },
+        { id: "best_selling", label: "Best selling" },
+        { id: "az", label: "Alphabetically, A-Z" },
+        { id: "za", label: "Alphabetically, Z-A" },
+        { id: "price_asc", label: "Price, low to high" },
+        { id: "price_desc", label: "Price, high to low" },
+        { id: "oldest", label: "Date, old to new" },
+        { id: "newest", label: "Date, new to old" },
+    ];
+    const activeSortLabel = sortOptions.find((option) => option.id === sortBy)?.label || "Best selling";
+
+    const priceBounds = useMemo(() => {
+        const prices = products
+            .map((product) => Number(product.price) || 0)
+            .filter((price) => price > 0);
+
+        if (prices.length === 0) {
+            return { min: 0, max: 0 };
+        }
+
+        return {
+            min: Math.floor(Math.min(...prices)),
+            max: Math.ceil(Math.max(...prices)),
+        };
+    }, [products]);
+
+    const inStockCount = useMemo(() => products.filter((product) => !product.soldOut).length, [products]);
+    const outOfStockCount = products.length - inStockCount;
+    const featuredProduct = useMemo(
+        () => products.find((product) => product.featured === true || product.mode?.toLowerCase() === "featured") || null,
+        [products]
+    );
 
     useEffect(() => {
         const qp = searchParams.get("category");
@@ -53,6 +156,10 @@ function GalleryContent() {
         setCategories(getCategoriesFromProducts(cachedCatalog.products));
         setLoading(false);
     }, []);
+
+    useEffect(() => {
+        setPriceRange([priceBounds.min, priceBounds.max]);
+    }, [priceBounds.min, priceBounds.max]);
 
     // Keep URL in sync with current filter (skip first sync until initial read)
     useEffect(() => {
@@ -138,17 +245,356 @@ function GalleryContent() {
             }
         }
 
+        if (availabilityFilter === "in") {
+            filtered = filtered.filter((product) => !product.soldOut);
+        } else if (availabilityFilter === "out") {
+            filtered = filtered.filter((product) => product.soldOut);
+        }
+
+        filtered = filtered.filter((product) => {
+            const price = Number(product.price) || 0;
+            const [minPrice, maxPrice] = priceRange;
+            if (maxPrice === 0) return true;
+            return price >= minPrice && price <= maxPrice;
+        });
+
         let sorted = [...filtered];
 
-        if (sortBy === "price_asc") {
+        if (sortBy === "featured") {
+            sorted.sort((a, b) => Number(b.featured === true) - Number(a.featured === true));
+        } else if (sortBy === "relevant") {
+            sorted.sort((a, b) => (Number(b.discount) || 0) - (Number(a.discount) || 0));
+        } else if (sortBy === "best_selling") {
+            sorted.sort((a, b) => (Number(b.sales || b.sold || b.discount) || 0) - (Number(a.sales || a.sold || a.discount) || 0));
+        } else if (sortBy === "az") {
+            sorted.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+        } else if (sortBy === "za") {
+            sorted.sort((a, b) => String(b.name || "").localeCompare(String(a.name || "")));
+        } else if (sortBy === "price_asc") {
             sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
         } else if (sortBy === "price_desc") {
             sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
         } else if (sortBy === "newest") {
             sorted = sortProductsByNewest(sorted);
+        } else if (sortBy === "oldest") {
+            sorted = sortProductsByNewest(sorted).reverse();
         }
         return sorted;
-    }, [filter, products, sortBy]);
+    }, [activeSale?.name, availabilityFilter, filter, priceRange, products, sortBy]);
+
+    const formatMoney = (value) => `Rs. ${Number(value || 0).toLocaleString()}`;
+    const updateMinPrice = (value) => {
+        const next = Math.min(Number(value), priceRange[1] || priceBounds.max);
+        setPriceRange([next, priceRange[1]]);
+    };
+    const updateMaxPrice = (value) => {
+        const next = Math.max(Number(value), priceRange[0]);
+        setPriceRange([priceRange[0], next]);
+    };
+    const clearFilters = () => {
+        setFilter("all");
+        setAvailabilityFilter("all");
+        setPriceRange([priceBounds.min, priceBounds.max]);
+    };
+    const priceSpread = Math.max(priceBounds.max - priceBounds.min, 1);
+    const minPricePercent = ((priceRange[0] - priceBounds.min) / priceSpread) * 100;
+    const maxPricePercent = ((priceRange[1] - priceBounds.min) / priceSpread) * 100;
+    const handleRangeTrackClick = (event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const percent = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1);
+        const nextValue = Math.round(priceBounds.min + percent * priceSpread);
+        const distanceToMin = Math.abs(nextValue - priceRange[0]);
+        const distanceToMax = Math.abs(nextValue - priceRange[1]);
+
+        if (distanceToMin <= distanceToMax) {
+            updateMinPrice(nextValue);
+        } else {
+            updateMaxPrice(nextValue);
+        }
+    };
+
+    const FilterPanel = ({ mobile = false }) => (
+        <div
+            style={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                background: "#101010",
+                color: "#f8f5ef",
+            }}
+        >
+            <div
+                style={{
+                    padding: "24px 24px 22px",
+                    borderBottom: "1px solid rgba(201,169,110,0.18)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "16px",
+                }}
+            >
+                <h2 style={{ fontSize: "17px", fontWeight: 800, lineHeight: 1.2 }}>
+                    Products Category
+                </h2>
+                {mobile && (
+                    <button
+                        type="button"
+                        onClick={() => setIsFilterOpen(false)}
+                        aria-label="Close filters"
+                        style={{
+                            width: "38px",
+                            height: "38px",
+                            borderRadius: "999px",
+                            border: "1px solid rgba(255,255,255,0.16)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "transparent",
+                            color: "#f8f5ef",
+                        }}
+                    >
+                        <X size={18} />
+                    </button>
+                )}
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
+                <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                    <label style={{ display: "block", marginBottom: "12px", fontSize: "13px", fontWeight: 800 }}>
+                        Category
+                    </label>
+                    <select
+                        value={filter}
+                        onChange={(event) => setFilter(event.target.value)}
+                        style={{
+                            width: "100%",
+                            height: "46px",
+                            padding: "0 14px",
+                            borderRadius: "8px",
+                            border: "1px solid rgba(255,255,255,0.14)",
+                            background: "#050505",
+                            color: "#f8f5ef",
+                            fontSize: "14px",
+                            fontWeight: 700,
+                            textTransform: "capitalize",
+                            outline: "none",
+                        }}
+                    >
+                        {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {cat}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <p style={{ fontSize: "15px", fontWeight: 800 }}>Availability</p>
+                        <span style={{ fontSize: "22px", lineHeight: 1, color: "#c9a96e" }}>-</span>
+                    </div>
+                    {[
+                        { id: "in", label: "In stock", count: inStockCount },
+                        { id: "out", label: "Out of stock", count: outOfStockCount },
+                    ].map((option) => (
+                        <label
+                            key={option.id}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                marginBottom: "14px",
+                                color: "rgba(248,245,239,0.72)",
+                                fontSize: "14px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={availabilityFilter === option.id}
+                                onChange={() => setAvailabilityFilter(availabilityFilter === option.id ? "all" : option.id)}
+                                style={{ width: "16px", height: "16px", accentColor: "#c9a96e" }}
+                            />
+                            <span>{option.label} ({option.count})</span>
+                        </label>
+                    ))}
+                </div>
+
+                <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <p style={{ fontSize: "15px", fontWeight: 800 }}>Price</p>
+                        <span style={{ fontSize: "22px", lineHeight: 1, color: "#c9a96e" }}>-</span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 18px 1fr", alignItems: "center", gap: "12px" }}>
+                        <input
+                            type="number"
+                            value={priceRange[0]}
+                            min={priceBounds.min}
+                            max={priceRange[1]}
+                            onChange={(event) => updateMinPrice(event.target.value)}
+                            style={{
+                                width: "100%",
+                                height: "42px",
+                                padding: "0 12px",
+                                borderRadius: "4px",
+                                border: "1px solid rgba(255,255,255,0.12)",
+                                background: "#050505",
+                                color: "#f8f5ef",
+                                fontSize: "14px",
+                                outline: "none",
+                            }}
+                        />
+                        <span style={{ textAlign: "center", color: "rgba(248,245,239,0.45)" }}>-</span>
+                        <input
+                            type="number"
+                            value={priceRange[1]}
+                            min={priceRange[0]}
+                            max={priceBounds.max}
+                            onChange={(event) => updateMaxPrice(event.target.value)}
+                            style={{
+                                width: "100%",
+                                height: "42px",
+                                padding: "0 12px",
+                                borderRadius: "4px",
+                                border: "1px solid rgba(255,255,255,0.12)",
+                                background: "#050505",
+                                color: "#f8f5ef",
+                                fontSize: "14px",
+                                outline: "none",
+                            }}
+                        />
+                    </div>
+                    <div
+                        onClick={handleRangeTrackClick}
+                        style={{
+                            position: "relative",
+                            height: "34px",
+                            marginTop: "18px",
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                    >
+                        <div style={{ position: "absolute", left: 0, right: 0, height: "4px", borderRadius: "999px", background: "rgba(255,255,255,0.16)" }} />
+                        <div
+                            style={{
+                                position: "absolute",
+                                left: `${minPricePercent}%`,
+                                width: `${Math.max(maxPricePercent - minPricePercent, 0)}%`,
+                                height: "4px",
+                                borderRadius: "999px",
+                                background: "#c9a96e",
+                            }}
+                        />
+                        <input
+                            className="price-range-input"
+                            type="range"
+                            min={priceBounds.min}
+                            max={priceBounds.max}
+                            value={priceRange[0]}
+                            onChange={(event) => updateMinPrice(event.target.value)}
+                            style={{ position: "absolute", inset: 0, width: "100%" }}
+                        />
+                        <input
+                            className="price-range-input"
+                            type="range"
+                            min={priceBounds.min}
+                            max={priceBounds.max}
+                            value={priceRange[1]}
+                            onChange={(event) => updateMaxPrice(event.target.value)}
+                            style={{ position: "absolute", inset: 0, width: "100%" }}
+                        />
+                    </div>
+                    <p style={{ marginTop: "14px", color: "rgba(248,245,239,0.72)", fontSize: "14px" }}>
+                        Price: <span style={{ color: "#f8f5ef", fontWeight: 800 }}>{formatMoney(priceRange[0])} - {formatMoney(priceRange[1])}</span>
+                    </p>
+                </div>
+
+                <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <p style={{ fontSize: "15px", fontWeight: 800 }}>Featured product</p>
+                        <span style={{ fontSize: "22px", lineHeight: 1, color: "#c9a96e" }}>-</span>
+                    </div>
+                    {featuredProduct ? (
+                        <Link
+                            href={`/product/${featuredProduct.id}`}
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "72px minmax(0, 1fr)",
+                                gap: "12px",
+                                alignItems: "center",
+                                color: "#f8f5ef",
+                                textDecoration: "none",
+                            }}
+                        >
+                            <div style={{ position: "relative", width: "72px", aspectRatio: "1 / 1", borderRadius: "8px", overflow: "hidden", background: "#171717" }}>
+                                {featuredProduct.imageUrl ? (
+                                    <Image src={featuredProduct.imageUrl} alt={featuredProduct.name} fill sizes="72px" className="object-cover" />
+                                ) : (
+                                    <div className="skeleton-surface" style={{ width: "100%", height: "100%" }} />
+                                )}
+                            </div>
+                            <div style={{ minWidth: 0 }}>
+                                <p style={{ fontSize: "13px", fontWeight: 800, lineHeight: 1.25 }}>{featuredProduct.name}</p>
+                                <p style={{ marginTop: "4px", color: "#c9a96e", fontSize: "12px", fontWeight: 800 }}>
+                                    Rs. {featuredProduct.price?.toLocaleString()}
+                                </p>
+                            </div>
+                        </Link>
+                    ) : (
+                        <p style={{ color: "rgba(248,245,239,0.52)", fontSize: "13px" }}>No featured product selected.</p>
+                    )}
+                </div>
+            </div>
+
+            <div
+                style={{
+                    padding: "16px 24px",
+                    borderTop: "1px solid rgba(201,169,110,0.18)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "16px",
+                    background: "#101010",
+                }}
+            >
+                <button
+                    type="button"
+                    onClick={clearFilters}
+                    style={{
+                        border: 0,
+                        background: "transparent",
+                        color: "#f8f5ef",
+                        fontSize: "14px",
+                        fontWeight: 800,
+                        textDecoration: "underline",
+                        textUnderlineOffset: "4px",
+                        cursor: "pointer",
+                    }}
+                >
+                    Clear all
+                </button>
+                {mobile && (
+                    <button
+                        type="button"
+                        onClick={() => setIsFilterOpen(false)}
+                        style={{
+                            minWidth: "112px",
+                            height: "44px",
+                            border: 0,
+                            borderRadius: "999px",
+                            background: "#c9a96e",
+                            color: "#050505",
+                            fontSize: "14px",
+                            fontWeight: 800,
+                            cursor: "pointer",
+                        }}
+                    >
+                        Apply
+                    </button>
+                )}
+            </div>
+        </div>
+    );
 
     return (
         <main className="min-h-screen bg-dark" style={{ paddingTop: "150px", paddingLeft: "16px", paddingRight: "16px", paddingBottom: "3vw" }}>
@@ -163,123 +609,232 @@ function GalleryContent() {
                     <div className="mt-6 w-16 h-px bg-gold mx-auto" />
                 </div>
 
-                {/* Filters and Sorting Row */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-16">
-                    {/* Category Filter */}
-                    <div style={{ padding: "0.5vw 0.5vw 0.5vw 0.5vw" }} className="flex cursor-pointer flex-wrap justify-center gap-2 p-1 bg-dark-card rounded-full border border-white/5">
-                        {categories.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilter(cat)}
-                                style={{ padding: "10px 32px" }}
-                                className={cn(
-                                    "relative text-[10px] md:text-xs uppercase tracking-[0.2em] transition-colors duration-300 z-10",
-                                    filter === cat ? "text-black font-bold" : "text-gray-400 hover:text-white"
-                                )}
-                            >
-                                <span className="relative z-10">{cat}</span>
-                                {filter === cat && (
-                                    <motion.div
-                                        
-                                        layoutId="activeTab"
-                                        className="absolute inset-0 bg-gold rounded-full z-0 shadow-[0_0_20px_rgba(201,169,76,0.2)]"
-                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                    />
-                                )}
-                            </button>
-                        ))}
+                <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setIsFilterOpen(true)}
+                            className="lg:hidden"
+                            style={{
+                                height: "38px",
+                                padding: "0 14px",
+                                border: "1px solid rgba(201,169,110,0.5)",
+                                borderRadius: "999px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                background: "rgba(201,169,110,0.14)",
+                                color: "#f8f5ef",
+                                fontSize: "12px",
+                                fontWeight: 900,
+                                letterSpacing: "0.14em",
+                                textTransform: "uppercase",
+                            }}
+                        >
+                            <SlidersHorizontal size={15} color="#c9a96e" />
+                            Filter
+                        </button>
+                        <p className="text-sm text-gray-400">
+                            Showing <span className="font-bold text-white">{displayedProducts.length}</span> of {products.length} products
+                        </p>
                     </div>
 
-                    {/* Sort Dropdown */}
-                    <div className="relative z-40">
-                        <button
-                            onClick={() => setIsSortOpen(!isSortOpen)}
-                            style={{ padding: "14px 28px" }}
-                            className="flex items-center justify-between min-w-50 bg-dark-card border border-white/10 text-white rounded-full focus:outline-none focus:ring-1 focus:ring-gold text-[10px] tracking-[0.2em] uppercase transition-all duration-300 hover:border-gold/50 group shadow-xl"
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div
+                            className="gallery-view-controls"
+                            style={{
+                                display: "none",
+                                alignItems: "center",
+                                gap: "4px",
+                                padding: "4px",
+                                borderRadius: "999px",
+                                border: "1px solid rgba(255,255,255,0.1)",
+                                background: "#1a1a1a",
+                            }}
                         >
-                            <span className="opacity-60 mr-2">Sort:</span>
-                            <span className="font-bold">
-                                {sortBy === "default" && "Default"}
-                                {sortBy === "price_asc" && "Price: Low to High"}
-                                {sortBy === "price_desc" && "Price: High to Low"}
-                                {sortBy === "newest" && "Newest First"}
-                            </span>
-                            <ChevronDown size={14} className={cn("ml-3 transition-transform duration-300", isSortOpen ? "rotate-180" : "")} />
-                        </button>
-
-                        <AnimatePresence>
-                            {isSortOpen && (
-                                <>
-                                    <div 
-                                        className="fixed inset-0 z-30" 
-                                        onClick={() => setIsSortOpen(false)} 
-                                    />
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        transition={{ duration: 0.2, ease: "easeOut" }}
-                                        className="absolute right-0 mt-3 w-64 bg-[#111] border border-white/5 rounded-2xl shadow-2xl overflow-hidden z-40 backdrop-blur-xl"
+                            {[
+                                { value: 2, label: "2x2 grid" },
+                                { value: 3, label: "3x3 grid" },
+                                { value: 4, label: "4x4 grid" },
+                            ].map((option) => {
+                                const active = viewMode === "grid" && gridColumns === option.value;
+                                return (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() => {
+                                            setViewMode("grid");
+                                            setGridColumns(option.value);
+                                        }}
+                                        aria-label={option.label}
+                                        title={option.label}
+                                        style={{
+                                            width: "38px",
+                                            height: "38px",
+                                            border: 0,
+                                            borderRadius: "999px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            background: active ? "#c9a96e" : "transparent",
+                                            color: active ? "#111" : "rgba(255,255,255,0.55)",
+                                            cursor: "pointer",
+                                        }}
                                     >
-                                        {[
-                                            { id: "default", label: "Default" },
-                                            { id: "price_asc", label: "Price: Low to High" },
-                                            { id: "price_desc", label: "Price: High to Low" },
-                                            { id: "newest", label: "Newest First" }
-                                        ].map((opt) => (
+                                        <DensityIcon columns={option.value} active={active} />
+                                    </button>
+                                );
+                            })}
+                            <button
+                                type="button"
+                                onClick={() => setViewMode("list")}
+                                aria-label="List view"
+                                title="List view"
+                                style={{
+                                    width: "38px",
+                                    height: "38px",
+                                    border: 0,
+                                    borderRadius: "999px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    background: viewMode === "list" ? "#c9a96e" : "transparent",
+                                    color: viewMode === "list" ? "#111" : "rgba(255,255,255,0.55)",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                <DensityIcon list active={viewMode === "list"} />
+                            </button>
+                        </div>
+
+                        <div className="relative z-40">
+                            <button
+                                onClick={() => setIsSortOpen(!isSortOpen)}
+                                style={{ padding: "12px 18px" }}
+                                className="flex min-w-52 items-center justify-between rounded-full border border-white/10 bg-dark-card text-white shadow-xl transition-all duration-300 hover:border-gold/50 focus:outline-none focus:ring-1 focus:ring-gold"
+                            >
+                                <span className="mr-2 text-xs text-white/55">Sort by:</span>
+                                <span className="text-xs font-bold">{activeSortLabel}</span>
+                                <ChevronDown size={15} className={cn("ml-3 transition-transform duration-300", isSortOpen ? "rotate-180" : "")} />
+                            </button>
+
+                            <AnimatePresence>
+                                {isSortOpen && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-30 bg-black/40 md:bg-transparent"
+                                            onClick={() => setIsSortOpen(false)}
+                                        />
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            transition={{ duration: 0.2, ease: "easeOut" }}
+                                            className="fixed bottom-0 left-0 right-0 z-40 rounded-t-3xl border border-white/10 bg-[#111] p-4 shadow-2xl md:absolute md:bottom-auto md:left-auto md:right-0 md:mt-3 md:w-72 md:rounded-2xl"
+                                        >
                                             <button
-                                                key={opt.id}
-                                                onClick={() => {
-                                                    setSortBy(opt.id);
-                                                    setIsSortOpen(false);
+                                                type="button"
+                                                onClick={() => setIsSortOpen(false)}
+                                                className="md:hidden"
+                                                style={{
+                                                    position: "absolute",
+                                                    top: "-22px",
+                                                    left: "50%",
+                                                    transform: "translateX(-50%)",
+                                                    width: "44px",
+                                                    height: "44px",
+                                                    borderRadius: "999px",
+                                                    border: "1px solid rgba(255,255,255,0.12)",
+                                                    background: "#f8f5ef",
+                                                    color: "#050505",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
                                                 }}
-                                                style={{ padding: "16px 24px" }}
-                                                className={cn(
-                                                    "w-full text-left text-[10px] tracking-[0.2em] uppercase transition-all duration-200 border-b border-white/5 last:border-none flex items-center justify-between group",
-                                                    sortBy === opt.id ? "text-gold bg-gold/5" : "text-gray-400 hover:text-white hover:bg-white/5"
-                                                )}
+                                                aria-label="Close sort"
                                             >
-                                                {opt.label}
-                                                {sortBy === opt.id && <Check size={12} />}
+                                                <X size={18} />
                                             </button>
-                                        ))}
-                                    </motion.div>
-                                </>
-                            )}
-                        </AnimatePresence>
+                                            {sortOptions.map((opt) => (
+                                                <button
+                                                    key={opt.id}
+                                                    onClick={() => {
+                                                        setSortBy(opt.id);
+                                                        setIsSortOpen(false);
+                                                    }}
+                                                    style={{ padding: "13px 16px" }}
+                                                    className={cn(
+                                                        "flex w-full items-center justify-between rounded-xl text-left text-sm transition-all duration-200",
+                                                        sortBy === opt.id ? "bg-gold/10 font-black text-gold" : "text-gray-300 hover:bg-white/5 hover:text-white"
+                                                    )}
+                                                >
+                                                    {opt.label}
+                                                    {sortBy === opt.id && <Check size={14} />}
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    </>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
 
-                {loading ? (
-                    <CollectionLoader variant="gallery" />
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {displayedProducts.length === 0 ? (
-                            <div className="col-span-full text-center text-gray-500 py-20">
-                                No products found in this category.
-                            </div>
-                        ) : (
-                            displayedProducts.map((watch) => (
-                                <div key={watch.id} className="group cursor-pointer block relative">
+                <div className="grid gap-8 lg:grid-cols-[340px_minmax(0,1fr)]">
+                    <aside className="hidden lg:block">
+                        <div
+                            className="sticky top-32 overflow-hidden"
+                            style={{
+                                borderRadius: "2px",
+                                border: "1px solid rgba(201,169,110,0.18)",
+                                background: "#101010",
+                            }}
+                        >
+                            <FilterPanel />
+                        </div>
+                    </aside>
+
+                    {loading ? (
+                        <CollectionLoader variant="gallery" />
+                    ) : (
+                        <div className={cn(viewMode === "list" ? "gallery-product-list" : "gallery-product-grid", viewMode === "grid" && `gallery-grid-${gridColumns}`)}>
+                            {displayedProducts.length === 0 ? (
+                                <div className="col-span-full rounded-3xl border border-white/10 bg-white/3 py-20 text-center text-gray-500">
+                                    No products found for these filters.
+                                </div>
+                            ) : (
+                                displayedProducts.map((watch) => (
+                                <div
+                                    key={watch.id}
+                                    className={cn("group cursor-pointer relative", viewMode === "list" ? "gallery-list-card" : "block")}
+                                    style={viewMode === "list" ? {
+                                        display: "grid",
+                                        gridTemplateColumns: "minmax(140px, min(32vw, 320px)) minmax(0, 1fr)",
+                                        gap: "20px",
+                                        alignItems: "center",
+                                        padding: "16px",
+                                        border: "1px solid rgba(255,255,255,0.08)",
+                                        borderRadius: "14px",
+                                        background: "rgba(255,255,255,0.03)",
+                                    } : undefined}
+                                >
                                     <Link
                                         href={`/product/${watch.id}`}
                                         prefetch
                                         onMouseEnter={() => prefetchProduct(watch.id)}
                                         onTouchStart={() => prefetchProduct(watch.id)}
+                                        style={viewMode === "list" ? { width: "100%", maxWidth: "min(32vw, 320px)" } : undefined}
                                     >
-                                        <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[4/5] mb-4 border border-white/5">
+                                        <div
+                                            className="gallery-card-media relative overflow-hidden bg-dark-card rounded-lg aspect-[4/5] mb-4 border border-white/5"
+                                            style={viewMode === "list" ? { marginBottom: 0 } : undefined}
+                                        >
                                             {watch.imageUrl ? (
-                                                <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
-                                                    <Image
-                                                        src={watch.imageUrl}
-                                                        alt={watch.name}
-                                                        fill
-                                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                                                        className="w-full h-full object-cover"
-                                                        loading="lazy"
-                                                        quality={80}
-                                                    />
-                                                </div>
+                                                <GalleryProductImage
+                                                    src={watch.imageUrl}
+                                                    alt={watch.name}
+                                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                                />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center bg-white/5">
                                                     <span className="text-gray-600 text-xs">No Image</span>
@@ -314,7 +869,7 @@ function GalleryContent() {
                                                         e.preventDefault();
                                                         e.stopPropagation();
                                                         setQuickViewProduct(watch);
-                                                        setSelectedQuickViewColor(watch.variants?.[0]?.color || null);
+                                                        setSelectedQuickViewColor(watch.variants?.find((variant) => variant.available !== false && variant.images?.length)?.color || watch.variants?.[0]?.color || null);
                                                     }}
                                                     className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-black font-semibold text-[10px] tracking-[0.2em] uppercase px-8 py-3 rounded-full transition-all duration-300 shadow-xl"
                                                 >
@@ -345,11 +900,18 @@ function GalleryContent() {
                                         prefetch
                                         onMouseEnter={() => prefetchProduct(watch.id)}
                                         onTouchStart={() => prefetchProduct(watch.id)}
+                                        style={viewMode === "list" ? { minWidth: 0 } : undefined}
                                     >
-                                        <h3 className="font-serif text-lg text-center text-white group-hover:text-gold transition-colors duration-300">
+                                        <h3
+                                            className="font-serif text-sm leading-tight text-white transition-colors duration-300 group-hover:text-gold sm:text-lg"
+                                            style={{ textAlign: viewMode === "list" ? "left" : "center" }}
+                                        >
                                             {watch.name}
                                         </h3>
-                                        <div className="text-center mt-1 flex justify-center items-center gap-2">
+                                        <div
+                                            className="mt-1 flex items-center gap-2"
+                                            style={{ justifyContent: viewMode === "list" ? "flex-start" : "center", textAlign: viewMode === "list" ? "left" : "center" }}
+                                        >
                                             <span className="text-gold text-sm font-medium">Rs. {watch.price?.toLocaleString()}</span>
                                             {watch.discount > 0 && (
                                                 <span className="text-gray-500 text-xs line-through opacity-70">Rs. {Math.round(watch.price / (1 - watch.discount / 100)).toLocaleString()}</span>
@@ -357,11 +919,36 @@ function GalleryContent() {
                                         </div>
                                     </Link>
                                 </div>
-                            ))
-                        )}
-                    </div>
-                )}
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
+            <AnimatePresence>
+                {isFilterOpen && (
+                    <>
+                        <motion.button
+                            aria-label="Close filters"
+                            className="fixed inset-0 z-[95] bg-black/65 backdrop-blur-[2px] lg:hidden"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsFilterOpen(false)}
+                        />
+                        <motion.aside
+                            className="fixed left-0 top-0 z-[100] h-dvh w-[86vw] max-w-sm overflow-hidden border-r border-white/10 bg-[#0f0f0f] shadow-2xl lg:hidden"
+                            initial={{ x: "-100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ type: "spring", bounce: 0, duration: 0.34 }}
+                        >
+                            <FilterPanel mobile />
+                        </motion.aside>
+                    </>
+                )}
+            </AnimatePresence>
+
             {/* Quick View Modal */}
             {quickViewProduct && (
                 <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
@@ -394,10 +981,10 @@ function GalleryContent() {
                                 />
                              </AnimatePresence>
                              
-                             {/* Loading Spinner */}
+                             {/* Loading skeleton */}
                              {isImageLoading && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] z-10 transition-opacity duration-300">
-                                    <div className="w-12 h-12 border-2 border-white/5 border-t-gold rounded-full animate-spin shadow-[0_0_15px_rgba(201,169,76,0.2)]"></div>
+                                    <div className="skeleton-surface h-full w-full" />
                                 </div>
                              )}
                              
@@ -423,13 +1010,18 @@ function GalleryContent() {
                                         {quickViewProduct.variants.map((v) => (
                                             <button
                                                 key={v.color}
+                                                disabled={v.available === false || !v.images?.length}
                                                 onClick={() => {
-                                                    if (v.color !== selectedQuickViewColor) {
+                                                    if (v.available !== false && v.images?.length && v.color !== selectedQuickViewColor) {
                                                         setIsImageLoading(true);
                                                         setSelectedQuickViewColor(v.color);
                                                     }
                                                 }}
                                                 className={`w-10 h-10 rounded-full border-2 transition-all duration-300 relative flex items-center justify-center ${
+                                                    v.available === false || !v.images?.length
+                                                        ? "cursor-not-allowed opacity-40 after:absolute after:left-1 after:right-1 after:top-1/2 after:h-px after:-rotate-45 after:bg-white"
+                                                        : ""
+                                                } ${
                                                     selectedQuickViewColor === v.color 
                                                         ? "border-gold scale-110 shadow-[0_0_15px_rgba(201,169,76,0.3)]" 
                                                         : "border-white/20 hover:border-white/50"

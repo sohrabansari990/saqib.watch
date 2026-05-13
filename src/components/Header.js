@@ -6,17 +6,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { ShoppingBag, Heart } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
-import { buildWhatsAppUrl } from "@/lib/order";
 import { useBanner } from "@/context/BannerContext";
-
-const ORDER_WHATSAPP_MESSAGE = "Hi! I'd like to place an order from Saqib Watches. Please send me the available options.";
+import CartSidebar from "@/components/CartSidebar";
 
 export default function Header() {
     const { bannerHeight } = useBanner();
     const [isOpen, setIsOpen] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const { cart, mounted } = useCart();
     const { favorites } = useFavorites();
@@ -65,17 +63,6 @@ export default function Header() {
                             </Link>
                         ))}
 
-                        <a
-                            href={buildWhatsAppUrl(ORDER_WHATSAPP_MESSAGE)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ padding: "10px 16px" }}
-                            className="inline-flex items-center gap-2 rounded-full border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#25D366] transition-all duration-300 hover:bg-[#25D366] hover:text-black"
-                        >
-                            <FaWhatsapp size={14} />
-                            Order on WhatsApp
-                        </a>
-
                         {/* Favorites Icon */}
                         <Link href="/favorites" className="relative group text-white/80 hover:text-gold transition-colors">
                             <Heart size={20} />
@@ -87,29 +74,23 @@ export default function Header() {
                         </Link>
 
                         {/* Cart Icon */}
-                        <Link href="/cart" className="relative group text-white/80 hover:text-gold transition-colors">
+                        <button
+                            type="button"
+                            onClick={() => setIsCartOpen(true)}
+                            aria-label="Open shopping cart"
+                            className="relative group text-white/80 hover:text-gold transition-colors"
+                        >
                             <ShoppingBag size={20} />
                             {cartCount > 0 && (
                                 <span className="absolute -top-2 -right-2 bg-gold text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-black">
                                     {cartCount}
                                 </span>
                             )}
-                        </Link>
+                        </button>
                     </nav>
 
                     {/* Mobile Menu Button - shows Cart count too */}
                     <div className="flex items-center gap-4 lg:hidden">
-                        <a
-                            href={buildWhatsAppUrl(ORDER_WHATSAPP_MESSAGE)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ padding: "10px" }}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#25D366]/30 bg-[#25D366]/10 text-[#25D366] transition-colors hover:bg-[#25D366] hover:text-black"
-                            aria-label="Order on WhatsApp"
-                        >
-                            <FaWhatsapp size={18} />
-                        </a>
-
                         <Link href="/favorites" className="relative text-white hover:text-gold transition-colors">
                             <Heart size={24} />
                             {favCount > 0 && (
@@ -119,14 +100,19 @@ export default function Header() {
                             )}
                         </Link>
 
-                        <Link href="/cart" className="relative text-white hover:text-gold transition-colors">
+                        <button
+                            type="button"
+                            onClick={() => setIsCartOpen(true)}
+                            aria-label="Open shopping cart"
+                            className="relative text-white hover:text-gold transition-colors"
+                        >
                             <ShoppingBag size={24} />
                             {cartCount > 0 && (
                                 <span className="absolute -top-2 -right-2 bg-gold text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-black">
                                     {cartCount}
                                 </span>
                             )}
-                        </Link>
+                        </button>
 
                         <button
                             onClick={() => setIsOpen(true)}
@@ -187,6 +173,7 @@ export default function Header() {
                     </motion.div>
                 )}
             </AnimatePresence>
+            <CartSidebar open={isCartOpen} onClose={() => setIsCartOpen(false)} />
         </>
     );
 }

@@ -80,19 +80,8 @@ function WatchCard({ watch, index }) {
                 )}
 
                 {!imageLoaded && watch.imageUrl && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0b0b0b]/85 backdrop-blur-sm">
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
-                            className="mb-4 h-10 w-10 rounded-full border border-gold/20 border-t-gold"
-                        />
-                        <div className="h-2 w-24 overflow-hidden rounded-full bg-white/5">
-                            <motion.div
-                                animate={{ x: ["-100%", "200%"] }}
-                                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                                className="h-full w-1/2 bg-linear-to-r from-transparent via-gold/40 to-transparent"
-                            />
-                        </div>
+                    <div className="absolute inset-0 z-10 bg-[#111]">
+                        <div className="skeleton-surface h-full w-full" />
                     </div>
                 )}
 
@@ -209,17 +198,10 @@ export default function NewArrivals() {
                                     className="group"
                                 >
                                     <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-3/4 mb-4 border border-white/5">
-                                        <div className="absolute inset-0 bg-[#0e0e0e]" />
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-                                            <motion.div
-                                                animate={{ rotate: 360 }}
-                                                transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
-                                                className="h-10 w-10 rounded-full border border-gold/20 border-t-gold"
-                                            />
-                                        </div>
+                                        <div className="skeleton-surface absolute inset-0" />
                                     </div>
-                                    <div className="mx-auto h-4 w-4/5 rounded-full bg-white/6" />
-                                    <div className="mx-auto mt-3 h-3 w-1/2 rounded-full bg-white/5" />
+                                    <div className="skeleton-surface mx-auto h-4 w-4/5 rounded-full" />
+                                    <div className="skeleton-surface mx-auto mt-3 h-3 w-1/2 rounded-full" />
                                 </motion.div>
                             ))}
                         </div>

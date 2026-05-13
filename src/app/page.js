@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import NewArrivals from "@/components/NewArrivals";
+import HomePreloader from "@/components/HomePreloader";
 
 // Lazy-load below-fold components — they won't block hero paint
 const CategoryCards = dynamic(() => import("@/components/CategoryCards"), {
@@ -26,6 +27,7 @@ const Footer = dynamic(() => import("@/components/Footer"), {
 export default function Home() {
     return (
         <>
+            <HomePreloader />
             <Header />
             <main>
                 <HeroSection />
