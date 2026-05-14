@@ -43,11 +43,6 @@ export default function CartPage() {
     const subtotal = getCartTotal();
     const total = subtotal - discount;
 
-    useEffect(() => {
-        if (!contextMounted) return;
-        localStorage.setItem("total", total);
-    }, [contextMounted, total]);
-
     const handleApplyCoupon = async (e) => {
         e.preventDefault();
         if (!coupon.trim()) return;

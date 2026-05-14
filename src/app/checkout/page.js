@@ -227,12 +227,8 @@ export default function CheckoutPage() {
     }
 
     const amount = getCartTotal();
-    const storedTotal = typeof window !== 'undefined' ? localStorage.getItem("total") : null;
-    const initialDiscount = storedTotal ? Math.max(0, amount - parseFloat(storedTotal)) : 0;
-    
-    // Total calculation: subtotal - (cart discount OR checkout coupon discount)
-    const activeDiscount = Math.max(initialDiscount, couponDiscount);
-    const total = amount - activeDiscount;
+    const activeDiscount = Math.max(0, couponDiscount);
+    const total = Math.max(0, amount - activeDiscount);
 
     const handleApplyCoupon = async (e) => {
         if (e) e.preventDefault();
@@ -714,10 +710,12 @@ export default function CheckoutPage() {
                                             <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Selection Total</span>
                                             <span style={{ fontSize: "14px", color: "white" }}>{amount.toLocaleString()} PKR</span>
                                         </div>
-                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                            <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Luxury Discount</span>
-                                            <span style={{ fontSize: "14px", color: "#10b981" }}>- {activeDiscount.toLocaleString()} PKR</span>
-                                        </div>
+                                        {activeDiscount > 0 && (
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Luxury Discount</span>
+                                                <span style={{ fontSize: "14px", color: "#10b981" }}>- {activeDiscount.toLocaleString()} PKR</span>
+                                            </div>
+                                        )}
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                             <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", color: "#6b7280" }}>Global Shipping</span>
                                             <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.2em", color: "#C9A84C", fontWeight: "bold" }}>Complimentary</span>
