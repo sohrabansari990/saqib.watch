@@ -159,11 +159,11 @@ export default function Footer() {
 
                         <div className="flex flex-col gap-4 pt-4">
                             <a
-                                href="tel:+923345062546"
+                                href="tel:+923095225815"
                                 className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-300 px-6 py-2 w-fit"
                             >
                                 <FaPhone size={14} className="text-gold" />
-                                <span className="text-sm font-light tracking-widest">+92 334 5062546</span>
+                                <span className="text-sm font-light tracking-widest">+92 309 5225815</span>
                             </a>
                         </div>
                     </div>

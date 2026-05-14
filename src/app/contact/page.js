@@ -57,7 +57,7 @@ export default function ContactPage() {
                                             Call Us
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            +92 334 5062546
+                                            +92 309 5225815
                                         </p>
                                     </div>
                                 </div>
@@ -71,7 +71,7 @@ export default function ContactPage() {
                                             WhatsApp
                                         </p>
                                         <p className="text-white text-lg font-medium">
-                                            +92 334 5062546
+                                            +92 309 5225815
                                         </p>
                                     </div>
                                 </div>

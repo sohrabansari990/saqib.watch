@@ -325,7 +325,7 @@ export default function CheckoutPage() {
             setTimeout(() => clearCart(), 100);
         } catch (error) {
             console.error("Order submission error:", error);
-            toast.error("Something went wrong. Please WhatsApp us directly at +92 334 5062546");
+            toast.error("Something went wrong. Please WhatsApp us directly at +92 309 5225815");
         } finally {
             setLoading(false);
         }
@@ -608,7 +608,7 @@ export default function CheckoutPage() {
                                                 <div style={{ marginTop: "32px", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(201,169,76,0.2)", borderRadius: "24px", padding: "32px" }}>
                                                     <div style={{ textAlign: "center", marginBottom: "32px" }}>
                                                         <p style={{ color: "#6b7280", letterSpacing: "0.2em", fontSize: "10px", textTransform: "uppercase", marginBottom: "8px" }}>Send Precise Amount To</p>
-                                                        <h3 style={{ fontSize: "2rem", fontWeight: "bold", color: "white", letterSpacing: "0.1em" }}>0334 5062546</h3>
+                                                        <h3 style={{ fontSize: "2rem", fontWeight: "bold", color: "white", letterSpacing: "0.1em" }}>0309 5225815</h3>
                                                         <p style={{ color: "#C9A84C", fontWeight: "600", fontSize: "14px" }}>Erfan Khan</p>
                                                     </div>
 

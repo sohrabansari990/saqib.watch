@@ -130,7 +130,7 @@ export default function RootLayout({ children }) {
                   },
                   contactPoint: {
                     "@type": "ContactPoint",
-                    telephone: "+92-334-5062546",
+                    telephone: "+92-309-5225815",
                     contactType: "sales",
                     areaServed: "PK",
                     availableLanguage: ["en", "ur"],
@@ -183,7 +183,7 @@ export default function RootLayout({ children }) {
                   name: "Saqib Watches",
                   description: "Premium luxury watches store in Peshawar, Pakistan. Curated by National Physique Champion Saqib Khan.",
                   url: "https://saqib.watch",
-                  telephone: "+92-334-5062546",
+                  telephone: "+92-309-5225815",
                   priceRange: "PKR 3000 - PKR 20000",
                   currenciesAccepted: "PKR",
                   paymentAccepted: "Cash, EasyPaisa, JazzCash",
