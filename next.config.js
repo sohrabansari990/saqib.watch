@@ -9,6 +9,14 @@ const nextConfig = {
                 port: '',
                 pathname: '/**',
             },
+            // Primary: subdomain with reverse proxy (HTTPS)
+            {
+                protocol: 'https',
+                hostname: 'images.saqib.watch',
+                port: '',
+                pathname: '/images/**',
+            },
+            // Fallback: direct IP access (HTTP, port 8080)
             {
                 protocol: 'http',
                 hostname: '64.227.191.172',
