@@ -101,9 +101,12 @@ function GalleryContent() {
     const hasSyncedQuery = useRef(false);
     const { toggleFavorite, isFavorite } = useFavorites();
     const { addToCart } = useCart();
-    const prefetchProduct = (productId) => {
-        router.prefetch(`/product/${productId}`);
+    
+    const prefetchProduct = (watch) => {
+        const slug = watch.name.toLowerCase().replace(/ /g, '-');
+        router.prefetch(`/product/${slug}`);
     };
+
     const sortOptions = [
         { id: "featured", label: "Featured" },
         { id: "relevant", label: "Most relevant" },
@@ -161,7 +164,6 @@ function GalleryContent() {
         setPriceRange([priceBounds.min, priceBounds.max]);
     }, [priceBounds.min, priceBounds.max]);
 
-    // Keep URL in sync with current filter (skip first sync until initial read)
     useEffect(() => {
         if (!router) return;
         if (!hasSyncedQuery.current) {
@@ -181,7 +183,6 @@ function GalleryContent() {
             }
 
             try {
-                // Fetch Sale Settings
                 const saleSnap = await getDoc(doc(db, "settings", "sale"));
                 let saleData = null;
                 if (saleSnap.exists() && saleSnap.data().active) {
@@ -189,7 +190,6 @@ function GalleryContent() {
                     setActiveSale(saleData);
                 }
 
-                // Fetch Products
                 const querySnapshot = await getDocs(collection(db, "products"));
                 if (!isActive) return;
 
@@ -202,7 +202,6 @@ function GalleryContent() {
                 
                 const baseCats = getCategoriesFromProducts(productsList);
                 if (saleData?.name) {
-                    // Add sale name as a primary category tab if active
                     const saleCat = saleData.name.toLowerCase();
                     if (!baseCats.includes(saleCat)) {
                         setCategories(["all", saleCat, ...baseCats.filter(c => c !== "all")]);
@@ -225,16 +224,12 @@ function GalleryContent() {
         return () => { isActive = false; };
     }, []);
 
-    // Apply sorting in memo
     const displayedProducts = useMemo(() => {
         const saleName = activeSale?.name?.toLowerCase();
         
         let filtered = products;
         if (filter !== "all") {
             if (saleName && filter === saleName) {
-                // Special filter for active sale:
-                // 1. Items with mode or category matching sale name
-                // 2. Items with discount >= 20% (system default)
                 filtered = products.filter((p) => {
                     const matchesName = (p.mode?.toLowerCase() === saleName) || (p.category?.toLowerCase() === saleName);
                     const isHighDiscount = (p.discount >= 20);
@@ -314,45 +309,11 @@ function GalleryContent() {
     };
 
     const FilterPanel = ({ mobile = false }) => (
-        <div
-            style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                background: "#101010",
-                color: "#f8f5ef",
-            }}
-        >
-            <div
-                style={{
-                    padding: "24px 24px 22px",
-                    borderBottom: "1px solid rgba(201,169,110,0.18)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "16px",
-                }}
-            >
-                <h2 style={{ fontSize: "17px", fontWeight: 800, lineHeight: 1.2 }}>
-                    Products Category
-                </h2>
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "#101010", color: "#f8f5ef" }}>
+            <div style={{ padding: "24px 24px 22px", borderBottom: "1px solid rgba(201,169,110,0.18)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+                <h2 style={{ fontSize: "17px", fontWeight: 800, lineHeight: 1.2 }}>Products Category</h2>
                 {mobile && (
-                    <button
-                        type="button"
-                        onClick={() => setIsFilterOpen(false)}
-                        aria-label="Close filters"
-                        style={{
-                            width: "38px",
-                            height: "38px",
-                            borderRadius: "999px",
-                            border: "1px solid rgba(255,255,255,0.16)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: "transparent",
-                            color: "#f8f5ef",
-                        }}
-                    >
+                    <button type="button" onClick={() => setIsFilterOpen(false)} style={{ width: "38px", height: "38px", borderRadius: "999px", border: "1px solid rgba(255,255,255,0.16)", display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", color: "#f8f5ef" }}>
                         <X size={18} />
                     </button>
                 )}
@@ -360,30 +321,10 @@ function GalleryContent() {
 
             <div style={{ flex: 1, overflowY: "auto", padding: "0 24px" }}>
                 <div style={{ padding: "24px 0", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                    <label style={{ display: "block", marginBottom: "12px", fontSize: "13px", fontWeight: 800 }}>
-                        Category
-                    </label>
-                    <select
-                        value={filter}
-                        onChange={(event) => setFilter(event.target.value)}
-                        style={{
-                            width: "100%",
-                            height: "46px",
-                            padding: "0 14px",
-                            borderRadius: "8px",
-                            border: "1px solid rgba(255,255,255,0.14)",
-                            background: "#050505",
-                            color: "#f8f5ef",
-                            fontSize: "14px",
-                            fontWeight: 700,
-                            textTransform: "capitalize",
-                            outline: "none",
-                        }}
-                    >
+                    <label style={{ display: "block", marginBottom: "12px", fontSize: "13px", fontWeight: 800 }}>Category</label>
+                    <select value={filter} onChange={(event) => setFilter(event.target.value)} style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.14)", background: "#050505", color: "#f8f5ef", fontSize: "14px", fontWeight: 700, textTransform: "capitalize", outline: "none" }}>
                         {categories.map((cat) => (
-                            <option key={cat} value={cat}>
-                                {cat}
-                            </option>
+                            <option key={cat} value={cat}>{cat}</option>
                         ))}
                     </select>
                 </div>
@@ -397,24 +338,8 @@ function GalleryContent() {
                         { id: "in", label: "In stock", count: inStockCount },
                         { id: "out", label: "Out of stock", count: outOfStockCount },
                     ].map((option) => (
-                        <label
-                            key={option.id}
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "12px",
-                                marginBottom: "14px",
-                                color: "rgba(248,245,239,0.72)",
-                                fontSize: "14px",
-                                cursor: "pointer",
-                            }}
-                        >
-                            <input
-                                type="checkbox"
-                                checked={availabilityFilter === option.id}
-                                onChange={() => setAvailabilityFilter(availabilityFilter === option.id ? "all" : option.id)}
-                                style={{ width: "16px", height: "16px", accentColor: "#c9a96e" }}
-                            />
+                        <label key={option.id} style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px", color: "rgba(248,245,239,0.72)", fontSize: "14px", cursor: "pointer" }}>
+                            <input type="checkbox" checked={availabilityFilter === option.id} onChange={() => setAvailabilityFilter(availabilityFilter === option.id ? "all" : option.id)} style={{ width: "16px", height: "16px", accentColor: "#c9a96e" }} />
                             <span>{option.label} ({option.count})</span>
                         </label>
                     ))}
@@ -426,83 +351,15 @@ function GalleryContent() {
                         <span style={{ fontSize: "22px", lineHeight: 1, color: "#c9a96e" }}>-</span>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 18px 1fr", alignItems: "center", gap: "12px" }}>
-                        <input
-                            type="number"
-                            value={priceRange[0]}
-                            min={priceBounds.min}
-                            max={priceRange[1]}
-                            onChange={(event) => updateMinPrice(event.target.value)}
-                            style={{
-                                width: "100%",
-                                height: "42px",
-                                padding: "0 12px",
-                                borderRadius: "4px",
-                                border: "1px solid rgba(255,255,255,0.12)",
-                                background: "#050505",
-                                color: "#f8f5ef",
-                                fontSize: "14px",
-                                outline: "none",
-                            }}
-                        />
+                        <input type="number" value={priceRange[0]} min={priceBounds.min} max={priceRange[1]} onChange={(event) => updateMinPrice(event.target.value)} style={{ width: "100%", height: "42px", padding: "0 12px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.12)", background: "#050505", color: "#f8f5ef", fontSize: "14px", outline: "none" }} />
                         <span style={{ textAlign: "center", color: "rgba(248,245,239,0.45)" }}>-</span>
-                        <input
-                            type="number"
-                            value={priceRange[1]}
-                            min={priceRange[0]}
-                            max={priceBounds.max}
-                            onChange={(event) => updateMaxPrice(event.target.value)}
-                            style={{
-                                width: "100%",
-                                height: "42px",
-                                padding: "0 12px",
-                                borderRadius: "4px",
-                                border: "1px solid rgba(255,255,255,0.12)",
-                                background: "#050505",
-                                color: "#f8f5ef",
-                                fontSize: "14px",
-                                outline: "none",
-                            }}
-                        />
+                        <input type="number" value={priceRange[1]} min={priceRange[0]} max={priceBounds.max} onChange={(event) => updateMaxPrice(event.target.value)} style={{ width: "100%", height: "42px", padding: "0 12px", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.12)", background: "#050505", color: "#f8f5ef", fontSize: "14px", outline: "none" }} />
                     </div>
-                    <div
-                        onClick={handleRangeTrackClick}
-                        style={{
-                            position: "relative",
-                            height: "34px",
-                            marginTop: "18px",
-                            display: "flex",
-                            alignItems: "center",
-                        }}
-                    >
+                    <div onClick={handleRangeTrackClick} style={{ position: "relative", height: "34px", marginTop: "18px", display: "flex", alignItems: "center" }}>
                         <div style={{ position: "absolute", left: 0, right: 0, height: "4px", borderRadius: "999px", background: "rgba(255,255,255,0.16)" }} />
-                        <div
-                            style={{
-                                position: "absolute",
-                                left: `${minPricePercent}%`,
-                                width: `${Math.max(maxPricePercent - minPricePercent, 0)}%`,
-                                height: "4px",
-                                borderRadius: "999px",
-                                background: "#c9a96e",
-                            }}
-                        />
-                        <input
-                            className="price-range-input"
-                            type="range"
-                            min={priceBounds.min}
-                            max={priceBounds.max}
-                            value={priceRange[0]}
-                            onChange={(event) => updateMinPrice(event.target.value)}
-                            style={{ position: "absolute", inset: 0, width: "100%" }}
-                        />
-                        <input
-                            className="price-range-input"
-                            type="range"
-                            min={priceBounds.min}
-                            max={priceBounds.max}
-                            value={priceRange[1]}
-                            onChange={(event) => updateMaxPrice(event.target.value)}
-                            style={{ position: "absolute", inset: 0, width: "100%" }}
-                        />
+                        <div style={{ position: "absolute", left: `${minPricePercent}%`, width: `${Math.max(maxPricePercent - minPricePercent, 0)}%`, height: "4px", borderRadius: "999px", background: "#c9a96e" }} />
+                        <input className="price-range-input" type="range" min={priceBounds.min} max={priceBounds.max} value={priceRange[0]} onChange={(event) => updateMinPrice(event.target.value)} style={{ position: "absolute", inset: 0, width: "100%" }} />
+                        <input className="price-range-input" type="range" min={priceBounds.min} max={priceBounds.max} value={priceRange[1]} onChange={(event) => updateMaxPrice(event.target.value)} style={{ position: "absolute", inset: 0, width: "100%" }} />
                     </div>
                     <p style={{ marginTop: "14px", color: "rgba(248,245,239,0.72)", fontSize: "14px" }}>
                         Price: <span style={{ color: "#f8f5ef", fontWeight: 800 }}>{formatMoney(priceRange[0])} - {formatMoney(priceRange[1])}</span>
@@ -515,17 +372,7 @@ function GalleryContent() {
                         <span style={{ fontSize: "22px", lineHeight: 1, color: "#c9a96e" }}>-</span>
                     </div>
                     {featuredProduct ? (
-                        <Link
-                            href={`/product/${featuredProduct.id}`}
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "72px minmax(0, 1fr)",
-                                gap: "12px",
-                                alignItems: "center",
-                                color: "#f8f5ef",
-                                textDecoration: "none",
-                            }}
-                        >
+                        <Link href={`/product/${featuredProduct.name.toLowerCase().replace(/ /g, '-')}`} style={{ display: "grid", gridTemplateColumns: "72px minmax(0, 1fr)", gap: "12px", alignItems: "center", color: "#f8f5ef", textDecoration: "none" }}>
                             <div style={{ position: "relative", width: "72px", aspectRatio: "1 / 1", borderRadius: "8px", overflow: "hidden", background: "#171717" }}>
                                 {featuredProduct.imageUrl ? (
                                     <Image src={featuredProduct.imageUrl} alt={featuredProduct.name} fill sizes="72px" className="object-cover" />
@@ -535,9 +382,7 @@ function GalleryContent() {
                             </div>
                             <div style={{ minWidth: 0 }}>
                                 <p style={{ fontSize: "13px", fontWeight: 800, lineHeight: 1.25 }}>{featuredProduct.name}</p>
-                                <p style={{ marginTop: "4px", color: "#c9a96e", fontSize: "12px", fontWeight: 800 }}>
-                                    Rs. {featuredProduct.price?.toLocaleString()}
-                                </p>
+                                <p style={{ marginTop: "4px", color: "#c9a96e", fontSize: "12px", fontWeight: 800 }}>Rs. {featuredProduct.price?.toLocaleString()}</p>
                             </div>
                         </Link>
                     ) : (
@@ -546,51 +391,10 @@ function GalleryContent() {
                 </div>
             </div>
 
-            <div
-                style={{
-                    padding: "16px 24px",
-                    borderTop: "1px solid rgba(201,169,110,0.18)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "16px",
-                    background: "#101010",
-                }}
-            >
-                <button
-                    type="button"
-                    onClick={clearFilters}
-                    style={{
-                        border: 0,
-                        background: "transparent",
-                        color: "#f8f5ef",
-                        fontSize: "14px",
-                        fontWeight: 800,
-                        textDecoration: "underline",
-                        textUnderlineOffset: "4px",
-                        cursor: "pointer",
-                    }}
-                >
-                    Clear all
-                </button>
+            <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(201,169,110,0.18)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", background: "#101010" }}>
+                <button type="button" onClick={clearFilters} style={{ border: 0, background: "transparent", color: "#f8f5ef", fontSize: "14px", fontWeight: 800, textDecoration: "underline", textUnderlineOffset: "4px", cursor: "pointer" }}>Clear all</button>
                 {mobile && (
-                    <button
-                        type="button"
-                        onClick={() => setIsFilterOpen(false)}
-                        style={{
-                            minWidth: "112px",
-                            height: "44px",
-                            border: 0,
-                            borderRadius: "999px",
-                            background: "#c9a96e",
-                            color: "#050505",
-                            fontSize: "14px",
-                            fontWeight: 800,
-                            cursor: "pointer",
-                        }}
-                    >
-                        Apply
-                    </button>
+                    <button type="button" onClick={() => setIsFilterOpen(false)} style={{ minWidth: "112px", height: "44px", border: 0, borderRadius: "999px", background: "#c9a96e", color: "#050505", fontSize: "14px", fontWeight: 800, cursor: "pointer" }}>Apply</button>
                 )}
             </div>
         </div>
@@ -600,174 +404,37 @@ function GalleryContent() {
         <main className="min-h-screen bg-dark" style={{ paddingTop: "150px", paddingLeft: "16px", paddingRight: "16px", paddingBottom: "3vw" }}>
             <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
                 <div className="text-center mb-12">
-                    <p className="text-gold tracking-[0.4em] text-xs uppercase mb-3">
-                        Collection
-                    </p>
-                    <h1 className="font-serif text-4xl md:text-6xl text-white font-light">
-                        Product Gallery
-                    </h1>
+                    <p className="text-gold tracking-[0.4em] text-xs uppercase mb-3">Collection</p>
+                    <h1 className="font-serif text-4xl md:text-6xl text-white font-light">Product Gallery</h1>
                     <div className="mt-6 w-16 h-px bg-gold mx-auto" />
                 </div>
 
                 <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex flex-wrap items-center gap-3">
-                        <button
-                            type="button"
-                            onClick={() => setIsFilterOpen(true)}
-                            className="lg:hidden"
-                            style={{
-                                height: "38px",
-                                padding: "0 14px",
-                                border: "1px solid rgba(201,169,110,0.5)",
-                                borderRadius: "999px",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                background: "rgba(201,169,110,0.14)",
-                                color: "#f8f5ef",
-                                fontSize: "12px",
-                                fontWeight: 900,
-                                letterSpacing: "0.14em",
-                                textTransform: "uppercase",
-                            }}
-                        >
+                        <button type="button" onClick={() => setIsFilterOpen(true)} className="lg:hidden" style={{ height: "38px", padding: "0 14px", border: "1px solid rgba(201,169,110,0.5)", borderRadius: "999px", display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(201,169,110,0.14)", color: "#f8f5ef", fontSize: "12px", fontWeight: 900, letterSpacing: "0.14em", textTransform: "uppercase" }}>
                             <SlidersHorizontal size={15} color="#c9a96e" />
                             Filter
                         </button>
-                        <p className="text-sm text-gray-400">
-                            Showing <span className="font-bold text-white">{displayedProducts.length}</span> of {products.length} products
-                        </p>
+                        <p className="text-sm text-gray-400">Showing <span className="font-bold text-white">{displayedProducts.length}</span> of {products.length} products</p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <div
-                            className="gallery-view-controls"
-                            style={{
-                                display: "none",
-                                alignItems: "center",
-                                gap: "4px",
-                                padding: "4px",
-                                borderRadius: "999px",
-                                border: "1px solid rgba(255,255,255,0.1)",
-                                background: "#1a1a1a",
-                            }}
-                        >
-                            {[
-                                { value: 2, label: "2x2 grid" },
-                                { value: 3, label: "3x3 grid" },
-                                { value: 4, label: "4x4 grid" },
-                            ].map((option) => {
-                                const active = viewMode === "grid" && gridColumns === option.value;
-                                return (
-                                    <button
-                                        key={option.value}
-                                        type="button"
-                                        onClick={() => {
-                                            setViewMode("grid");
-                                            setGridColumns(option.value);
-                                        }}
-                                        aria-label={option.label}
-                                        title={option.label}
-                                        style={{
-                                            width: "38px",
-                                            height: "38px",
-                                            border: 0,
-                                            borderRadius: "999px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            background: active ? "#c9a96e" : "transparent",
-                                            color: active ? "#111" : "rgba(255,255,255,0.55)",
-                                            cursor: "pointer",
-                                        }}
-                                    >
-                                        <DensityIcon columns={option.value} active={active} />
-                                    </button>
-                                );
-                            })}
-                            <button
-                                type="button"
-                                onClick={() => setViewMode("list")}
-                                aria-label="List view"
-                                title="List view"
-                                style={{
-                                    width: "38px",
-                                    height: "38px",
-                                    border: 0,
-                                    borderRadius: "999px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    background: viewMode === "list" ? "#c9a96e" : "transparent",
-                                    color: viewMode === "list" ? "#111" : "rgba(255,255,255,0.55)",
-                                    cursor: "pointer",
-                                }}
-                            >
-                                <DensityIcon list active={viewMode === "list"} />
-                            </button>
-                        </div>
-
                         <div className="relative z-40">
-                            <button
-                                onClick={() => setIsSortOpen(!isSortOpen)}
-                                style={{ padding: "12px 18px" }}
-                                className="flex min-w-52 items-center justify-between rounded-full border border-white/10 bg-dark-card text-white shadow-xl transition-all duration-300 hover:border-gold/50 focus:outline-none focus:ring-1 focus:ring-gold"
-                            >
+                            <button onClick={() => setIsSortOpen(!isSortOpen)} style={{ padding: "12px 18px" }} className="flex min-w-52 items-center justify-between rounded-full border border-white/10 bg-dark-card text-white shadow-xl transition-all duration-300 hover:border-gold/50 focus:outline-none focus:ring-1 focus:ring-gold">
                                 <span className="mr-2 text-xs text-white/55">Sort by:</span>
                                 <span className="text-xs font-bold">{activeSortLabel}</span>
                                 <ChevronDown size={15} className={cn("ml-3 transition-transform duration-300", isSortOpen ? "rotate-180" : "")} />
                             </button>
-
                             <AnimatePresence>
                                 {isSortOpen && (
                                     <>
-                                        <div
-                                            className="fixed inset-0 z-30 bg-black/40 md:bg-transparent"
-                                            onClick={() => setIsSortOpen(false)}
-                                        />
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                            transition={{ duration: 0.2, ease: "easeOut" }}
-                                            className="fixed bottom-0 left-0 right-0 z-40 rounded-t-3xl border border-white/10 bg-[#111] p-4 shadow-2xl md:absolute md:bottom-auto md:left-auto md:right-0 md:mt-3 md:w-72 md:rounded-2xl"
-                                        >
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsSortOpen(false)}
-                                                className="md:hidden"
-                                                style={{
-                                                    position: "absolute",
-                                                    top: "-22px",
-                                                    left: "50%",
-                                                    transform: "translateX(-50%)",
-                                                    width: "44px",
-                                                    height: "44px",
-                                                    borderRadius: "999px",
-                                                    border: "1px solid rgba(255,255,255,0.12)",
-                                                    background: "#f8f5ef",
-                                                    color: "#050505",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                }}
-                                                aria-label="Close sort"
-                                            >
+                                        <div className="fixed inset-0 z-30 bg-black/40 md:bg-transparent" onClick={() => setIsSortOpen(false)} />
+                                        <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2, ease: "easeOut" }} className="fixed bottom-0 left-0 right-0 z-40 rounded-t-3xl border border-white/10 bg-[#111] p-4 shadow-2xl md:absolute md:bottom-auto md:left-auto md:right-0 md:mt-3 md:w-72 md:rounded-2xl">
+                                            <button type="button" onClick={() => setIsSortOpen(false)} className="md:hidden" style={{ position: "absolute", top: "-22px", left: "50%", transform: "translateX(-50%)", width: "44px", height: "44px", borderRadius: "999px", border: "1px solid rgba(255,255,255,0.12)", background: "#f8f5ef", color: "#050505", display: "flex", alignItems: "center", justifyCenter: "center" }}>
                                                 <X size={18} />
                                             </button>
                                             {sortOptions.map((opt) => (
-                                                <button
-                                                    key={opt.id}
-                                                    onClick={() => {
-                                                        setSortBy(opt.id);
-                                                        setIsSortOpen(false);
-                                                    }}
-                                                    style={{ padding: "13px 16px" }}
-                                                    className={cn(
-                                                        "flex w-full items-center justify-between rounded-xl text-left text-sm transition-all duration-200",
-                                                        sortBy === opt.id ? "bg-gold/10 font-black text-gold" : "text-gray-300 hover:bg-white/5 hover:text-white"
-                                                    )}
-                                                >
+                                                <button key={opt.id} onClick={() => { setSortBy(opt.id); setIsSortOpen(false); }} style={{ padding: "13px 16px" }} className={cn("flex w-full items-center justify-between rounded-xl text-left text-sm transition-all duration-200", sortBy === opt.id ? "bg-gold/10 font-black text-gold" : "text-gray-300 hover:bg-white/5 hover:text-white")}>
                                                     {opt.label}
                                                     {sortBy === opt.id && <Check size={14} />}
                                                 </button>
@@ -782,14 +449,7 @@ function GalleryContent() {
 
                 <div className="grid gap-8 lg:grid-cols-[340px_minmax(0,1fr)]">
                     <aside className="hidden lg:block">
-                        <div
-                            className="sticky top-32 overflow-hidden"
-                            style={{
-                                borderRadius: "2px",
-                                border: "1px solid rgba(201,169,110,0.18)",
-                                background: "#101010",
-                            }}
-                        >
+                        <div className="sticky top-32 overflow-hidden" style={{ borderRadius: "2px", border: "1px solid rgba(201,169,110,0.18)", background: "#101010" }}>
                             <FilterPanel />
                         </div>
                     </aside>
@@ -797,121 +457,42 @@ function GalleryContent() {
                     {loading ? (
                         <CollectionLoader variant="gallery" />
                     ) : (
-                        <div className={cn(viewMode === "list" ? "gallery-product-list" : "gallery-product-grid", viewMode === "grid" && `gallery-grid-${gridColumns}`)}>
+                        <div className={cn(viewMode === "list" ? "gallery-product-list" : "gallery-product-grid", "gallery-grid-4")}>
                             {displayedProducts.length === 0 ? (
-                                <div className="col-span-full rounded-3xl border border-white/10 bg-white/3 py-20 text-center text-gray-500">
-                                    No products found for these filters.
-                                </div>
+                                <div className="col-span-full rounded-3xl border border-white/10 bg-white/3 py-20 text-center text-gray-500">No products found for these filters.</div>
                             ) : (
                                 displayedProducts.map((watch) => (
-                                <div
-                                    key={watch.id}
-                                    className={cn("group cursor-pointer relative", viewMode === "list" ? "gallery-list-card" : "block")}
-                                    style={viewMode === "list" ? {
-                                        display: "grid",
-                                        gridTemplateColumns: "minmax(140px, min(32vw, 320px)) minmax(0, 1fr)",
-                                        gap: "20px",
-                                        alignItems: "center",
-                                        padding: "16px",
-                                        border: "1px solid rgba(255,255,255,0.08)",
-                                        borderRadius: "14px",
-                                        background: "rgba(255,255,255,0.03)",
-                                    } : undefined}
-                                >
-                                    <Link
-                                        href={`/product/${watch.id}`}
-                                        prefetch
-                                        onMouseEnter={() => prefetchProduct(watch.id)}
-                                        onTouchStart={() => prefetchProduct(watch.id)}
-                                        style={viewMode === "list" ? { width: "100%", maxWidth: "min(32vw, 320px)" } : undefined}
-                                    >
-                                        <div
-                                            className="gallery-card-media relative overflow-hidden bg-dark-card rounded-lg aspect-[4/5] mb-4 border border-white/5"
-                                            style={viewMode === "list" ? { marginBottom: 0 } : undefined}
-                                        >
+                                <div key={watch.id} className={cn("group cursor-pointer relative", viewMode === "list" ? "gallery-list-card" : "block")}>
+                                    <Link href={`/product/${watch.name.toLowerCase().replace(/ /g, '-')}`} prefetch onMouseEnter={() => prefetchProduct(watch)} onTouchStart={() => prefetchProduct(watch)}>
+                                        <div className="gallery-card-media relative overflow-hidden bg-dark-card rounded-lg aspect-[4/5] mb-4 border border-white/5">
                                             {watch.imageUrl ? (
-                                                <GalleryProductImage
-                                                    src={watch.imageUrl}
-                                                    alt={watch.name}
-                                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                                />
+                                                <GalleryProductImage src={watch.imageUrl} alt={watch.name} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
                                             ) : (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-white/5">
-                                                    <span className="text-gray-600 text-xs">No Image</span>
-                                                </div>
+                                                <div className="absolute inset-0 flex items-center justify-center bg-white/5"><span className="text-gray-600 text-xs">No Image</span></div>
                                             )}
-
-                                            {/* Overlay */}
                                             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                                             <div style={{ position: "absolute", top: "16px", left: "0px", display: "flex", flexDirection: "column", gap: "8px", zIndex: 10 }}>
                                                 {watch.mode && watch.mode !== 'new' && (
-                                                    <span style={{ backgroundColor: "#c9a96e", color: "black", fontSize: "10px", fontWeight: "bold", padding: "4px 8px 4px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
-                                                        {watch.mode}
-                                                    </span>
+                                                    <span style={{ backgroundColor: "#c9a96e", color: "black", fontSize: "10px", fontWeight: "bold", padding: "4px 8px 4px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>{watch.mode}</span>
                                                 )}
                                                 {!watch.soldOut && watch.discount > 0 && (
-                                                    <span style={{ backgroundColor: "#DC2626", color: "white", fontSize: "10px", fontWeight: "bold", padding: "4px 8px 4px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
-                                                        -{watch.discount}% OFF
-                                                    </span>
+                                                    <span style={{ backgroundColor: "#DC2626", color: "white", fontSize: "10px", fontWeight: "bold", padding: "4px 8px 4px 12px", textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "flex-start", borderRadius: "0 4px 4px 0", boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>-{watch.discount}% OFF</span>
                                                 )}
                                             </div>
                                             {watch.soldOut && (
-                                                <div className="absolute top-2 right-2 z-20 pointer-events-none w-[100px] sm:w-[120px]">
-                                                    <img src="/sold-out-removebg-preview.png" alt="Sold Out" className="w-full h-auto drop-shadow-lg" />
-                                                </div>
+                                                <div className="absolute top-2 right-2 z-20 pointer-events-none w-[100px] sm:w-[120px]"><img src="/sold-out-removebg-preview.png" alt="Sold Out" className="w-full h-auto drop-shadow-lg" /></div>
                                             )}
-
-                                            {/* Quick View Button Hover overlay */}
-                                            <div  className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-20">
-                                                <button
-                                                style={{padding : "10px"}}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        setQuickViewProduct(watch);
-                                                        setSelectedQuickViewColor(watch.variants?.find((variant) => variant.available !== false && variant.images?.length)?.color || watch.variants?.[0]?.color || null);
-                                                    }}
-                                                    className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-black font-semibold text-[10px] tracking-[0.2em] uppercase px-8 py-3 rounded-full transition-all duration-300 shadow-xl"
-                                                >
-                                                    Quick View
-                                                </button>
+                                            <div className="absolute bottom-6 left-0 right-0 flex justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-20">
+                                                <button style={{padding : "10px"}} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewProduct(watch); setSelectedQuickViewColor(watch.variants?.find((variant) => variant.available !== false && variant.images?.length)?.color || watch.variants?.[0]?.color || null); }} className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-gold hover:border-gold hover:text-black font-semibold text-[10px] tracking-[0.2em] uppercase px-8 py-3 rounded-full transition-all duration-300 shadow-xl">Quick View</button>
                                             </div>
                                         </div>
                                     </Link>
-
-                                    {/* Favorite icon - always visible on top-right of image */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            toggleFavorite(watch);
-                                        }}
-                                        className={`absolute top-6 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${
-                                            isFavorite(watch.id)
-                                                ? "bg-white/90 text-red-500 opacity-100"
-                                                : "bg-black/40 text-white opacity-0 group-hover:opacity-100 hover:bg-white/90 hover:text-red-500"
-                                        }`}
-                                    >
+                                    <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(watch); }} className={`absolute top-6 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isFavorite(watch.id) ? "bg-white/90 text-red-500 opacity-100" : "bg-black/40 text-white opacity-0 group-hover:opacity-100 hover:bg-white/90 hover:text-red-500"}`}>
                                         <Heart size={18} fill={isFavorite(watch.id) ? "currentColor" : "none"} />
                                     </button>
-
-                                    <Link
-                                        href={`/product/${watch.id}`}
-                                        prefetch
-                                        onMouseEnter={() => prefetchProduct(watch.id)}
-                                        onTouchStart={() => prefetchProduct(watch.id)}
-                                        style={viewMode === "list" ? { minWidth: 0 } : undefined}
-                                    >
-                                        <h3
-                                            className="font-serif text-sm leading-tight text-white transition-colors duration-300 group-hover:text-gold sm:text-lg"
-                                            style={{ textAlign: viewMode === "list" ? "left" : "center" }}
-                                        >
-                                            {watch.name}
-                                        </h3>
-                                        <div
-                                            className="mt-1 flex items-center gap-2"
-                                            style={{ justifyContent: viewMode === "list" ? "flex-start" : "center", textAlign: viewMode === "list" ? "left" : "center" }}
-                                        >
+                                    <Link href={`/product/${watch.name.toLowerCase().replace(/ /g, '-')}`} prefetch onMouseEnter={() => prefetchProduct(watch)} onTouchStart={() => prefetchProduct(watch)}>
+                                        <h3 className="font-serif text-sm leading-tight text-white transition-colors duration-300 group-hover:text-gold sm:text-lg text-center">{watch.name}</h3>
+                                        <div className="mt-1 flex items-center gap-2 justify-center">
                                             <span className="text-gold text-sm font-medium">Rs. {watch.price?.toLocaleString()}</span>
                                             {watch.discount > 0 && (
                                                 <span className="text-gray-500 text-xs line-through opacity-70">Rs. {Math.round(watch.price / (1 - watch.discount / 100)).toLocaleString()}</span>
@@ -928,133 +509,45 @@ function GalleryContent() {
             <AnimatePresence>
                 {isFilterOpen && (
                     <>
-                        <motion.button
-                            aria-label="Close filters"
-                            className="fixed inset-0 z-[95] bg-black/65 backdrop-blur-[2px] lg:hidden"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsFilterOpen(false)}
-                        />
-                        <motion.aside
-                            className="fixed left-0 top-0 z-[100] h-dvh w-[86vw] max-w-sm overflow-hidden border-r border-white/10 bg-[#0f0f0f] shadow-2xl lg:hidden"
-                            initial={{ x: "-100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "-100%" }}
-                            transition={{ type: "spring", bounce: 0, duration: 0.34 }}
-                        >
+                        <motion.button className="fixed inset-0 z-[95] bg-black/65 backdrop-blur-[2px] lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsFilterOpen(false)} />
+                        <motion.aside className="fixed left-0 top-0 z-[100] h-dvh w-[86vw] max-w-sm overflow-hidden border-r border-white/10 bg-[#0f0f0f] shadow-2xl lg:hidden" initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", bounce: 0, duration: 0.34 }}>
                             <FilterPanel mobile />
                         </motion.aside>
                     </>
                 )}
             </AnimatePresence>
 
-            {/* Quick View Modal */}
             {quickViewProduct && (
-                <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-all">
                     <div className="bg-[#111] border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl relative flex flex-col md:flex-row">
-                        <button
-                            onClick={() => setQuickViewProduct(null)}
-                            className="absolute top-4 right-4 z-20 text-gray-400 hover:text-white bg-black/50 p-2 rounded-full backdrop-blur transition-colors"
-                        >
-                            <X size={20} />
-                        </button>
-                        
-                        {/* Modal Image */}
+                        <button onClick={() => setQuickViewProduct(null)} className="absolute top-4 right-4 z-20 text-gray-400 hover:text-white bg-black/50 p-2 rounded-full backdrop-blur transition-colors"><X size={20} /></button>
                         <div className="w-full md:w-1/2 min-h-75 md:min-h-125 bg-dark relative flex items-center justify-center overflow-hidden">
                              <AnimatePresence mode="wait">
-                                <motion.img
-                                    key={selectedQuickViewColor || "default"}
-                                    initial={{ opacity: 0, scale: 1.1 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 1.05 }}
-                                    onLoadStart={() => setIsImageLoading(true)}
-                                    onLoad={() => setIsImageLoading(false)}
-                                    transition={{ duration: 0.5, ease: "easeOut" }}
-                                    src={
-                                        selectedQuickViewColor 
-                                            ? quickViewProduct.variants?.find(v => v.color === selectedQuickViewColor)?.images?.[0] || quickViewProduct.imageUrl
-                                            : quickViewProduct.imageUrl
-                                    }
-                                    alt={quickViewProduct.name}
-                                    className="object-cover w-full h-full absolute inset-0"
-                                />
+                                <motion.img key={selectedQuickViewColor || "default"} initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} onLoadStart={() => setIsImageLoading(true)} onLoad={() => setIsImageLoading(false)} transition={{ duration: 0.5, ease: "easeOut" }} src={selectedQuickViewColor ? quickViewProduct.variants?.find(v => v.color === selectedQuickViewColor)?.images?.[0] || quickViewProduct.imageUrl : quickViewProduct.imageUrl} alt={quickViewProduct.name} className="object-cover w-full h-full absolute inset-0" />
                              </AnimatePresence>
-                             
-                             {/* Loading skeleton */}
-                             {isImageLoading && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] z-10 transition-opacity duration-300">
-                                    <div className="skeleton-surface h-full w-full" />
-                                </div>
-                             )}
-                             
+                             {isImageLoading && (<div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] z-10 transition-opacity duration-300"><div className="skeleton-surface h-full w-full" /></div>)}
                              <div className="absolute inset-0 bg-linear-to-t from-dark/60 via-transparent to-transparent pointer-events-none" />
                         </div>
-
-                        {/* Modal Content */}
                         <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-[#0a0a0a]">
                             <h2 className="font-serif text-3xl md:text-4xl text-white mb-2">{quickViewProduct.name}</h2>
                             <div className="mb-8 flex items-end gap-3">
                                 <p className="text-xl md:text-2xl text-gold font-semibold">Rs. {quickViewProduct.price?.toLocaleString()}</p>
-                                {quickViewProduct.discount > 0 && (
-                                    <p className="text-lg text-gray-500 line-through mb-[2px] opacity-70">Rs. {Math.round(quickViewProduct.price / (1 - quickViewProduct.discount / 100)).toLocaleString()}</p>
-                                )}
+                                {quickViewProduct.discount > 0 && (<p className="text-lg text-gray-500 line-through mb-[2px] opacity-70">Rs. {Math.round(quickViewProduct.price / (1 - quickViewProduct.discount / 100)).toLocaleString()}</p>)}
                             </div>
-                            
                             {quickViewProduct.variants && quickViewProduct.variants.length > 0 && (
                                 <div className="mb-10">
-                                    <span className="text-xs text-gray-400 uppercase tracking-widest block mb-4">
-                                        Color: <span className="text-white ml-2">{selectedQuickViewColor || "Select"}</span>
-                                    </span>
+                                    <span className="text-xs text-gray-400 uppercase tracking-widest block mb-4">Color: <span className="text-white ml-2">{selectedQuickViewColor || "Select"}</span></span>
                                     <div className="flex gap-3">
                                         {quickViewProduct.variants.map((v) => (
-                                            <button
-                                                key={v.color}
-                                                disabled={v.available === false || !v.images?.length}
-                                                onClick={() => {
-                                                    if (v.available !== false && v.images?.length && v.color !== selectedQuickViewColor) {
-                                                        setIsImageLoading(true);
-                                                        setSelectedQuickViewColor(v.color);
-                                                    }
-                                                }}
-                                                className={`w-10 h-10 rounded-full border-2 transition-all duration-300 relative flex items-center justify-center ${
-                                                    v.available === false || !v.images?.length
-                                                        ? "cursor-not-allowed opacity-40 after:absolute after:left-1 after:right-1 after:top-1/2 after:h-px after:-rotate-45 after:bg-white"
-                                                        : ""
-                                                } ${
-                                                    selectedQuickViewColor === v.color 
-                                                        ? "border-gold scale-110 shadow-[0_0_15px_rgba(201,169,76,0.3)]" 
-                                                        : "border-white/20 hover:border-white/50"
-                                                }`}
-                                                style={{ backgroundColor: v.hex }}
-                                                title={v.color}
-                                            >
-                                                {selectedQuickViewColor === v.color && (
-                                                    <Check size={14} className={cn(
-                                                        v.color.toLowerCase() === 'white' ? 'text-black' : 'text-white'
-                                                    )} />
-                                                )}
+                                            <button key={v.color} disabled={!v.images?.length} onClick={() => { if (v.images?.length && v.color !== selectedQuickViewColor) { setIsImageLoading(true); setSelectedQuickViewColor(v.color); } }} className={`w-10 h-10 rounded-full border-2 transition-all duration-300 relative flex items-center justify-center ${!v.images?.length ? "cursor-not-allowed opacity-40 after:absolute after:left-1 after:right-1 after:top-1/2 after:h-px after:-rotate-45 after:bg-white" : v.available === false ? "opacity-60 after:absolute after:left-1 after:right-1 after:top-1/2 after:h-px after:-rotate-45 after:bg-white" : ""} ${selectedQuickViewColor === v.color ? "border-gold scale-110 shadow-[0_0_15px_rgba(201,169,76,0.3)]" : "border-white/20 hover:border-white/50"}`} style={{ backgroundColor: v.hex }} title={v.color}>
+                                                {selectedQuickViewColor === v.color && (<Check size={14} className={cn(v.color.toLowerCase() === 'white' ? 'text-black' : 'text-white')} />)}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
                             )}
-
-                            <button
-                                onClick={() => {
-                                    addToCart(quickViewProduct, 1, selectedQuickViewColor || quickViewProduct.variants?.[0]?.color || null);
-                                    setQuickViewProduct(null);
-                                }}
-                                className="w-full bg-gold text-black font-bold uppercase tracking-widest py-4 mb-4 hover:bg-white hover:text-black transition-all duration-300 shadow-lg hover:shadow-gold/20"
-                            >
-                                Add to Cart
-                            </button>
-                            <Link
-                                href={`/product/${quickViewProduct.id}`}
-                                className="text-center text-gray-400 hover:text-white text-[10px] uppercase tracking-[0.3em] transition-colors border-b border-white/10 hover:border-gold pb-1 self-center inline-block"
-                            >
-                                View Full Details
-                            </Link>
+                            <button onClick={() => { addToCart(quickViewProduct, 1, selectedQuickViewColor || quickViewProduct.variants?.[0]?.color || null); setQuickViewProduct(null); }} className="w-full bg-gold text-black font-bold uppercase tracking-widest py-4 mb-4 hover:bg-white hover:text-black transition-all duration-300 shadow-lg hover:shadow-gold/20">Add to Cart</button>
+                            <Link href={`/product/${quickViewProduct.name.toLowerCase().replace(/ /g, '-')}`} className="text-center text-gray-400 hover:text-white text-[10px] uppercase tracking-[0.3em] transition-colors border-b border-white/10 hover:border-gold pb-1 self-center inline-block">View Full Details</Link>
                         </div>
                     </div>
                 </div>
@@ -1067,13 +560,7 @@ export default function GalleryPage() {
     return (
         <>
             <Header />
-            <Suspense fallback={
-                <main className="pt-[120px] md:pt-[8.5vw] px-4 md:px-[2vw] pb-[3vw] min-h-screen bg-dark">
-                    <div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20">
-                        <CollectionLoader variant="gallery" />
-                    </div>
-                </main>
-            }>
+            <Suspense fallback={<main className="pt-[120px] md:pt-[8.5vw] px-4 md:px-[2vw] pb-[3vw] min-h-screen bg-dark"><div className="w-full px-6 md:px-12 2xl:px-20 py-12 md:py-20"><CollectionLoader variant="gallery" /></div></main>}>
                 <GalleryContent />
             </Suspense>
             <Footer />

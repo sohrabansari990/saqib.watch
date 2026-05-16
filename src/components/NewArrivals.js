@@ -16,12 +16,9 @@ import { cacheProducts, getCachedCatalog, getNewestProducts } from "@/lib/produc
 function WatchCard({ watch, index }) {
     const [imageLoaded, setImageLoaded] = useState(false);
     const router = useRouter();
-    const hasDiscount =
-        watch.originalPrice &&
-        watch.price &&
-        Number(watch.originalPrice) > Number(watch.price);
-
-    const productHref = `/product/${watch.id}`;
+    
+    const slug = watch.name.toLowerCase().replace(/ /g, '-');
+    const productHref = `/product/${slug}`;
     const prefetchProduct = () => {
         router.prefetch(productHref);
     };
@@ -87,7 +84,6 @@ function WatchCard({ watch, index }) {
 
                 <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                {/* View Details overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-black/80 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                     <span className="text-xs tracking-[0.2em] text-gold uppercase">
                         View Details
@@ -95,7 +91,6 @@ function WatchCard({ watch, index }) {
                 </div>
             </div>
 
-            {/* Title */}
             <h3 className="font-serif text-lg text-center text-white group-hover:text-gold transition-colors duration-300">
                 {watch.name}
             </h3>
@@ -139,7 +134,6 @@ export default function NewArrivals() {
                     setProducts(nextProducts);
                     cacheProducts(nextProducts);
                 } catch (e) {
-                    // Fallback if createdAt missing
                     const snap = await getDocs(query(collection(db, "products"), orderBy("name"), limit(12)));
                     if (!isMounted) return;
                     const nextProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter(p => !p.soldOut);
@@ -163,7 +157,6 @@ export default function NewArrivals() {
             className="py-20 md:py-32 px-6 md:px-12 2xl:px-20 bg-dark"
         >
             <div className="w-full">
-                {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -180,7 +173,6 @@ export default function NewArrivals() {
                     <div className="mt-6 w-16 h-px bg-gold mx-auto" />
                 </motion.div>
 
-                {/* Swiper Carousel */}
                 <motion.div
                     initial={{ opacity: 0, y: 60 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}

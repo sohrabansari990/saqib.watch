@@ -179,7 +179,7 @@ export default function CartSidebar({ open, onClose }) {
                         }}
                       >
                         <Link
-                          href={`/product/${item.id}`}
+                          href={`/product/${item.name.toLowerCase().replace(/ /g, '-')}`}
                           onClick={onClose}
                           style={{
                             width: "94px",
@@ -199,7 +199,7 @@ export default function CartSidebar({ open, onClose }) {
                         </Link>
                         <div style={{ minWidth: 0 }}>
                           <Link
-                            href={`/product/${item.id}`}
+                            href={`/product/${item.name.toLowerCase().replace(/ /g, '-')}`}
                             onClick={onClose}
                             style={{
                               display: "block",

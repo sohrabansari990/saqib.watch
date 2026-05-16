@@ -10,6 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useBanner } from "@/context/BannerContext";
 import CartSidebar from "@/components/CartSidebar";
+import SearchBar from "@/components/SearchBar";
 
 export default function Header() {
     const { bannerHeight } = useBanner();
@@ -63,6 +64,9 @@ export default function Header() {
                             </Link>
                         ))}
 
+                        {/* Search Bar */}
+                        <SearchBar />
+
                         {/* Favorites Icon */}
                         <Link href="/favorites" className="relative group text-white/80 hover:text-gold transition-colors">
                             <Heart size={20} />
@@ -90,15 +94,8 @@ export default function Header() {
                     </nav>
 
                     {/* Mobile Menu Button - shows Cart count too */}
-                    <div className="flex items-center gap-4 lg:hidden">
-                        <Link href="/favorites" className="relative text-white hover:text-gold transition-colors">
-                            <Heart size={24} />
-                            {favCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-gold text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-black">
-                                    {favCount}
-                                </span>
-                            )}
-                        </Link>
+                    <div className="flex items-center gap-2 sm:gap-4 lg:hidden" style={{ flex: 1, justifyContent: 'flex-end', marginLeft: '12px' }}>
+                        <SearchBar isMobile={true} />
 
                         <button
                             type="button"
@@ -136,10 +133,17 @@ export default function Header() {
                     >
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="absolute top-8 right-8 text-white/50 hover:text-gold transition-colors"
+                            className="text-white/50 hover:text-gold transition-colors"
+                            style={{ position: 'absolute', top: '30px', right: '30px', zIndex: 60, padding: '10px' }}
                         >
                             <HiX size={40} />
                         </button>
+
+                        <div className="w-full px-8 mb-8 flex justify-center">
+                            <div className="w-full max-w-sm">
+                                <SearchBar forceOpen={true} />
+                            </div>
+                        </div>
 
                         <nav className="flex flex-col items-center gap-8 text-center">
                             {[

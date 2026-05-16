@@ -57,7 +57,7 @@ export default function FavoritesPage() {
                                         exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.25 } }}
                                         className="group relative"
                                     >
-                                        <Link href={`/product/${item.id}`}>
+                                        <Link href={`/product/${item.name.toLowerCase().replace(/ /g, '-')}`}>
                                             <div className="relative aspect-[3/4] bg-dark-card rounded-lg overflow-hidden border border-white/5">
                                                 <img
                                                     src={item.imageUrl}
@@ -76,7 +76,7 @@ export default function FavoritesPage() {
                                             <Heart size={18} fill="currentColor" />
                                         </button>
 
-                                        <Link href={`/product/${item.id}`}>
+                                        <Link href={`/product/${item.name.toLowerCase().replace(/ /g, '-')}`}>
                                             <div className="mt-3 px-1">
                                                 <h3 className="text-white text-sm font-medium truncate">
                                                     {item.name}

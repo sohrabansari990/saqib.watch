@@ -62,6 +62,7 @@ export default function AddProductPage() {
         mode: "new",
         imageAspect: "auto",
         soldOut: false,
+        ratingPercentage: "95", // Default
     });
 
     useEffect(() => {
@@ -163,6 +164,8 @@ export default function AddProductPage() {
                 price: parseFloat(formData.price),
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
                 imageAspect: formData.imageAspect || "auto",
+                soldOut: formData.soldOut,
+                ratingPercentage: formData.ratingPercentage ? parseFloat(formData.ratingPercentage) : 0,
                 imageUrl,
                 images,
                 variants: variantsData,
@@ -335,6 +338,10 @@ export default function AddProductPage() {
                                             );
                                         })}
                                     </div>
+                                </div>
+                                <div>
+                                    <Label style={{ fontSize: "9px", textTransform: "uppercase", color: "#6b7280", marginBottom: "10px", display: "block" }}>Customer Reviews (%)</Label>
+                                    <Input type="number" min="0" max="100" value={formData.ratingPercentage} onChange={(e) => setFormData({ ...formData, ratingPercentage: e.target.value })} placeholder="e.g. 95 for 4.75 stars" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px" }} />
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px", background: "rgba(0,0,0,0.2)", borderRadius: "12px" }}>
                                     <input type="checkbox" checked={formData.soldOut} onChange={(e) => setFormData({...formData, soldOut: e.target.checked})} id="soldOut" />
