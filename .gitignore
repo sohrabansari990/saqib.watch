@@ -41,3 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+
+# after DB migration to vps 
+serviceAccount.json
+fix-urls.js
+check-urls.js

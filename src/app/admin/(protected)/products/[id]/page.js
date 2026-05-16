@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { doc, getDoc, getDocs, updateDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { supabase } from "@/lib/supabase";
+import { uploadToVPS } from "@/lib/vpsUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -119,13 +119,8 @@ export default function EditProductPage({ params }) {
 
     const allCategories = [...new Set([...existingCategories, "men", "women", "couples"])].sort();
 
-    const uploadToSupabase = async (file) => {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const { error } = await supabase.storage.from("products").upload(fileName, file);
-        if (error) throw error;
-        const { data: { publicUrl } } = supabase.storage.from("products").getPublicUrl(fileName);
-        return publicUrl;
+    const uploadToVPSFile = async (file) => {
+        return await uploadToVPS(file);
     };
 
     const handleGeneralImageAdd = (e) => {
@@ -190,7 +185,7 @@ export default function EditProductPage({ params }) {
             if (variants.length > 0) {
                 for (const variant of variants) {
                     const newUrls = [];
-                    for (const file of variant.newFiles) newUrls.push(await uploadToSupabase(file));
+                    for (const file of variant.newFiles) newUrls.push(await uploadToVPSFile(file));
                     const allUrls = [...variant.existingUrls, ...newUrls];
                     variantsData.push({ color: variant.color, hex: variant.hex, images: allUrls, available: variant.available !== false });
                 }
@@ -199,7 +194,7 @@ export default function EditProductPage({ params }) {
             } else {
                 for (const img of generalImages) {
                     if (img.url) images.push(img.url);
-                    else images.push(await uploadToSupabase(img.file));
+                    else images.push(await uploadToVPSFile(img.file));
                 }
                 imageUrl = images[0] || "";
             }

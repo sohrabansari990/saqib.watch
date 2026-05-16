@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { collection, addDoc, serverTimestamp, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { supabase } from "@/lib/supabase";
+import { uploadToVPS } from "@/lib/vpsUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -85,13 +85,8 @@ export default function AddProductPage() {
 
     const allCategories = [...new Set([...existingCategories, "men", "women", "couples"])].sort();
 
-    const uploadToSupabase = async (file) => {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const { error } = await supabase.storage.from("products").upload(fileName, file);
-        if (error) throw error;
-        const { data: { publicUrl } } = supabase.storage.from("products").getPublicUrl(fileName);
-        return publicUrl;
+    const uploadToVPSFile = async (file) => {
+        return await uploadToVPS(file);
     };
 
     const handleGeneralImageAdd = (e) => {
@@ -152,13 +147,13 @@ export default function AddProductPage() {
             if (variants.length > 0) {
                 for (const variant of variants) {
                     const urls = [];
-                    for (const file of variant.files) urls.push(await uploadToSupabase(file));
+                    for (const file of variant.files) urls.push(await uploadToVPSFile(file));
                     variantsData.push({ color: variant.color, hex: variant.hex, images: urls, available: variant.available !== false });
                 }
                 imageUrl = variantsData[0].images[0];
                 images = variantsData.flatMap(v => v.images);
             } else {
-                for (const img of generalImages) images.push(await uploadToSupabase(img.file));
+                for (const img of generalImages) images.push(await uploadToVPSFile(img.file));
                 imageUrl = images[0] || "";
             }
 
