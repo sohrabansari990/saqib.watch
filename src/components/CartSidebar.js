@@ -11,6 +11,7 @@ import {
   getItemDisplayImageUrl,
   getItemVariantLabel,
 } from "@/lib/order";
+import { getProductHref } from "@/lib/productSlug";
 
 function getLineTotal(item) {
   const price =
@@ -179,7 +180,7 @@ export default function CartSidebar({ open, onClose }) {
                         }}
                       >
                         <Link
-                          href={`/product/${item.name.toLowerCase().replace(/ /g, '-')}`}
+                          href={getProductHref(item)}
                           onClick={onClose}
                           style={{
                             width: "94px",
@@ -199,7 +200,7 @@ export default function CartSidebar({ open, onClose }) {
                         </Link>
                         <div style={{ minWidth: 0 }}>
                           <Link
-                            href={`/product/${item.name.toLowerCase().replace(/ /g, '-')}`}
+                            href={getProductHref(item)}
                             onClick={onClose}
                             style={{
                               display: "block",

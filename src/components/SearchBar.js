@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCachedCatalog } from "@/lib/productCache";
 import { useRouter } from "next/navigation";
+import { getProductHref } from "@/lib/productSlug";
 
 export default function SearchBar({ isMobile = false, forceOpen = false }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -103,11 +104,10 @@ export default function SearchBar({ isMobile = false, forceOpen = false }) {
                                 <ul className="max-h-[60vh] overflow-y-auto">
                                     {results.map((product) => {
                                         const imageUrl = product.images?.[0] || product.imageUrl;
-                                        const slug = product.name.toLowerCase().replace(/ /g, '-');
                                         return (
                                             <li key={product.id} className="border-b border-white/5 last:border-0">
                                                 <Link 
-                                                    href={`/product/${slug}`}
+                                                    href={getProductHref(product)}
                                                     onClick={() => { setIsOpen(false); setSearchQuery(""); }}
                                                     className="flex items-center gap-4 p-4 hover:bg-white/5 transition-colors text-left"
                                                 >

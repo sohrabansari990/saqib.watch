@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc, collection, query, where, limit, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, collection, query, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -20,8 +20,9 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Image from "next/image";
-import { cacheProducts, getCachedCatalog, getCachedProduct, getSimilarProducts } from "@/lib/productCache";
+import { getCachedCatalog, getSimilarProducts } from "@/lib/productCache";
 import { getImageFrameAspectRatio } from "@/lib/imageFrame";
+import { getProductHref, getProductSlug, productMatchesSlug, safeDecodeSlug } from "@/lib/productSlug";
 
 function isVariantAvailable(variant) {
   return variant?.available !== false && Array.isArray(variant?.images) && variant.images.length > 0;
@@ -101,54 +102,49 @@ export default function ProductPage() {
       
       const cachedCatalog = getCachedCatalog();
       let targetProduct = null;
+      const decodedSlug = safeDecodeSlug(slug);
+      const showProduct = (nextProduct, catalogProducts = []) => {
+        setProduct(nextProduct);
+        setSelectedColor(getInitialSelectedColor(nextProduct));
+        setLoading(false);
+
+        if (catalogProducts.length > 0) {
+          setSimilarProducts(getSimilarProducts(catalogProducts, nextProduct, 12));
+        }
+
+        const canonicalSlug = getProductSlug(nextProduct);
+        if (canonicalSlug && decodedSlug !== canonicalSlug) {
+          router.replace(getProductHref(nextProduct), { scroll: false });
+        }
+      };
 
       if (cachedCatalog && cachedCatalog.products) {
-          const targetSlug = slug.toLowerCase().replace(/ /g, '-');
-          targetProduct = cachedCatalog.products.find(p => {
-              const pNameSlug = p.name.toLowerCase().replace(/ /g, '-');
-              const pCustomSlug = p.slug?.toLowerCase().replace(/ /g, '-');
-              return p.id === slug || pNameSlug === targetSlug || pCustomSlug === targetSlug;
-          });
+          targetProduct = cachedCatalog.products.find((p) => productMatchesSlug(p, decodedSlug));
       }
 
       if (targetProduct) {
-        setProduct(targetProduct);
-        setSelectedColor(getInitialSelectedColor(targetProduct));
-        setLoading(false);
-        setSimilarProducts(getSimilarProducts(cachedCatalog.products, targetProduct, 12));
+        showProduct(targetProduct, cachedCatalog.products);
       } else {
         setLoading(true);
         try {
-            const docRef = doc(db, "products", slug);
+            const docRef = doc(db, "products", decodedSlug);
             const docSnap = await getDoc(docRef);
             
             if (docSnap.exists()) {
                 const data = { id: docSnap.id, ...docSnap.data() };
                 if (isActive) {
-                    setProduct(data);
-                    setSelectedColor(getInitialSelectedColor(data));
-                    setLoading(false);
+                    showProduct(data);
                 }
             } else {
                 const q = query(collection(db, "products"));
                 const snap = await getDocs(q);
                 const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 
-                // Normalizing both sides for robust matching
-                const targetSlug = slug.toLowerCase().replace(/ /g, '-');
-                
-                const match = all.find(p => {
-                    const pNameSlug = p.name.toLowerCase().replace(/ /g, '-');
-                    const pCustomSlug = p.slug?.toLowerCase().replace(/ /g, '-');
-                    return pNameSlug === targetSlug || pCustomSlug === targetSlug || p.id === slug;
-                });
+                const match = all.find((p) => productMatchesSlug(p, decodedSlug));
                 
                 if (isActive) {
                     if (match) {
-                        setProduct(match);
-                        setSelectedColor(getInitialSelectedColor(match));
-                        setSimilarProducts(getSimilarProducts(all, match, 12));
-                        setLoading(false);
+                        showProduct(match, all);
                     } else {
                         router.push("/gallery");
                     }
@@ -246,7 +242,7 @@ export default function ProductPage() {
 
   const handleShareOnWhatsApp = () => {
     const url = window.location.href;
-    window.open(`https://wa.me/?text=Check out this watch: \${url}`, "_blank");
+    window.open(`https://wa.me/?text=Check out this watch: ${url}`, "_blank");
   };
 
   const handleReviewSubmit = async (e) => {
@@ -351,7 +347,7 @@ export default function ProductPage() {
             >
               {allImages.map((img, idx) => (
                 <button
-                  key={`vthumb-\${idx}`}
+                  key={`vthumb-${idx}`}
                   onClick={() => handleThumbClick(idx)}
                   style={{
                     width: "76px",
@@ -370,7 +366,7 @@ export default function ProductPage() {
                 >
                   <Image
                     src={img.url}
-                    alt={`Thumb \${idx + 1}`}
+                    alt={`Thumb ${idx + 1}`}
                     fill
                     sizes="76px"
                     className="object-cover"
@@ -491,7 +487,7 @@ export default function ProductPage() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
                     {product.variants.map((variant) => (
                       <button
-                        key={`desktop-color-\${variant.color}`}
+                        key={`desktop-color-${variant.color}`}
                         type="button"
                         onClick={() => handleColorChange(variant.color)}
                         style={{
@@ -614,11 +610,11 @@ export default function ProductPage() {
                   slidesPerView={1}
                 >
                   {allImages.map((img, idx) => (
-                    <SwiperSlide key={`m-\${idx}`}>
+                    <SwiperSlide key={`m-${idx}`}>
                       <div style={{ position: "relative", aspectRatio: getFrameAspect(product, img.url) }}>
                         <ProductImageWithSkeleton
                           src={img.url}
-                          alt={`\${product.name} - \${idx + 1}`}
+                          alt={`${product.name} - ${idx + 1}`}
                           sizes="95vw"
                           priority={idx === 0}
                           style={{ objectFit: "cover", objectPosition: "center" }}
@@ -665,7 +661,7 @@ export default function ProductPage() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
                     {product.variants.map((variant) => (
                       <button
-                        key={`mobile-color-\${variant.color}`}
+                        key={`mobile-color-${variant.color}`}
                         type="button"
                         onClick={() => handleColorChange(variant.color)}
                         style={{
@@ -921,9 +917,8 @@ export default function ProductPage() {
                 <div className="flex flex-col items-center gap-16 w-full">
                     <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "3rem", width: "100%", marginTop: "2rem" }}>
                     {similarProducts.slice(0, visibleSimilarCount).map((simProduct) => {
-                        const simSlug = simProduct.name.toLowerCase().replace(/ /g, '-');
                         return (
-                            <Link href={`/product/${simSlug}`} key={simProduct.id} style={{ width: "280px", display: "flex", flexDirection: "column", alignItems: "center" }} className="group cursor-pointer">
+                            <Link href={getProductHref(simProduct)} key={simProduct.id} style={{ width: "280px", display: "flex", flexDirection: "column", alignItems: "center" }} className="group cursor-pointer">
                             <div style={{ width: "100%", aspectRatio: "3 / 4", position: "relative", borderRadius: "1rem", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", background: "#111" }}>
                                 {simProduct.imageUrl ? (
                                     <ProductImageWithSkeleton src={simProduct.imageUrl} alt={simProduct.name} className="object-cover group-hover:scale-105 transition-transform duration-700" onLoad={(event) => handleImageLoad(simProduct.imageUrl, event)} />

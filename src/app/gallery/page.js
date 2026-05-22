@@ -15,6 +15,7 @@ import { useCart } from "@/context/CartContext";
 import { Heart, X, Check, ChevronDown, SlidersHorizontal, Grid2X2, Grid3X3, LayoutGrid, ListFilter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cacheCatalog, getCachedCatalog, getCategoriesFromProducts, sortProductsByNewest } from "@/lib/productCache";
+import { getProductHref } from "@/lib/productSlug";
 
 function GalleryProductImage({ src, alt, sizes }) {
     const [loaded, setLoaded] = useState(false);
@@ -103,8 +104,7 @@ function GalleryContent() {
     const { addToCart } = useCart();
     
     const prefetchProduct = (watch) => {
-        const slug = watch.name.toLowerCase().replace(/ /g, '-');
-        router.prefetch(`/product/${slug}`);
+        router.prefetch(getProductHref(watch));
     };
 
     const sortOptions = [
@@ -372,7 +372,7 @@ function GalleryContent() {
                         <span style={{ fontSize: "22px", lineHeight: 1, color: "#c9a96e" }}>-</span>
                     </div>
                     {featuredProduct ? (
-                        <Link href={`/product/${featuredProduct.name.toLowerCase().replace(/ /g, '-')}`} style={{ display: "grid", gridTemplateColumns: "72px minmax(0, 1fr)", gap: "12px", alignItems: "center", color: "#f8f5ef", textDecoration: "none" }}>
+                        <Link href={getProductHref(featuredProduct)} style={{ display: "grid", gridTemplateColumns: "72px minmax(0, 1fr)", gap: "12px", alignItems: "center", color: "#f8f5ef", textDecoration: "none" }}>
                             <div style={{ position: "relative", width: "72px", aspectRatio: "1 / 1", borderRadius: "8px", overflow: "hidden", background: "#171717" }}>
                                 {featuredProduct.imageUrl ? (
                                     <Image src={featuredProduct.imageUrl} alt={featuredProduct.name} fill sizes="72px" className="object-cover" />
@@ -463,7 +463,7 @@ function GalleryContent() {
                             ) : (
                                 displayedProducts.map((watch) => (
                                 <div key={watch.id} className={cn("group cursor-pointer relative", viewMode === "list" ? "gallery-list-card" : "block")}>
-                                    <Link href={`/product/${watch.name.toLowerCase().replace(/ /g, '-')}`} prefetch onMouseEnter={() => prefetchProduct(watch)} onTouchStart={() => prefetchProduct(watch)}>
+                                    <Link href={getProductHref(watch)} prefetch onMouseEnter={() => prefetchProduct(watch)} onTouchStart={() => prefetchProduct(watch)}>
                                         <div className="gallery-card-media relative overflow-hidden bg-dark-card rounded-lg aspect-[4/5] mb-4 border border-white/5">
                                             {watch.imageUrl ? (
                                                 <GalleryProductImage src={watch.imageUrl} alt={watch.name} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
@@ -490,7 +490,7 @@ function GalleryContent() {
                                     <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(watch); }} className={`absolute top-6 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer ${isFavorite(watch.id) ? "bg-white/90 text-red-500 opacity-100" : "bg-black/40 text-white opacity-0 group-hover:opacity-100 hover:bg-white/90 hover:text-red-500"}`}>
                                         <Heart size={18} fill={isFavorite(watch.id) ? "currentColor" : "none"} />
                                     </button>
-                                    <Link href={`/product/${watch.name.toLowerCase().replace(/ /g, '-')}`} prefetch onMouseEnter={() => prefetchProduct(watch)} onTouchStart={() => prefetchProduct(watch)}>
+                                    <Link href={getProductHref(watch)} prefetch onMouseEnter={() => prefetchProduct(watch)} onTouchStart={() => prefetchProduct(watch)}>
                                         <h3 className="font-serif text-sm leading-tight text-white transition-colors duration-300 group-hover:text-gold sm:text-lg text-center">{watch.name}</h3>
                                         <div className="mt-1 flex items-center gap-2 justify-center">
                                             <span className="text-gold text-sm font-medium">Rs. {watch.price?.toLocaleString()}</span>
@@ -547,7 +547,7 @@ function GalleryContent() {
                                 </div>
                             )}
                             <button onClick={() => { addToCart(quickViewProduct, 1, selectedQuickViewColor || quickViewProduct.variants?.[0]?.color || null); setQuickViewProduct(null); }} className="w-full bg-gold text-black font-bold uppercase tracking-widest py-4 mb-4 hover:bg-white hover:text-black transition-all duration-300 shadow-lg hover:shadow-gold/20">Add to Cart</button>
-                            <Link href={`/product/${quickViewProduct.name.toLowerCase().replace(/ /g, '-')}`} className="text-center text-gray-400 hover:text-white text-[10px] uppercase tracking-[0.3em] transition-colors border-b border-white/10 hover:border-gold pb-1 self-center inline-block">View Full Details</Link>
+                            <Link href={getProductHref(quickViewProduct)} className="text-center text-gray-400 hover:text-white text-[10px] uppercase tracking-[0.3em] transition-colors border-b border-white/10 hover:border-gold pb-1 self-center inline-block">View Full Details</Link>
                         </div>
                     </div>
                 </div>

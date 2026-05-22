@@ -18,6 +18,7 @@ import {
     getItemDisplayImageUrl,
     getItemVariantLabel,
 } from "@/lib/order";
+import { getProductHref } from "@/lib/productSlug";
 
 export default function CartPage() {
     const { cart, removeFromCart, updateQuantity, getCartTotal, mounted: contextMounted } = useCart();
@@ -152,7 +153,7 @@ export default function CartPage() {
                                         >
                                             {/* Image */}
                                             <Link 
-                                                href={`/product/${item.id}`} 
+                                                href={getProductHref(item)} 
                                                 style={{ width: "160px", aspectRatio: "3/4", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)", position: "relative", flexShrink: 0 }}
                                                 className="group-hover:border-gold/30 transition-all duration-500"
                                             >
@@ -313,7 +314,7 @@ export default function CartPage() {
                             {crossSells.map((product) => (
                                 <Link 
                                     key={product.id} 
-                                    href={`/product/${product.id}`}
+                                    href={getProductHref(product)}
                                     style={{ width: "280px", display: "flex", flexDirection: "column", alignItems: "center" }}
                                     className="group cursor-pointer"
                                 >

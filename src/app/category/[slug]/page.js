@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getProductHref } from "@/lib/productSlug";
 
 export async function generateStaticParams() {
     const categories = ["men", "women", "couples"];
@@ -46,7 +47,7 @@ export default async function CategoryPage({ params }) {
                         {categoryProducts.map((watch) => (
                             <Link
                                 key={watch.id}
-                                href={`/product/${watch.id}`}
+                                href={getProductHref(watch)}
                                 className="group cursor-pointer block"
                             >
                                 <div className="relative overflow-hidden bg-dark-card rounded-lg aspect-[3/4] mb-4">

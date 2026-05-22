@@ -12,13 +12,13 @@ import "swiper/css/pagination";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { cacheProducts, getCachedCatalog, getNewestProducts } from "@/lib/productCache";
+import { getProductHref } from "@/lib/productSlug";
 
 function WatchCard({ watch, index }) {
     const [imageLoaded, setImageLoaded] = useState(false);
     const router = useRouter();
     
-    const slug = watch.name.toLowerCase().replace(/ /g, '-');
-    const productHref = `/product/${slug}`;
+    const productHref = getProductHref(watch);
     const prefetchProduct = () => {
         router.prefetch(productHref);
     };
