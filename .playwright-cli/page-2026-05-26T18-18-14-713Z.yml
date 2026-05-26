@@ -1,0 +1,160 @@
+- generic [active] [ref=e1]:
+  - status "Loading 0 percent" [ref=e4]:
+    - img [ref=e5]:
+      - generic [ref=e66]: "100"
+      - generic [ref=e67]: "5"
+      - generic [ref=e68]: "10"
+      - generic [ref=e69]: "15"
+      - generic [ref=e70]: "20"
+      - generic [ref=e71]: "25"
+      - generic [ref=e72]: "30"
+      - generic [ref=e73]: "35"
+      - generic [ref=e74]: "40"
+      - generic [ref=e75]: "45"
+      - generic [ref=e76]: "50"
+      - generic [ref=e77]: "55"
+    - generic:
+      - generic: 0%
+      - generic: Saqib Watches
+  - banner [ref=e80]:
+    - generic [ref=e81]:
+      - link "Saqib Watches Saqib Watches" [ref=e82] [cursor=pointer]:
+        - /url: /
+        - img "Saqib Watches" [ref=e83]
+        - generic [ref=e84]: Saqib Watches
+      - generic [ref=e85]:
+        - button "Open search" [ref=e87]:
+          - img [ref=e88]
+        - button "Open shopping cart" [ref=e91]:
+          - img [ref=e92]
+        - button [ref=e95]:
+          - img [ref=e96]
+  - main [ref=e98]:
+    - generic [ref=e103]:
+      - generic [ref=e106]:
+        - generic [ref=e109]:
+          - generic [ref=e112] [cursor=pointer]:
+            - img "best-selling-0"
+          - generic [ref=e115] [cursor=pointer]:
+            - img "best-selling-1"
+          - generic [ref=e118] [cursor=pointer]:
+            - img "best-selling-2"
+          - generic [ref=e121] [cursor=pointer]:
+            - img "best-selling-3"
+        - generic [ref=e122]:
+          - heading "Our Top Selling Watches" [level=3] [ref=e123]
+          - heading "A Legacy on Your Wrist" [level=2] [ref=e124]
+          - link "Shop Best Selling Products" [ref=e125] [cursor=pointer]:
+            - /url: /gallery?category=best-selling-products
+      - generic [ref=e126]:
+        - generic [ref=e128]:
+          - generic [ref=e131]:
+            - heading "Worn by Champions. Saqib Watches" [level=1] [ref=e132]:
+              - text: Worn by Champions.
+              - text: Saqib Watches
+            - paragraph [ref=e133]: Curated by Pakistan's Physique Champion. Built for everyone who values precision.
+            - generic [ref=e134]:
+              - link "Explore Collection" [ref=e135] [cursor=pointer]:
+                - /url: /gallery
+                - generic [ref=e136]: Explore Collection
+                - img [ref=e137]
+              - button "Full Experience" [ref=e140] [cursor=pointer]:
+                - img [ref=e142]
+                - generic [ref=e145]: Full Experience
+          - generic [ref=e147]: Scroll
+        - generic [ref=e174]:
+          - paragraph [ref=e175]: Featured Brands
+          - region "Featured watch brands" [ref=e176]:
+            - generic [ref=e177]:
+              - list [ref=e178]:
+                - listitem [ref=e179]:
+                  - img "Patek Philippe"
+                - listitem [ref=e180]:
+                  - img "Seastar"
+                - listitem [ref=e181]:
+                  - img "Curren"
+                - listitem [ref=e182]:
+                  - img "D-Ziner"
+                - listitem [ref=e183]:
+                  - img "Audemars Piguet"
+                - listitem [ref=e184]:
+                  - img "Skmei"
+                - listitem [ref=e185]:
+                  - img "Pagani Design"
+                - listitem [ref=e186]:
+                  - img "Naviforce"
+                - listitem [ref=e187]:
+                  - img "Benyar"
+                - listitem [ref=e188]:
+                  - img "Rolex"
+                - listitem [ref=e189]:
+                  - img "Tissot"
+                - listitem [ref=e190]:
+                  - img "Universal Point"
+                - listitem [ref=e191]:
+                  - img "Rick"
+                - listitem [ref=e192]:
+                  - img "Rado"
+                - listitem [ref=e193]:
+                  - img "KWC"
+                - listitem [ref=e194]:
+                  - img "Frank Muller"
+                - listitem [ref=e195]:
+                  - img "Elegance"
+                - listitem [ref=e196]:
+                  - img "Hublot"
+                - listitem [ref=e197]:
+                  - img "Carter"
+                - listitem [ref=e198]:
+                  - img "Citizen"
+                - listitem [ref=e199]:
+                  - img "Megir"
+              - list [ref=e200]:
+                - listitem [ref=e201]:
+                  - img
+                - listitem [ref=e202]:
+                  - img
+                - listitem [ref=e203]:
+                  - img
+                - listitem [ref=e204]:
+                  - img
+                - listitem [ref=e205]:
+                  - img
+                - listitem [ref=e206]:
+                  - img
+                - listitem [ref=e207]:
+                  - img
+                - listitem [ref=e208]:
+                  - img
+                - listitem [ref=e209]:
+                  - img
+                - listitem [ref=e210]:
+                  - img
+                - listitem [ref=e211]:
+                  - img
+                - listitem [ref=e212]:
+                  - img
+                - listitem [ref=e213]:
+                  - img
+                - listitem [ref=e214]:
+                  - img
+                - listitem [ref=e215]:
+                  - img
+                - listitem [ref=e216]:
+                  - img
+                - listitem [ref=e217]:
+                  - img
+                - listitem [ref=e218]:
+                  - img
+                - listitem [ref=e219]:
+                  - img
+                - listitem [ref=e220]:
+                  - img
+                - listitem [ref=e221]:
+                  - img
+  - link "Chat on WhatsApp" [ref=e222] [cursor=pointer]:
+    - /url: https://wa.me/923095225815?text=Hi!%20I'd%20like%20to%20ask%20about%20Saqib%20Watches.%20Please%20share%20the%20available%20options.
+    - img [ref=e223]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e230] [cursor=pointer]:
+    - img [ref=e231]

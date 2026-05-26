@@ -1,0 +1,1049 @@
+[    3929ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    4164ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    5216ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SegmentViewNode type="page" pagePath="page.js">
+      <SegmentTrieNode>
+      <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+        <Home params={Promise} searchParams={Promise}>
+          <HomePreloader>
+            <div data-home-preloader={true} style={{position:"...", ...}}>
+              <div>
+              <motion.div initial={false} animate={{scale:1}} transition={{duration:0.18, ...}} ...>
+                <div style={{position:"...", ...}} ref={function useMotionRef.useCallback}>
+                  <motion.div aria-label="Loading" role="status" style={{width:"100%", ...}}>
+                    <div aria-label="Loading" role="status" style={{width:"100%", ...}} ...>
+                      <svg viewBox="0 0 320 320" style={{width:"100%", ...}}>
+                        <defs>
+                        <circle>
+                        <circle>
+                        <circle>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line
+                          x1={110.3781295447524}
+                          y1={271.45254583239733}
++                         x2={107.124236400146}
+-                         x2="107.12423640014599"
+                          y2={278.7609094935381}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line
++                         x1={69.33633129175793}
+-                         x1="69.33633129175792"
+                          y1={241.63393397578074}
++                         x2={63.39117268793878}
+-                         x2="63.39117268793876"
+                          y2={246.98697882665158}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line
++                         x1={61.2999266862564}
+-                         x1="61.29992668625641"
+                          y1={88.29019922031829}
++                         x2={54.82779073125681}
+-                         x2="54.827790731256826"
+                          y2={83.58791720197851}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line
+                          x1={96.99999999999994}
++                         y1={50.88079912316077}
+-                         y1="50.880799123160756"
+                          x2={91.99999999999994}
++                         y2={42.22054508531639}
+-                         y2="42.22054508531636"
+                          stroke="#f8f5ef"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                        >
+                        ...
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text
+                          x={108.49999999999996}
++                         y={70.79938341020285}
+-                         y="70.79938341020284"
+                          fill="rgba(248,245,239,0.78)"
+                          fontSize="10"
+                          fontWeight="800"
+                          textAnchor="middle"
+                          dominantBaseline="middle"
++                         transform="rotate(330 108.49999999999996 70.79938341020285)"
+-                         transform="rotate(330 108.49999999999996 70.79938341020284)"
+                        >
++                         55
+                        ...
+          <Header>
+          ...
+            <div style={{display:"flex", ...}}>
+              <div style={{flex:"1 1 ...", ...}}>
+                <div style={{width:"400px", ...}}>
+                  <Stack randomRotation={true} sensitivity={220} sendToBackOnClick={false} cards={[...]} autoplay={true} ...>
+                    <div className="stack-cont..." onMouseEnter={function onMouseEnter} ...>
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.76) rotateZ(15.837355124415335deg)"
+-                                 transform: "scale(0.76) rotateZ(7.10737deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.8200000000000001) rotateZ(12.379881236212903deg)"
+-                                 transform: "scale(0.82) rotateZ(4.36401deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.8800000000000001) rotateZ(4.478050119246838deg)"
+-                                 transform: "scale(0.88) rotateZ(4.64499deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.94) rotateZ(4.415496376416719deg)"
+-                                 transform: "scale(0.94) rotateZ(3.1658deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+              ...
+          ...
+    ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[    5243ms] [WARNING] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    5292ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6954ms] [WARNING] Image with src "/testimonials/IMG_7555.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6965ms] [WARNING] Image with src "/testimonials/IMG_7556.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6973ms] [WARNING] Image with src "/testimonials/IMG_7557.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6984ms] [WARNING] Image with src "/testimonials/IMG_7559.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6987ms] [WARNING] Image with src "/testimonials/IMG_7560.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6993ms] [WARNING] Image with src "/testimonials/IMG_7561.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7000ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05-25 43.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7003ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05-25 at 2.41.47 PM.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7007ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7018ms] [WARNING] Image with src "/testimonials/WhatsApp_Image_2024-06-05_at_10.45.13_PM.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7021ms] [WARNING] Image with src "/testimonials/WhatsApp_Image_2024-06-05_at_10.45.16_PM.avif" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7705ms] [LOG] %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7714ms] [LOG] %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {route: /, path: /} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7716ms] [LOG] %c[Vercel Web Analytics]%c [view] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {o: http://localhost:3000/, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1779822849827} /_vercel/insights/view @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7762ms] [LOG] [Fast Refresh] done in 2649ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    8081ms] [LOG] %c[Vercel Speed Insights]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   28787ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   28805ms] [LOG] [Fast Refresh] done in 118ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   28833ms] [LOG] %c[Vercel Speed Insights]%c [vitals] color: rgb(120, 120, 120) color: inherit {speed: 3g, metrics: Array(3), scriptVersion: 0.1.3, sdkName: @vercel/speed-insights/next, sdkVersion: 2.0.0} /_vercel/speed-insights/vitals @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   28835ms] [LOG] %c[Vercel Speed Insights]%c [vitals] color: rgb(120, 120, 120) color: inherit {speed: 3g, metrics: Array(1), scriptVersion: 0.1.3, sdkName: @vercel/speed-insights/next, sdkVersion: 2.0.0} /_vercel/speed-insights/vitals @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   29583ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   29779ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   29923ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30288ms] [LOG] [Fast Refresh] done in 468ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30401ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SegmentViewNode type="page" pagePath="page.js">
+      <SegmentTrieNode>
+      <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+        <Home params={Promise} searchParams={Promise}>
+          <HomePreloader>
+            <div data-home-preloader={true} style={{position:"...", ...}}>
+              <div>
+              <motion.div initial={false} animate={{scale:1}} transition={{duration:0.18, ...}} ...>
+                <div style={{position:"...", ...}} ref={function useMotionRef.useCallback}>
+                  <motion.div aria-label="Loading" role="status" style={{width:"100%", ...}}>
+                    <div aria-label="Loading" role="status" style={{width:"100%", ...}} ...>
+                      <svg viewBox="0 0 320 320" style={{width:"100%", ...}}>
+                        <defs>
+                        <circle>
+                        <circle>
+                        <circle>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line
+                          x1={110.3781295447524}
+                          y1={271.45254583239733}
++                         x2={107.124236400146}
+-                         x2="107.12423640014599"
+                          y2={278.7609094935381}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line
++                         x1={69.33633129175793}
+-                         x1="69.33633129175792"
+                          y1={241.63393397578074}
++                         x2={63.39117268793878}
+-                         x2="63.39117268793876"
+                          y2={246.98697882665158}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line
++                         x1={61.2999266862564}
+-                         x1="61.29992668625641"
+                          y1={88.29019922031829}
++                         x2={54.82779073125681}
+-                         x2="54.827790731256826"
+                          y2={83.58791720197851}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line
+                          x1={96.99999999999994}
++                         y1={50.88079912316077}
+-                         y1="50.880799123160756"
+                          x2={91.99999999999994}
++                         y2={42.22054508531639}
+-                         y2="42.22054508531636"
+                          stroke="#f8f5ef"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                        >
+                        ...
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text
+                          x={108.49999999999996}
++                         y={70.79938341020285}
+-                         y="70.79938341020284"
+                          fill="rgba(248,245,239,0.78)"
+                          fontSize="10"
+                          fontWeight="800"
+                          textAnchor="middle"
+                          dominantBaseline="middle"
++                         transform="rotate(330 108.49999999999996 70.79938341020285)"
+-                         transform="rotate(330 108.49999999999996 70.79938341020284)"
+                        >
++                         55
+                        ...
+          <Header>
+          ...
+            <div style={{display:"flex", ...}}>
+              <div style={{flex:"1 1 ...", ...}}>
+                <div style={{width:"400px", ...}}>
+                  <Stack randomRotation={true} sensitivity={220} sendToBackOnClick={false} cards={[...]} autoplay={true} ...>
+                    <div className="stack-cont..." onMouseEnter={function onMouseEnter} ...>
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.76) rotateZ(11.336215372792731deg)"
+-                                 transform: "scale(0.76) rotateZ(10.0654deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.8200000000000001) rotateZ(5.825176168517743deg)"
+-                                 transform: "scale(0.82) rotateZ(8.37846deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.8800000000000001) rotateZ(0.030803663055388508deg)"
+-                                 transform: "scale(0.88) rotateZ(2.107deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.94) rotateZ(-4.686247920472165deg)"
+-                                 transform: "scale(0.94) rotateZ(-1.98457deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+              ...
+          ...
+    ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   30424ms] [WARNING] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   31871ms] [WARNING] Image with src "/testimonials/IMG_7555.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   31879ms] [WARNING] Image with src "/testimonials/IMG_7556.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32000ms] [WARNING] Image with src "/testimonials/IMG_7557.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32002ms] [WARNING] Image with src "/testimonials/IMG_7559.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32004ms] [WARNING] Image with src "/testimonials/IMG_7560.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32006ms] [WARNING] Image with src "/testimonials/IMG_7561.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32011ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05-25 43.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32018ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05-25 at 2.41.47 PM.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32020ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32023ms] [WARNING] Image with src "/testimonials/WhatsApp_Image_2024-06-05_at_10.45.13_PM.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   32024ms] [WARNING] Image with src "/testimonials/WhatsApp_Image_2024-06-05_at_10.45.16_PM.avif" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   33555ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   34382ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   34438ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   35249ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SegmentViewNode type="page" pagePath="page.js">
+      <SegmentTrieNode>
+      <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+        <Home params={Promise} searchParams={Promise}>
+          <HomePreloader>
+            <div data-home-preloader={true} style={{position:"...", ...}}>
+              <div>
+              <motion.div initial={false} animate={{scale:1}} transition={{duration:0.18, ...}} ...>
+                <div style={{position:"...", ...}} ref={function useMotionRef.useCallback}>
+                  <motion.div aria-label="Loading" role="status" style={{width:"100%", ...}}>
+                    <div aria-label="Loading" role="status" style={{width:"100%", ...}} ...>
+                      <svg viewBox="0 0 320 320" style={{width:"100%", ...}}>
+                        <defs>
+                        <circle>
+                        <circle>
+                        <circle>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line
+                          x1={110.3781295447524}
+                          y1={271.45254583239733}
++                         x2={107.124236400146}
+-                         x2="107.12423640014599"
+                          y2={278.7609094935381}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line
++                         x1={69.33633129175793}
+-                         x1="69.33633129175792"
+                          y1={241.63393397578074}
++                         x2={63.39117268793878}
+-                         x2="63.39117268793876"
+                          y2={246.98697882665158}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line
++                         x1={61.2999266862564}
+-                         x1="61.29992668625641"
+                          y1={88.29019922031829}
++                         x2={54.82779073125681}
+-                         x2="54.827790731256826"
+                          y2={83.58791720197851}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line
+                          x1={96.99999999999994}
++                         y1={50.88079912316077}
+-                         y1="50.880799123160756"
+                          x2={91.99999999999994}
++                         y2={42.22054508531639}
+-                         y2="42.22054508531636"
+                          stroke="#f8f5ef"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                        >
+                        ...
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text
+                          x={108.49999999999996}
++                         y={70.79938341020285}
+-                         y="70.79938341020284"
+                          fill="rgba(248,245,239,0.78)"
+                          fontSize="10"
+                          fontWeight="800"
+                          textAnchor="middle"
+                          dominantBaseline="middle"
++                         transform="rotate(330 108.49999999999996 70.79938341020285)"
+-                         transform="rotate(330 108.49999999999996 70.79938341020284)"
+                        >
++                         55
+                        ...
+          <Header>
+          ...
+            <div style={{display:"flex", ...}}>
+              <div style={{flex:"1 1 ...", ...}}>
+                <div style={{width:"400px", ...}}>
+                  <Stack randomRotation={true} sensitivity={220} sendToBackOnClick={false} cards={[...]} autoplay={true} ...>
+                    <div className="stack-cont..." onMouseEnter={function onMouseEnter} ...>
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.76) rotateZ(8.192603211746883deg)"
+-                                 transform: "scale(0.76) rotateZ(12.7208deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.8200000000000001) rotateZ(6.3965040517342295deg)"
+-                                 transform: "scale(0.82) rotateZ(3.93094deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.8800000000000001) rotateZ(8.979249569817787deg)"
+-                                 transform: "scale(0.88) rotateZ(6.13833deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.94) rotateZ(1.318025615900222deg)"
+-                                 transform: "scale(0.94) rotateZ(1.31238deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+              ...
+          ...
+    ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   35266ms] [WARNING] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36469ms] [WARNING] Image with src "/testimonials/IMG_7555.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36471ms] [WARNING] Image with src "/testimonials/IMG_7556.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36621ms] [WARNING] Image with src "/testimonials/IMG_7557.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36699ms] [WARNING] Image with src "/testimonials/IMG_7559.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36702ms] [WARNING] Image with src "/testimonials/IMG_7560.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36704ms] [WARNING] Image with src "/testimonials/IMG_7561.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36714ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05-25 43.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36716ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05-25 at 2.41.47 PM.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36719ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36721ms] [WARNING] Image with src "/testimonials/WhatsApp_Image_2024-06-05_at_10.45.13_PM.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   36803ms] [WARNING] Image with src "/testimonials/WhatsApp_Image_2024-06-05_at_10.45.16_PM.avif" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   37775ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   37842ms] [LOG] [Fast Refresh] done in 180ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   43271ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   43459ms] [LOG] [Fast Refresh] done in 298ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   52476ms] [LOG] %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   52476ms] [LOG] %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {route: /, path: /} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   52478ms] [LOG] %c[Vercel Web Analytics]%c [view] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {o: http://localhost:3000/, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1779822894589} /_vercel/insights/view @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   52486ms] [LOG] %c[Vercel Speed Insights]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   81700ms] [LOG] %c[Vercel Speed Insights]%c [vitals] color: rgb(120, 120, 120) color: inherit {speed: 3g, metrics: Array(3), scriptVersion: 0.1.3, sdkName: @vercel/speed-insights/next, sdkVersion: 2.0.0} /_vercel/speed-insights/vitals @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   81701ms] [LOG] %c[Vercel Speed Insights]%c [vitals] color: rgb(120, 120, 120) color: inherit {speed: 3g, metrics: Array(1), scriptVersion: 0.1.3, sdkName: @vercel/speed-insights/next, sdkVersion: 2.0.0} /_vercel/speed-insights/vitals @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   82132ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   82224ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   82740ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <SegmentViewNode type="page" pagePath="page.js">
+      <SegmentTrieNode>
+      <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+        <Home params={Promise} searchParams={Promise}>
+          <HomePreloader>
+            <div data-home-preloader={true} style={{position:"...", ...}}>
+              <div>
+              <motion.div initial={false} animate={{scale:1}} transition={{duration:0.18, ...}} ...>
+                <div style={{position:"...", ...}} ref={function useMotionRef.useCallback}>
+                  <motion.div aria-label="Loading" role="status" style={{width:"100%", ...}}>
+                    <div aria-label="Loading" role="status" style={{width:"100%", ...}} ...>
+                      <svg viewBox="0 0 320 320" style={{width:"100%", ...}}>
+                        <defs>
+                        <circle>
+                        <circle>
+                        <circle>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line
+                          x1={110.3781295447524}
+                          y1={271.45254583239733}
++                         x2={107.124236400146}
+-                         x2="107.12423640014599"
+                          y2={278.7609094935381}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line
++                         x1={69.33633129175793}
+-                         x1="69.33633129175792"
+                          y1={241.63393397578074}
++                         x2={63.39117268793878}
+-                         x2="63.39117268793876"
+                          y2={246.98697882665158}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line>
+                        <line
++                         x1={61.2999266862564}
+-                         x1="61.29992668625641"
+                          y1={88.29019922031829}
++                         x2={54.82779073125681}
+-                         x2="54.827790731256826"
+                          y2={83.58791720197851}
+                          stroke="rgba(248,245,239,0.46)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                        >
+                        <line>
+                        <line>
+                        <line>
+                        <line
+                          x1={96.99999999999994}
++                         y1={50.88079912316077}
+-                         y1="50.880799123160756"
+                          x2={91.99999999999994}
++                         y2={42.22054508531639}
+-                         y2="42.22054508531636"
+                          stroke="#f8f5ef"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                        >
+                        ...
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text>
+                        <text
+                          x={108.49999999999996}
++                         y={70.79938341020285}
+-                         y="70.79938341020284"
+                          fill="rgba(248,245,239,0.78)"
+                          fontSize="10"
+                          fontWeight="800"
+                          textAnchor="middle"
+                          dominantBaseline="middle"
++                         transform="rotate(330 108.49999999999996 70.79938341020285)"
+-                         transform="rotate(330 108.49999999999996 70.79938341020284)"
+                        >
++                         55
+                        ...
+          <Header>
+          ...
+            <div style={{display:"flex", ...}}>
+              <div style={{flex:"1 1 ...", ...}}>
+                <div style={{width:"400px", ...}}>
+                  <Stack randomRotation={true} sensitivity={220} sendToBackOnClick={false} cards={[...]} autoplay={true} ...>
+                    <div className="stack-cont..." onMouseEnter={function onMouseEnter} ...>
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.76) rotateZ(15.246003460047026deg)"
+-                                 transform: "scale(0.76) rotateZ(7.48195deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.8200000000000001) rotateZ(4.978413554294134deg)"
+-                                 transform: "scale(0.82) rotateZ(5.54428deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.8800000000000001) rotateZ(0.49962381388389465deg)"
+-                                 transform: "scale(0.88) rotateZ(6.66572deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+                      <CardRotate onSendToBack={function onSendToBack} sensitivity={220} disableDrag={false}>
+                        <motion.div className="card-rotate" style={{x:{...},y:{...}, ...}} drag={true} ...>
+                          <MeasureLayout>
+                          <div className="card-rotate" draggable={false} tabIndex={0} style={{...}} ...>
+                            <motion.div className="card" onClick={function onClick} animate={{...}} initial={false} ...>
+                              <div
+                                className="card"
+                                onClick={function onClick}
+                                style={{
++                                 transformOrigin: "90% 90%"
++                                 transform: "scale(0.94) rotateZ(-3.175165965245742deg)"
+-                                 transform: "scale(0.94) rotateZ(-2.17636deg)"
+-                                 transform-origin: "90% 90%"
+                                }}
+                                ref={function useMotionRef.useCallback}
+                              >
+              ...
+          ...
+    ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   82755ms] [WARNING] Please ensure that the container has a non-static position, like 'relative', 'fixed', or 'absolute' to ensure scroll offset is calculated correctly. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   83519ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   83547ms] [WARNING] Image with src "https://images.saqib.watch/images/1779529712798_y7ahwmubg4j.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   83591ms] [LOG] [Fast Refresh] done in 201ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84194ms] [WARNING] Image with src "/testimonials/IMG_7555.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84201ms] [WARNING] Image with src "/testimonials/IMG_7556.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84203ms] [WARNING] Image with src "/testimonials/IMG_7557.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84205ms] [WARNING] Image with src "/testimonials/IMG_7559.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84207ms] [WARNING] Image with src "/testimonials/IMG_7560.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84216ms] [WARNING] Image with src "/testimonials/IMG_7561.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84218ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05-25 43.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84220ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05-25 at 2.41.47 PM.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84223ms] [WARNING] Image with src "/testimonials/WhatsApp Image 2026-05.jpeg" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84320ms] [WARNING] Image with src "/testimonials/WhatsApp_Image_2024-06-05_at_10.45.13_PM.webp" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84323ms] [WARNING] Image with src "/testimonials/WhatsApp_Image_2024-06-05_at_10.45.16_PM.avif" is using quality "85" which is not configured in images.qualities [75]. Please update your config to [75, 85].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84467ms] [LOG] %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84468ms] [LOG] %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {route: /, path: /} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84469ms] [LOG] %c[Vercel Web Analytics]%c [view] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {o: http://localhost:3000/, sv: 0.1.3, sdkn: @vercel/analytics/next, sdkv: 2.0.1, ts: 1779822926580} /_vercel/insights/view @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   84483ms] [LOG] %c[Vercel Speed Insights]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   86231ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   86396ms] [LOG] [Fast Refresh] done in 275ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  107001ms] [WARNING] Image with src "https://images.saqib.watch/images/1778942895670_iypt2b3p64l.jpeg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  114328ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  114598ms] [LOG] [Fast Refresh] done in 378ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  129252ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  129645ms] [LOG] [Fast Refresh] done in 502ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  129919ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  129992ms] [LOG] [Fast Refresh] done in 175ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  130318ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  130325ms] [LOG] [Fast Refresh] done in 121ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  162115ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  162172ms] [LOG] [Fast Refresh] done in 164ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  162347ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  162468ms] [LOG] [Fast Refresh] done in 228ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  163264ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  163407ms] [LOG] [Fast Refresh] done in 252ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  166456ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  166488ms] [LOG] [Fast Refresh] done in 141ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  172292ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  172295ms] [LOG] [Fast Refresh] done in 111ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297

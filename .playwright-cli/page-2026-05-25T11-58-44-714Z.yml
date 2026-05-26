@@ -1,0 +1,57 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e5]
+      - generic [ref=e9]:
+        - generic [ref=e10]: "0"
+        - generic [ref=e11]: Percent
+    - paragraph [ref=e12]: Saqib Watches
+    - paragraph [ref=e13]: Loading, almost there
+  - banner [ref=e14]:
+    - generic [ref=e15]:
+      - link "Saqib Watches Saqib Watches" [ref=e16] [cursor=pointer]:
+        - /url: /
+        - img "Saqib Watches" [ref=e17]
+        - generic [ref=e18]: Saqib Watches
+      - navigation [ref=e19]:
+        - link "About Us" [ref=e20] [cursor=pointer]:
+          - /url: /about
+          - text: About Us
+        - link "Product Gallery" [ref=e21] [cursor=pointer]:
+          - /url: /gallery
+          - text: Product Gallery
+        - link "Contact Us" [ref=e22] [cursor=pointer]:
+          - /url: /contact
+          - text: Contact Us
+        - button "Open search" [ref=e24]:
+          - img [ref=e25]
+        - link [ref=e28] [cursor=pointer]:
+          - /url: /favorites
+          - img [ref=e29]
+        - button "Open shopping cart" [ref=e31]:
+          - img [ref=e32]
+  - main [ref=e35]:
+    - generic [ref=e36]:
+      - generic [ref=e45]:
+        - heading "Worn by Champions. Saqib Watches" [level=1] [ref=e46]:
+          - text: Worn by Champions.
+          - text: Saqib Watches
+        - paragraph [ref=e47]: Curated by Pakistan's Physique Champion. Built for everyone who values precision.
+        - generic [ref=e48]:
+          - link "Explore Collection" [ref=e49] [cursor=pointer]:
+            - /url: /gallery
+            - generic [ref=e50]: Explore Collection
+            - img [ref=e51]
+          - button "Full Experience" [ref=e54] [cursor=pointer]:
+            - img [ref=e56]
+            - generic [ref=e59]: Full Experience
+      - generic [ref=e61]: Scroll
+    - generic [ref=e65]:
+      - paragraph [ref=e66]: Discover
+      - heading "New Arrivals" [level=2] [ref=e67]
+  - link "Chat on WhatsApp" [ref=e91] [cursor=pointer]:
+    - /url: https://wa.me/923095225815?text=Hi!%20I'd%20like%20to%20ask%20about%20Saqib%20Watches.%20Please%20share%20the%20available%20options.
+    - img [ref=e92]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e99] [cursor=pointer]:
+    - img [ref=e100]

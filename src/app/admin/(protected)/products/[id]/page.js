@@ -58,12 +58,14 @@ export default function EditProductPage({ params }) {
         name: "",
         model: "",
         category: "",
+        brand: "",
         price: "",
         discount: "",
         description: "",
         mode: "new",
         imageAspect: "auto",
         soldOut: false,
+        isBestSeller: false,
         ratingPercentage: "",
     });
 
@@ -92,12 +94,14 @@ export default function EditProductPage({ params }) {
                         name: data.name || "",
                         model: data.model || "",
                         category: data.category || "",
+                        brand: data.brand || "",
                         price: data.price?.toString() || "",
                         discount: data.discount?.toString() || "",
                         description: data.description || "",
                         mode: data.mode || "new",
                         imageAspect: data.imageAspect || "auto",
                         soldOut: data.soldOut || false,
+                        isBestSeller: data.isBestSeller || false,
                         ratingPercentage: data.ratingPercentage?.toString() || "",
                     });
 
@@ -208,6 +212,7 @@ export default function EditProductPage({ params }) {
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
                 imageAspect: formData.imageAspect || "auto",
                 soldOut: formData.soldOut,
+                isBestSeller: formData.isBestSeller || false,
                 ratingPercentage: formData.ratingPercentage ? parseFloat(formData.ratingPercentage) : 0,
                 imageUrl,
                 images,
@@ -332,6 +337,30 @@ export default function EditProductPage({ params }) {
                                     <button type="button" onClick={() => setShowCustomCategory(!showCustomCategory)} style={{ fontSize: "9px", color: "#C9A84C", marginTop: "8px" }}>{showCustomCategory ? "← Cancel" : "+ Add Custom"}</button>
                                 </div>
                                 <div>
+                                    <Label style={{ fontSize: "9px", textTransform: "uppercase", color: "#6b7280", marginBottom: "10px", display: "block" }}>Brand</Label>
+                                    <select value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "12px", color: "white", outline: "none" }}>
+                                        <option value="">Select Brand (optional)</option>
+                                        <option value="audemars-piguet" style={{ background: "#1a1a1a" }}>Audemars Piguet</option>
+                                        <option value="benyar" style={{ background: "#1a1a1a" }}>Benyar</option>
+                                        <option value="cartier" style={{ background: "#1a1a1a" }}>Cartier</option>
+                                        <option value="citizen" style={{ background: "#1a1a1a" }}>Citizen</option>
+                                        <option value="curren" style={{ background: "#1a1a1a" }}>Curren</option>
+                                        <option value="dsigner" style={{ background: "#1a1a1a" }}>Dsigner</option>
+                                        <option value="elegance" style={{ background: "#1a1a1a" }}>Elegance</option>
+                                        <option value="fitron" style={{ background: "#1a1a1a" }}>Fitron</option>
+                                        <option value="franck-muller" style={{ background: "#1a1a1a" }}>Franck Muller</option>
+                                        <option value="hublot" style={{ background: "#1a1a1a" }}>Hublot</option>
+                                        <option value="naviforce" style={{ background: "#1a1a1a" }}>Naviforce</option>
+                                        <option value="pagani-design" style={{ background: "#1a1a1a" }}>Pagani Design</option>
+                                        <option value="patek" style={{ background: "#1a1a1a" }}>Patek Philippe</option>
+                                        <option value="rado" style={{ background: "#1a1a1a" }}>Rado</option>
+                                        <option value="rolex" style={{ background: "#1a1a1a" }}>Rolex</option>
+                                        <option value="seastar" style={{ background: "#1a1a1a" }}>Seastar</option>
+                                        <option value="skmei" style={{ background: "#1a1a1a" }}>Skmei</option>
+                                        <option value="tissot" style={{ background: "#1a1a1a" }}>Tissot</option>
+                                    </select>
+                                </div>
+                                <div>
                                     <Label style={{ fontSize: "9px", textTransform: "uppercase", color: "#6b7280", marginBottom: "10px", display: "block" }}>Configuration</Label>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                                         <select value={formData.mode} onChange={(e) => setFormData({ ...formData, mode: e.target.value })} style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", padding: "12px", color: "white" }}>
@@ -381,9 +410,13 @@ export default function EditProductPage({ params }) {
                                     <Label style={{ fontSize: "9px", textTransform: "uppercase", color: "#6b7280", marginBottom: "10px", display: "block" }}>Customer Reviews (%)</Label>
                                     <Input type="number" min="0" max="100" value={formData.ratingPercentage} onChange={(e) => setFormData({ ...formData, ratingPercentage: e.target.value })} placeholder="e.g. 95 for 4.75 stars" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px" }} />
                                 </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px", background: "rgba(0,0,0,0.2)", borderRadius: "12px" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px", background: "rgba(0,0,0,0.2)", borderRadius: "12px", marginBottom: "8px" }}>
                                     <input type="checkbox" checked={formData.soldOut} onChange={(e) => setFormData({...formData, soldOut: e.target.checked})} id="soldOut" />
                                     <Label htmlFor="soldOut" style={{ fontSize: "11px", fontWeight: "bold" }}>MARK SOLD OUT</Label>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px", background: "rgba(0,0,0,0.2)", borderRadius: "12px" }}>
+                                    <input type="checkbox" checked={formData.isBestSeller} onChange={(e) => setFormData({...formData, isBestSeller: e.target.checked})} id="isBestSeller" />
+                                    <Label htmlFor="isBestSeller" style={{ fontSize: "11px", fontWeight: "bold" }}>MARK BEST SELLER</Label>
                                 </div>
                             </div>
                         </Card>

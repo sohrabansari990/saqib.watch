@@ -156,13 +156,19 @@ function GalleryContent() {
         }
 
         setProducts(cachedCatalog.products);
-        setCategories(getCategoriesFromProducts(cachedCatalog.products));
+        const baseCats = getCategoriesFromProducts(cachedCatalog.products);
+        setCategories(["all", "best-selling-products", ...baseCats.filter(c => c !== "all")]);
         setLoading(false);
     }, []);
 
     useEffect(() => {
-        setPriceRange([priceBounds.min, priceBounds.max]);
-    }, [priceBounds.min, priceBounds.max]);
+        const maxPriceParam = searchParams.get("maxPrice");
+        const maxVal = maxPriceParam ? Number(maxPriceParam) : null;
+        setPriceRange([
+            priceBounds.min,
+            (maxVal && maxVal > 0) ? maxVal : priceBounds.max
+        ]);
+    }, [priceBounds.min, priceBounds.max, searchParams]);
 
     useEffect(() => {
         if (!router) return;
@@ -170,7 +176,13 @@ function GalleryContent() {
             hasSyncedQuery.current = true;
             return;
         }
-        const queryString = filter === "all" ? "" : `?category=${filter}`;
+        const params = new URLSearchParams(window.location.search);
+        if (filter === "all") {
+            params.delete("category");
+        } else {
+            params.set("category", filter);
+        }
+        const queryString = params.toString() ? `?${params.toString()}` : "";
         router.replace(`/gallery${queryString}`, { scroll: false });
     }, [filter, router]);
 
@@ -201,15 +213,16 @@ function GalleryContent() {
                 setProducts(productsList);
                 
                 const baseCats = getCategoriesFromProducts(productsList);
+                const finalCats = ["all", "best-selling-products", ...baseCats.filter(c => c !== "all")];
                 if (saleData?.name) {
                     const saleCat = saleData.name.toLowerCase();
-                    if (!baseCats.includes(saleCat)) {
-                        setCategories(["all", saleCat, ...baseCats.filter(c => c !== "all")]);
+                    if (!finalCats.includes(saleCat)) {
+                        setCategories([finalCats[0], saleCat, ...finalCats.slice(1)]);
                     } else {
-                        setCategories(baseCats);
+                        setCategories(finalCats);
                     }
                 } else {
-                    setCategories(baseCats);
+                    setCategories(finalCats);
                 }
                 
                 cacheCatalog(productsList);
@@ -235,6 +248,8 @@ function GalleryContent() {
                     const isHighDiscount = (p.discount >= 20);
                     return matchesName || isHighDiscount;
                 });
+            } else if (filter === "best-selling-products") {
+                filtered = products.filter((product) => product.isBestSeller);
             } else {
                 filtered = products.filter((product) => product.category === filter);
             }
@@ -324,7 +339,7 @@ function GalleryContent() {
                     <label style={{ display: "block", marginBottom: "12px", fontSize: "13px", fontWeight: 800 }}>Category</label>
                     <select value={filter} onChange={(event) => setFilter(event.target.value)} style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.14)", background: "#050505", color: "#f8f5ef", fontSize: "14px", fontWeight: 700, textTransform: "capitalize", outline: "none" }}>
                         {categories.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
+                            <option key={cat} value={cat}>{cat.replace('-', ' ')}</option>
                         ))}
                     </select>
                 </div>

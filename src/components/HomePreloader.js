@@ -1,13 +1,49 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
-const PRELOADER_DURATION_MS = 2200;
+const PRELOADER_MIN_DURATION_MS = 1600;
+const PRELOADER_MAX_DURATION_MS = 2600;
 const PRELOADER_EXIT_DELAY_MS = 180;
-const RING_SIZE = 250;
-const STROKE_WIDTH = 8;
-const RADIUS = (RING_SIZE - STROKE_WIDTH) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const HOME_CRITICAL_READY_EVENT = "saqib:home-critical-ready";
+const GAUGE_SIZE = 320;
+const CENTER = GAUGE_SIZE / 2;
+const STROKE_WIDTH = 3;
+const RADIUS = 122;
+const GOLD = "#d5ad5f";
+const WHITE = "#f8f5ef";
+const TICKS = Array.from({ length: 60 }, (_, index) => {
+  const angle = index * 6 - 90;
+  const radians = (angle * Math.PI) / 180;
+  const isMajor = index % 5 === 0;
+  const isQuarter = index % 15 === 0;
+  const outer = isQuarter ? 141 : isMajor ? 136 : 130;
+  const inner = isQuarter ? 124 : isMajor ? 126 : 122;
+
+  return {
+    index,
+    isMajor,
+    x1: CENTER + Math.cos(radians) * inner,
+    y1: CENTER + Math.sin(radians) * inner,
+    x2: CENTER + Math.cos(radians) * outer,
+    y2: CENTER + Math.sin(radians) * outer,
+  };
+});
+
+const NUMBERS = Array.from({ length: 11 }, (_, index) => {
+  const value = (index + 1) * 5;
+  const dialIndex = index + 1;
+  const angle = dialIndex * 30 - 90;
+  const radians = (angle * Math.PI) / 180;
+
+  return {
+    value,
+    x: CENTER + Math.cos(radians) * 103,
+    y: CENTER + Math.sin(radians) * 103,
+    angle,
+  };
+});
 
 export default function HomePreloader() {
   const [progress, setProgress] = useState(0);
@@ -16,39 +52,73 @@ export default function HomePreloader() {
 
   useEffect(() => {
     let frameId = 0;
+    let minTimePassed = false;
+    let criticalAssetsReady = Boolean(window.__saqibHomeCriticalReady);
     let finished = false;
     const startTime = performance.now();
+    const maxDurationTimerId = window.setTimeout(() => {
+      criticalAssetsReady = true;
+      window.__saqibHomeCriticalReady = true;
+      maybeFinish();
+    }, PRELOADER_MAX_DURATION_MS);
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      window.clearTimeout(maxDurationTimerId);
+      setProgress(100);
+      setExiting(true);
+      window.setTimeout(() => setVisible(false), PRELOADER_EXIT_DELAY_MS);
+    };
+
+    const maybeFinish = () => {
+      if (minTimePassed && criticalAssetsReady) {
+        finish();
+      }
+    };
+
+    const handleCriticalReady = () => {
+      criticalAssetsReady = true;
+      window.__saqibHomeCriticalReady = true;
+      maybeFinish();
+    };
+
+    window.addEventListener(HOME_CRITICAL_READY_EVENT, handleCriticalReady);
 
     const tick = (now) => {
       const elapsed = now - startTime;
-      const rawProgress = Math.min(elapsed / PRELOADER_DURATION_MS, 1);
+      const rawProgress = Math.min(elapsed / PRELOADER_MIN_DURATION_MS, 1);
       const easedProgress = 1 - Math.pow(1 - rawProgress, 2.25);
-      const nextValue = Math.min(Math.round(easedProgress * 100), 100);
+      const progressCap = criticalAssetsReady ? 100 : 96;
+      const nextValue = Math.min(Math.round(easedProgress * progressCap), progressCap);
 
       setProgress(nextValue);
 
-      if (rawProgress < 1) {
-        frameId = window.requestAnimationFrame(tick);
-        return;
+      if (rawProgress >= 1) {
+        minTimePassed = true;
+        maybeFinish();
       }
 
       if (!finished) {
-        finished = true;
-        setExiting(true);
-        window.setTimeout(() => setVisible(false), PRELOADER_EXIT_DELAY_MS);
+        frameId = window.requestAnimationFrame(tick);
       }
     };
 
     frameId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(frameId);
+    return () => {
+      window.clearTimeout(maxDurationTimerId);
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener(HOME_CRITICAL_READY_EVENT, handleCriticalReady);
+    };
   }, []);
 
   if (!visible) return null;
 
-  const dashOffset = CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE;
+  const needleRotation = progress * 3.6;
 
   return (
     <div
+      data-home-preloader
       style={{
         position: "fixed",
         inset: 0,
@@ -58,8 +128,8 @@ export default function HomePreloader() {
         justifyContent: "center",
         overflow: "hidden",
         background:
-          "radial-gradient(circle at center, rgba(201,169,110,0.14), transparent 24%), radial-gradient(circle at top, rgba(201,169,110,0.08), transparent 30%), #050505",
-        color: "#f8f5ef",
+          "radial-gradient(circle at 50% 50%, rgba(213,173,95,0.11), transparent 20%), radial-gradient(circle at 50% 72%, rgba(213,173,95,0.08), transparent 30%), #030302",
+        color: WHITE,
         opacity: exiting ? 0 : 1,
         transition: `opacity ${PRELOADER_EXIT_DELAY_MS}ms ease`,
       }}
@@ -69,133 +139,153 @@ export default function HomePreloader() {
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(180deg, rgba(5,5,5,0.2), rgba(5,5,5,0.84))",
+            "linear-gradient(135deg, rgba(255,255,255,0.035), transparent 30%, rgba(213,173,95,0.035) 58%, transparent 76%), radial-gradient(circle at center, transparent 0 30%, rgba(0,0,0,0.72) 70%)",
           pointerEvents: "none",
         }}
       />
 
-      <div
+      <motion.div
+        initial={false}
+        animate={{ scale: exiting ? 0.985 : 1 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
         style={{
           position: "relative",
-          width: "min(82vw, 420px)",
+          width: "min(64vw, 330px)",
+          minWidth: "220px",
+          maxWidth: "330px",
+          aspectRatio: "1 / 1",
           textAlign: "center",
-          padding: "24px 20px",
+          display: "grid",
+          placeItems: "center",
         }}
       >
-        <div
+        <motion.div
+          aria-label="Loading"
+          role="status"
           style={{
-            width: `${RING_SIZE}px`,
-            height: `${RING_SIZE}px`,
-            maxWidth: "68vw",
-            maxHeight: "68vw",
-            margin: "0 auto 18px",
+            width: "100%",
+            aspectRatio: "1 / 1",
             position: "relative",
             display: "grid",
             placeItems: "center",
           }}
         >
           <svg
-            viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+            viewBox={`0 0 ${GAUGE_SIZE} ${GAUGE_SIZE}`}
             style={{
               width: "100%",
               height: "100%",
               overflow: "visible",
-              transform: "rotate(-90deg)",
-              filter: "drop-shadow(0 0 28px rgba(201,169,110,0.18))",
+              filter: "drop-shadow(0 0 28px rgba(213,173,95,0.18))",
             }}
           >
+            <defs>
+              <filter id="needle-glow" x="-70%" y="-70%" width="240%" height="240%">
+                <feGaussianBlur stdDeviation="3.6" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <radialGradient id="gauge-face" cx="50%" cy="50%" r="55%">
+                <stop offset="0%" stopColor="rgba(213,173,95,0.1)" />
+                <stop offset="62%" stopColor="rgba(10,10,10,0.86)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0.96)" />
+              </radialGradient>
+            </defs>
+
             <circle
-              cx={RING_SIZE / 2}
-              cy={RING_SIZE / 2}
+              cx={CENTER}
+              cy={CENTER}
+              r="116"
+              fill="url(#gauge-face)"
+              stroke="rgba(213,173,95,0.18)"
+              strokeWidth="1"
+            />
+
+            <circle
+              cx={CENTER}
+              cy={CENTER}
+              r="146"
+              fill="none"
+              stroke="rgba(248,245,239,0.12)"
+              strokeWidth="1"
+            />
+
+            <circle
+              cx={CENTER}
+              cy={CENTER}
               r={RADIUS}
-              fill="transparent"
+              fill="none"
               stroke="rgba(255,255,255,0.08)"
               strokeWidth={STROKE_WIDTH}
             />
-            <circle
-              cx={RING_SIZE / 2}
-              cy={RING_SIZE / 2}
-              r={RADIUS}
-              fill="transparent"
-              stroke="#c9a96e"
-              strokeWidth={STROKE_WIDTH}
-              strokeLinecap="round"
-              strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={dashOffset}
-            />
+
+            {TICKS.map((tick) => (
+              <line
+                key={tick.index}
+                x1={tick.x1}
+                y1={tick.y1}
+                x2={tick.x2}
+                y2={tick.y2}
+                stroke={tick.isMajor ? WHITE : "rgba(248,245,239,0.46)"}
+                strokeWidth={tick.isMajor ? 2 : 1}
+                strokeLinecap="round"
+              />
+            ))}
+
+            {NUMBERS.map((number) => (
+              <text
+                key={number.value}
+                x={number.x}
+                y={number.y}
+                fill="rgba(248,245,239,0.78)"
+                fontSize="10"
+                fontWeight="800"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                transform={`rotate(${number.angle + 90} ${number.x} ${number.y})`}
+              >
+                {number.value}
+              </text>
+            ))}
+
+            <g
+              filter="url(#needle-glow)"
+              transform={`rotate(${needleRotation} ${CENTER} ${CENTER})`}
+            >
+              <polygon
+                points={`${CENTER - 3.5},${CENTER + 14} ${CENTER + 3.5},${CENTER + 14} ${CENTER + 2.25},${CENTER - 106} ${CENTER},${CENTER - 122} ${CENTER - 2.25},${CENTER - 106}`}
+                fill={GOLD}
+                opacity="0.95"
+              />
+              <line
+                x1={CENTER}
+                y1={CENTER + 12}
+                x2={CENTER}
+                y2={CENTER - 112}
+                stroke={WHITE}
+                strokeWidth="1.25"
+                strokeLinecap="round"
+              />
+              <line
+                x1={CENTER}
+                y1={CENTER + 10}
+                x2={CENTER}
+                y2={CENTER + 44}
+                stroke={GOLD}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                opacity="0.45"
+              />
+              <circle cx={CENTER} cy={CENTER - 113} r="4.6" fill={GOLD} stroke={WHITE} strokeWidth="1.1" />
+            </g>
+
+            <circle cx={CENTER} cy={CENTER} r="13" fill="#050505" stroke={GOLD} strokeWidth="4" />
+            <circle cx={CENTER} cy={CENTER} r="4" fill={WHITE} />
           </svg>
-
-          <div
-            style={{
-              position: "absolute",
-              inset: "11%",
-              borderRadius: "999px",
-              border: "1px solid rgba(201,169,110,0.24)",
-              background:
-                "radial-gradient(circle at center, rgba(201,169,110,0.08), rgba(10,10,10,0.9) 68%)",
-              boxShadow:
-                "inset 0 0 40px rgba(201,169,110,0.08), 0 18px 60px rgba(0,0,0,0.45)",
-            }}
-          />
-
-          <div
-            style={{
-              position: "absolute",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-            }}
-          >
-            <span
-              style={{
-                color: "#c9a96e",
-                fontSize: "clamp(34px, 7vw, 52px)",
-                lineHeight: 1,
-                fontWeight: 700,
-                fontFamily: "var(--font-cormorant-garamond), Georgia, serif",
-              }}
-            >
-              {progress}
-            </span>
-            <span
-              style={{
-                color: "rgba(248,245,239,0.78)",
-                fontSize: "12px",
-                fontWeight: 800,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-              }}
-            >
-              Percent
-            </span>
-          </div>
-        </div>
-
-        <p
-          style={{
-            color: "#c9a96e",
-            fontSize: "11px",
-            fontWeight: 800,
-            letterSpacing: "0.34em",
-            textTransform: "uppercase",
-          }}
-        >
-          Saqib Watches
-        </p>
-        <p
-          style={{
-            marginTop: "8px",
-            color: "rgba(248,245,239,0.62)",
-            fontSize: "12px",
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-          }}
-        >
-          Loading, almost there
-        </p>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
