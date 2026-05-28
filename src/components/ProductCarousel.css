@@ -1,0 +1,142 @@
+.product-carousel-container {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  padding: 16px;
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.product-carousel-track {
+  display: flex;
+  align-items: stretch;
+  cursor: grab;
+}
+
+.product-carousel-track:active {
+  cursor: grabbing;
+}
+
+.product-carousel-item {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  min-height: 390px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: #080808;
+  transform-style: preserve-3d;
+}
+
+.product-carousel-link {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-carousel-media {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  overflow: hidden;
+  background: #111111;
+}
+
+.product-carousel-image {
+  object-fit: cover;
+}
+
+.product-carousel-badge {
+  position: absolute;
+  left: 0;
+  top: 14px;
+  z-index: 2;
+  border-radius: 0 4px 4px 0;
+  background: #dc2626;
+  padding: 5px 10px 5px 12px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.product-carousel-content {
+  display: grid;
+  gap: 10px;
+  padding: 16px 14px 18px;
+  text-align: center;
+}
+
+.product-carousel-content h3 {
+  min-height: 44px;
+  overflow: hidden;
+  color: #ffffff;
+  font-family: var(--font-cormorant-garamond), Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.product-carousel-price {
+  display: inline-flex;
+  min-height: 18px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #c9a96e;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.product-carousel-price s {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+}
+
+.product-carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.product-carousel-indicators button {
+  height: 8px;
+  width: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.product-carousel-indicators button.active {
+  background: #c9a96e;
+  transform: scale(1.25);
+}
+
+@media (max-width: 767px) {
+  .product-carousel-container {
+    width: min(100%, 342px) !important;
+    padding: 12px;
+  }
+
+  .product-carousel-item {
+    min-height: 372px;
+  }
+
+  .product-carousel-content h3 {
+    font-size: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-carousel-indicators button {
+    transition: none;
+  }
+}

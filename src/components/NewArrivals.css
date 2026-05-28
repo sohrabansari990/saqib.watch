@@ -1,0 +1,245 @@
+.new-arrivals-section {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background: #000000;
+  color: #ffffff;
+}
+
+.new-arrivals-title {
+  position: relative;
+  z-index: 4;
+  margin: clamp(22px, 4vh, 46px) auto clamp(12px, 2.5vh, 24px);
+  padding: 0 18px;
+  text-align: center;
+}
+
+.new-arrivals-title p {
+  margin: 0 0 14px;
+  color: #c9a96e;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.44em;
+  text-transform: uppercase;
+}
+
+.new-arrivals-title h2 {
+  margin: 0;
+  color: #ffffff;
+  font-family: var(--font-cormorant-garamond), Georgia, serif;
+  font-size: clamp(42px, 5vw, 72px);
+  font-weight: 400;
+  line-height: 0.95;
+}
+
+.new-arrivals-title > div {
+  width: 72px;
+  height: 1px;
+  margin: 20px auto 0;
+  background: #c9a96e;
+}
+
+.new-arrivals-gallery-shell {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: clamp(330px, 42vh, 470px);
+  min-height: 330px;
+  place-items: center;
+  overflow: hidden;
+}
+
+.new-arrivals-carousel-fallback {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  width: 100%;
+  min-height: min(430px, 42vh);
+  place-items: center;
+  opacity: 1;
+  transition: opacity 280ms ease;
+}
+
+.new-arrivals-carousel-fallback.is-hidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.new-arrivals-webgl-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  min-height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms ease;
+}
+
+.new-arrivals-webgl-layer.is-ready {
+  z-index: 4;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.new-arrivals-loading-grid {
+  display: grid;
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  padding: 40px clamp(18px, 4vw, 56px);
+}
+
+.new-arrivals-skeleton-card,
+.skeleton-surface {
+  border-radius: 8px;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.055) 0%,
+    rgba(255, 255, 255, 0.12) 48%,
+    rgba(255, 255, 255, 0.055) 100%
+  );
+  background-size: 220% 100%;
+  animation: new-arrivals-sheen 1.5s ease-in-out infinite;
+}
+
+.new-arrivals-skeleton-card {
+  aspect-ratio: 3 / 4;
+  padding: 1px;
+}
+
+.new-arrivals-skeleton-title {
+  width: 82%;
+  height: 18px;
+  margin: 16px auto 0;
+}
+
+.new-arrivals-skeleton-meta {
+  width: 54%;
+  height: 14px;
+  margin: 12px auto 0;
+}
+
+.new-arrivals-brands {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  margin-top: clamp(10px, 2.5vh, 24px);
+  padding: 0 0 clamp(18px, 3vh, 32px);
+  overflow: hidden;
+}
+
+.new-arrivals-brands > p {
+  margin: 0 0 14px;
+  color: #8f6d30;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.52em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.featured-brand-logo {
+  display: block;
+  width: auto;
+  max-width: 156px;
+  height: 44px;
+  object-fit: contain;
+  background: transparent;
+  border: 0;
+  filter: saturate(0.92) contrast(1.08);
+}
+
+.new-arrivals-brand-loop {
+  isolation: isolate;
+}
+
+.new-arrivals-brands .logoloop__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes new-arrivals-sheen {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .new-arrivals-loading-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .new-arrivals-section {
+    min-height: auto;
+  }
+
+  .new-arrivals-title {
+    margin-top: 32px;
+    margin-bottom: 18px;
+  }
+
+  .new-arrivals-title p {
+    font-size: 10px;
+    letter-spacing: 0.34em;
+  }
+
+  .new-arrivals-title h2 {
+    font-size: clamp(38px, 13vw, 52px);
+  }
+
+  .new-arrivals-gallery-shell {
+    height: 500px;
+    min-height: 500px;
+  }
+
+  .new-arrivals-carousel-fallback {
+    min-height: 486px;
+  }
+
+  .new-arrivals-webgl-layer {
+    display: none;
+  }
+
+  .new-arrivals-loading-grid {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+    gap: 18px;
+    padding-top: 22px;
+    padding-bottom: 26px;
+  }
+
+  .new-arrivals-brands {
+    margin-top: 30px;
+  }
+
+  .new-arrivals-brands > p {
+    margin-bottom: 18px;
+    font-size: 10px;
+    letter-spacing: 0.38em;
+  }
+
+  .featured-brand-logo {
+    max-width: 132px;
+    height: 42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .new-arrivals-carousel-fallback,
+  .new-arrivals-webgl-layer,
+  .new-arrivals-skeleton-card,
+  .skeleton-surface {
+    animation: none;
+    transition: none;
+  }
+}
